@@ -17,6 +17,7 @@
     "axios": "^1.11.0",
     "date-fns": "^4.1.0",
     "ra-data-json-server": "^5.12.2",
+    "ra-language-spanish": "^1.0.0",
     "react": "^19.1.1",
     "react-admin": "^5.11.1",
     "react-dom": "^19.1.1",

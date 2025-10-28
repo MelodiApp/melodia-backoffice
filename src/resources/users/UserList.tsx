@@ -30,7 +30,7 @@ export const UserList = () => (
       />
       <ShowButton />
       <EditButton />
-      <DeleteButton />
+      <DeleteButton mutationMode="pessimistic" />
     </Datagrid>
   </List>
 );

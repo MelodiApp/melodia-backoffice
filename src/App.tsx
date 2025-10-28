@@ -5,6 +5,7 @@ import {
 
 // Providers
 import { authProvider, dataProvider } from './providers';
+import { i18nProvider } from './providers/i18nProvider';
 
 // Tema
 import { spotifyTheme } from './theme/adminTheme';
@@ -38,6 +39,7 @@ function App() {
     <Admin
       authProvider={authProvider}
       dataProvider={dataProvider}
+      i18nProvider={i18nProvider}
       theme={spotifyTheme}
       dashboard={Dashboard}
       title="Melodia Backoffice"

@@ -158,14 +158,22 @@ export const dataProvider: DataProvider = {
 
   // Eliminar un recurso
   delete: async (resource, params) => {
+    console.log('DataProvider delete: Iniciando eliminación');
+    console.log('DataProvider delete: Recurso:', resource);
+    console.log('DataProvider delete: ID a eliminar:', params.id);
+    
     if (resource === 'users') {
       const index = users.findIndex((u) => u.id === params.id);
       if (index === -1) {
+        console.error('DataProvider delete: Usuario no encontrado con id:', params.id);
         throw new Error(`Usuario con id ${params.id} no encontrado`);
       }
 
       const deletedUser = users[index];
+      console.log('DataProvider delete: Usuario encontrado:', deletedUser.username);
       users.splice(index, 1);
+      console.log('DataProvider delete: Usuario eliminado exitosamente');
+      console.log('DataProvider delete: Total usuarios restantes:', users.length);
 
       return { data: deletedUser as any };
     }

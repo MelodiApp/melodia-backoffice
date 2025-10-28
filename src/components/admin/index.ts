@@ -1,6 +1,1 @@
 export { Dashboard } from './Dashboard'
-export { UsersList } from './UsersList'
-export { CatalogList } from './CatalogList'
-export { SongMetricsView } from './SongMetricsView'
-export { UserMetricsView } from './UserMetricsView'
-export { ArtistMetricsView } from './ArtistMetricsView'
