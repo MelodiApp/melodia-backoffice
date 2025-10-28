@@ -6,8 +6,8 @@ import {
   DateField,
   ChipField,
   FunctionField,
-} from 'react-admin';
-import type { User } from '../../types/user';
+} from "react-admin";
+import type { User } from "../../types/user";
 
 export const UserShow = () => (
   <Show>
@@ -18,12 +18,14 @@ export const UserShow = () => (
       <FunctionField
         label="Estado"
         render={(record: User) => (
-          <span style={{ 
-            color: record.isActive ? '#1db954' : '#f44336',
-            fontWeight: 'bold',
-            fontSize: '16px'
-          }}>
-            {record.isActive ? 'Activo' : 'Bloqueado'}
+          <span
+            style={{
+              color: record.isActive ? "#1db954" : "#f44336",
+              fontWeight: "bold",
+              fontSize: "16px",
+            }}
+          >
+            {record.isActive ? "Activo" : "Bloqueado"}
           </span>
         )}
       />

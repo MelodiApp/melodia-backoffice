@@ -1,9 +1,9 @@
-import type { DataProvider } from 'react-admin';
-import { mockUsers } from './mockData';
+import type { DataProvider } from "react-admin";
+import { mockUsers } from "./mockData";
 
 /**
  * Data Provider con datos mockeados para desarrollo
- * 
+ *
  * Simula una API REST con datos en memoria.
  * Cuando conectes tu backend real, puedes reemplazar esto con:
  * import jsonServerProvider from 'ra-data-json-server';
@@ -11,45 +11,49 @@ import { mockUsers } from './mockData';
  */
 
 // Estado en memoria para simular persistencia
-let users = [...mockUsers];
+const users = [...mockUsers];
 
 export const dataProvider: DataProvider = {
   // Obtener lista de recursos
   getList: async (resource, params) => {
     const { page = 1, perPage = 10 } = params.pagination || {};
-    const { field = 'id', order = 'ASC' } = params.sort || {};
+    const { field = "id", order = "ASC" } = params.sort || {};
     const filter = params.filter || {};
 
-    if (resource === 'users') {
+    if (resource === "users") {
       // Filtrar
       let filteredUsers = [...users];
-      
+
       if (filter.q) {
         const searchTerm = filter.q.toLowerCase();
         filteredUsers = filteredUsers.filter(
           (user) =>
             user.username.toLowerCase().includes(searchTerm) ||
             user.email.toLowerCase().includes(searchTerm) ||
-            user.fullName.toLowerCase().includes(searchTerm)
+            user.fullName.toLowerCase().includes(searchTerm),
         );
       }
 
       if (filter.role) {
-        filteredUsers = filteredUsers.filter((user) => user.role === filter.role);
+        filteredUsers = filteredUsers.filter(
+          (user) => user.role === filter.role,
+        );
       }
 
       if (filter.isActive !== undefined) {
-        filteredUsers = filteredUsers.filter((user) => user.isActive === filter.isActive);
+        filteredUsers = filteredUsers.filter(
+          (user) => user.isActive === filter.isActive,
+        );
       }
 
       // Ordenar
       filteredUsers.sort((a, b) => {
         const aValue = a[field as keyof typeof a];
         const bValue = b[field as keyof typeof b];
-        
+
         if (!aValue || !bValue) return 0;
-        if (aValue < bValue) return order === 'ASC' ? -1 : 1;
-        if (aValue > bValue) return order === 'ASC' ? 1 : -1;
+        if (aValue < bValue) return order === "ASC" ? -1 : 1;
+        if (aValue > bValue) return order === "ASC" ? 1 : -1;
         return 0;
       });
 
@@ -59,7 +63,7 @@ export const dataProvider: DataProvider = {
       const paginatedUsers = filteredUsers.slice(start, end);
 
       return {
-        data: paginatedUsers as any,
+        data: paginatedUsers,
         total: filteredUsers.length,
       };
     }
@@ -69,12 +73,12 @@ export const dataProvider: DataProvider = {
 
   // Obtener un recurso por ID
   getOne: async (resource, params) => {
-    if (resource === 'users') {
+    if (resource === "users") {
       const user = users.find((u) => u.id === params.id);
       if (!user) {
         throw new Error(`Usuario con id ${params.id} no encontrado`);
       }
-      return { data: user as any };
+      return { data: user };
     }
 
     throw new Error(`Recurso ${resource} no soportado`);
@@ -82,24 +86,24 @@ export const dataProvider: DataProvider = {
 
   // Obtener múltiples recursos por IDs
   getMany: async (resource, params) => {
-    if (resource === 'users') {
+    if (resource === "users") {
       const foundUsers = users.filter((user) => params.ids.includes(user.id));
-      return { data: foundUsers as any };
+      return { data: foundUsers };
     }
 
     return { data: [] };
   },
 
   // Obtener múltiples referencias
-  getManyReference: async (_resource, _params) => {
+  getManyReference: async () => {
     // No se usa en este caso
     return { data: [], total: 0 };
   },
 
   // Crear un recurso
   create: async (resource, params) => {
-    if (resource === 'users') {
-      const newUser: any = {
+    if (resource === "users") {
+      const newUser = {
         ...params.data,
         id: String(users.length + 1),
         createdAt: new Date().toISOString(),
@@ -114,13 +118,13 @@ export const dataProvider: DataProvider = {
 
   // Actualizar un recurso
   update: async (resource, params) => {
-    if (resource === 'users') {
+    if (resource === "users") {
       const index = users.findIndex((u) => u.id === params.id);
       if (index === -1) {
         throw new Error(`Usuario con id ${params.id} no encontrado`);
       }
 
-      const updatedUser: any = {
+      const updatedUser = {
         ...users[index],
         ...params.data,
         updatedAt: new Date().toISOString(),
@@ -135,9 +139,9 @@ export const dataProvider: DataProvider = {
 
   // Actualizar múltiples recursos
   updateMany: async (resource, params) => {
-    if (resource === 'users') {
+    if (resource === "users") {
       const updatedIds: string[] = [];
-      
+
       params.ids.forEach((id) => {
         const index = users.findIndex((u) => u.id === id);
         if (index !== -1) {
@@ -158,24 +162,33 @@ export const dataProvider: DataProvider = {
 
   // Eliminar un recurso
   delete: async (resource, params) => {
-    console.log('DataProvider delete: Iniciando eliminación');
-    console.log('DataProvider delete: Recurso:', resource);
-    console.log('DataProvider delete: ID a eliminar:', params.id);
-    
-    if (resource === 'users') {
+    console.log("DataProvider delete: Iniciando eliminación");
+    console.log("DataProvider delete: Recurso:", resource);
+    console.log("DataProvider delete: ID a eliminar:", params.id);
+
+    if (resource === "users") {
       const index = users.findIndex((u) => u.id === params.id);
       if (index === -1) {
-        console.error('DataProvider delete: Usuario no encontrado con id:', params.id);
+        console.error(
+          "DataProvider delete: Usuario no encontrado con id:",
+          params.id,
+        );
         throw new Error(`Usuario con id ${params.id} no encontrado`);
       }
 
       const deletedUser = users[index];
-      console.log('DataProvider delete: Usuario encontrado:', deletedUser.username);
+      console.log(
+        "DataProvider delete: Usuario encontrado:",
+        deletedUser.username,
+      );
       users.splice(index, 1);
-      console.log('DataProvider delete: Usuario eliminado exitosamente');
-      console.log('DataProvider delete: Total usuarios restantes:', users.length);
+      console.log("DataProvider delete: Usuario eliminado exitosamente");
+      console.log(
+        "DataProvider delete: Total usuarios restantes:",
+        users.length,
+      );
 
-      return { data: deletedUser as any };
+      return { data: deletedUser };
     }
 
     throw new Error(`Recurso ${resource} no soportado`);
@@ -183,7 +196,7 @@ export const dataProvider: DataProvider = {
 
   // Eliminar múltiples recursos
   deleteMany: async (resource, params) => {
-    if (resource === 'users') {
+    if (resource === "users") {
       const deletedIds: string[] = [];
 
       params.ids.forEach((id) => {
@@ -200,4 +213,3 @@ export const dataProvider: DataProvider = {
     throw new Error(`Recurso ${resource} no soportado`);
   },
 };
-

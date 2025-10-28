@@ -1,34 +1,27 @@
-import { Admin, Resource } from 'react-admin';
-import {
-  People,
-} from '@mui/icons-material';
+import { Admin, Resource } from "react-admin";
+import { People } from "@mui/icons-material";
 
 // Providers
-import { authProvider, dataProvider } from './providers';
-import { i18nProvider } from './providers/i18nProvider';
+import { authProvider, dataProvider } from "./providers";
+import { i18nProvider } from "./providers/i18nProvider";
 
 // Tema
-import { spotifyTheme } from './theme/adminTheme';
+import { spotifyTheme } from "./theme/adminTheme";
 
 // Dashboard
-import { Dashboard } from './components/Dashboard';
+import { Dashboard } from "./components/Dashboard";
 
 // Recursos - Solo Usuarios por ahora
-import {
-  UserList,
-  UserEdit,
-  UserCreate,
-  UserShow,
-} from './resources/users';
+import { UserList, UserEdit, UserCreate, UserShow } from "./resources/users";
 
 /**
  * Aplicación principal de React Admin
- * 
+ *
  * CONFIGURACIÓN:
  * - authProvider: Maneja la autenticación (login/logout)
  * - dataProvider: Datos mockeados para desarrollo
  * - theme: Tema personalizado con estilo Spotify
- * 
+ *
  * ROLES DISPONIBLES:
  * - admin: Administrador con acceso completo
  * - listener: Usuario oyente
@@ -53,7 +46,7 @@ function App() {
         create={UserCreate}
         show={UserShow}
         icon={People}
-        options={{ label: 'Usuarios' }}
+        options={{ label: "Usuarios" }}
       />
     </Admin>
   );

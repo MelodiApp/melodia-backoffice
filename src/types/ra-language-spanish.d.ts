@@ -1,4 +1,4 @@
-declare module 'ra-language-spanish' {
-  const spanishMessages: any;
+declare module "ra-language-spanish" {
+  const spanishMessages: unknown;
   export default spanishMessages;
 }

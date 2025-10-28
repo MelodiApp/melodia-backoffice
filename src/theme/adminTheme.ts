@@ -1,44 +1,44 @@
-import { defaultTheme } from 'react-admin';
-import { deepmerge } from '@mui/utils';
+import { defaultTheme } from "react-admin";
+import { deepmerge } from "@mui/utils";
 
 /**
  * Tema personalizado para React Admin con estilo Spotify
- * 
+ *
  * Basado en el diseño de Spotify con paleta oscura y verde característico
  * Se combina con el tema por defecto de React Admin para mantener compatibilidad
  */
 export const spotifyTheme = deepmerge(defaultTheme, {
   palette: {
-    mode: 'dark',
+    mode: "dark",
     primary: {
-      main: '#1db954', // Verde Spotify
-      light: '#1ed760',
-      dark: '#169c46',
+      main: "#1db954", // Verde Spotify
+      light: "#1ed760",
+      dark: "#169c46",
     },
     secondary: {
-      main: '#ffffff',
+      main: "#ffffff",
     },
     background: {
-      default: '#121212', // Fondo oscuro Spotify
-      paper: '#181818', // Tarjetas/Paper
+      default: "#121212", // Fondo oscuro Spotify
+      paper: "#181818", // Tarjetas/Paper
     },
     text: {
-      primary: '#ffffff',
-      secondary: '#b3b3b3',
+      primary: "#ffffff",
+      secondary: "#b3b3b3",
     },
     error: {
-      main: '#f44336',
+      main: "#f44336",
     },
     warning: {
-      main: '#ff9800',
+      main: "#ff9800",
     },
     info: {
-      main: '#2196f3',
+      main: "#2196f3",
     },
     success: {
-      main: '#1db954',
+      main: "#1db954",
     },
-    divider: '#282828',
+    divider: "#282828",
   },
   typography: {
     fontFamily: '"Circular", "Helvetica Neue", Arial, sans-serif',
@@ -66,15 +66,15 @@ export const spotifyTheme = deepmerge(defaultTheme, {
     RaMenuItemLink: {
       styleOverrides: {
         root: {
-          borderLeft: '3px solid transparent',
-          '&.RaMenuItemLink-active': {
-            borderLeft: '3px solid #1db954',
-            backgroundColor: '#282828',
-            color: '#1db954',
+          borderLeft: "3px solid transparent",
+          "&.RaMenuItemLink-active": {
+            borderLeft: "3px solid #1db954",
+            backgroundColor: "#282828",
+            color: "#1db954",
           },
-          '&:hover': {
-            backgroundColor: '#282828',
-            color: '#ffffff',
+          "&:hover": {
+            backgroundColor: "#282828",
+            color: "#ffffff",
           },
         },
       },
@@ -83,18 +83,18 @@ export const spotifyTheme = deepmerge(defaultTheme, {
     MuiButton: {
       styleOverrides: {
         contained: {
-          backgroundColor: '#1db954',
-          color: '#ffffff',
-          '&:hover': {
-            backgroundColor: '#1ed760',
+          backgroundColor: "#1db954",
+          color: "#ffffff",
+          "&:hover": {
+            backgroundColor: "#1ed760",
           },
         },
         outlined: {
-          borderColor: '#1db954',
-          color: '#1db954',
-          '&:hover': {
-            borderColor: '#1ed760',
-            backgroundColor: 'rgba(29, 185, 84, 0.08)',
+          borderColor: "#1db954",
+          color: "#1db954",
+          "&:hover": {
+            borderColor: "#1ed760",
+            backgroundColor: "rgba(29, 185, 84, 0.08)",
           },
         },
       },
@@ -103,8 +103,8 @@ export const spotifyTheme = deepmerge(defaultTheme, {
     RaAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: '#181818',
-          color: '#ffffff',
+          backgroundColor: "#181818",
+          color: "#ffffff",
         },
       },
     },
@@ -112,8 +112,8 @@ export const spotifyTheme = deepmerge(defaultTheme, {
     RaLayout: {
       styleOverrides: {
         root: {
-          '& .RaLayout-content': {
-            backgroundColor: '#121212',
+          "& .RaLayout-content": {
+            backgroundColor: "#121212",
           },
         },
       },
@@ -122,11 +122,11 @@ export const spotifyTheme = deepmerge(defaultTheme, {
     MuiTableHead: {
       styleOverrides: {
         root: {
-          '& .MuiTableCell-head': {
-            backgroundColor: '#2a2a2a',
-            color: '#ffffff',
+          "& .MuiTableCell-head": {
+            backgroundColor: "#2a2a2a",
+            color: "#ffffff",
             fontWeight: 600,
-            borderBottom: '1px solid #404040',
+            borderBottom: "1px solid #404040",
           },
         },
       },
@@ -134,12 +134,12 @@ export const spotifyTheme = deepmerge(defaultTheme, {
     MuiTableRow: {
       styleOverrides: {
         root: {
-          '&:hover': {
-            backgroundColor: '#282828 !important',
+          "&:hover": {
+            backgroundColor: "#282828 !important",
           },
-          '&.MuiTableRow-hover': {
-            '&:hover': {
-              backgroundColor: '#282828',
+          "&.MuiTableRow-hover": {
+            "&:hover": {
+              backgroundColor: "#282828",
             },
           },
         },
@@ -148,7 +148,7 @@ export const spotifyTheme = deepmerge(defaultTheme, {
     MuiTableCell: {
       styleOverrides: {
         root: {
-          borderBottom: '1px solid #282828',
+          borderBottom: "1px solid #282828",
         },
       },
     },
@@ -156,8 +156,8 @@ export const spotifyTheme = deepmerge(defaultTheme, {
     MuiChip: {
       styleOverrides: {
         root: {
-          backgroundColor: '#282828',
-          color: '#ffffff',
+          backgroundColor: "#282828",
+          color: "#ffffff",
         },
       },
     },
@@ -165,7 +165,7 @@ export const spotifyTheme = deepmerge(defaultTheme, {
     MuiPaper: {
       styleOverrides: {
         root: {
-          backgroundImage: 'none',
+          backgroundImage: "none",
         },
       },
     },
@@ -173,15 +173,15 @@ export const spotifyTheme = deepmerge(defaultTheme, {
     MuiTextField: {
       styleOverrides: {
         root: {
-          '& .MuiOutlinedInput-root': {
-            '& fieldset': {
-              borderColor: '#404040',
+          "& .MuiOutlinedInput-root": {
+            "& fieldset": {
+              borderColor: "#404040",
             },
-            '&:hover fieldset': {
-              borderColor: '#1db954',
+            "&:hover fieldset": {
+              borderColor: "#1db954",
             },
-            '&.Mui-focused fieldset': {
-              borderColor: '#1db954',
+            "&.Mui-focused fieldset": {
+              borderColor: "#1db954",
             },
           },
         },

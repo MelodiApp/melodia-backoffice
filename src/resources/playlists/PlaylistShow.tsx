@@ -8,7 +8,7 @@ import {
   ArrayField,
   Datagrid,
   NumberField,
-} from 'react-admin';
+} from "react-admin";
 
 export const PlaylistShow = () => (
   <Show>
@@ -21,7 +21,7 @@ export const PlaylistShow = () => (
       <BooleanField source="isActive" label="Activo" />
       <DateField source="createdAt" label="Creado" showTime />
       <DateField source="updatedAt" label="Actualizado" showTime />
-      
+
       {/* Lista de canciones en la playlist */}
       <ArrayField source="songs" label="Canciones">
         <Datagrid bulkActionButtons={false}>

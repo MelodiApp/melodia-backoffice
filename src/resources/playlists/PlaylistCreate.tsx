@@ -5,27 +5,27 @@ import {
   BooleanInput,
   SelectInput,
   required,
-} from 'react-admin';
+} from "react-admin";
 
 export const PlaylistCreate = () => (
   <Create>
     <SimpleForm>
       <TextInput source="name" label="Nombre" validate={required()} fullWidth />
-      <TextInput 
-        source="description" 
-        label="Descripción" 
-        multiline 
+      <TextInput
+        source="description"
+        label="Descripción"
+        multiline
         rows={3}
-        fullWidth 
+        fullWidth
       />
       <SelectInput
         source="type"
         label="Tipo"
         choices={[
-          { id: 'weekly_top', name: 'Top Semanal' },
-          { id: 'monthly_top', name: 'Top Mensual' },
-          { id: 'trending', name: 'Tendencias' },
-          { id: 'custom', name: 'Personalizada' },
+          { id: "weekly_top", name: "Top Semanal" },
+          { id: "monthly_top", name: "Top Mensual" },
+          { id: "trending", name: "Tendencias" },
+          { id: "custom", name: "Personalizada" },
         ]}
         defaultValue="custom"
         validate={required()}

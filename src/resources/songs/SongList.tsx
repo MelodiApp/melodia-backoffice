@@ -11,7 +11,7 @@ import {
   TextInput,
   BooleanInput,
   ImageField,
-} from 'react-admin';
+} from "react-admin";
 
 const songFilters = [
   <TextInput label="Buscar" source="q" alwaysOn />,
@@ -21,7 +21,7 @@ const songFilters = [
 ];
 
 export const SongList = () => (
-  <List filters={songFilters} sort={{ field: 'createdAt', order: 'DESC' }}>
+  <List filters={songFilters} sort={{ field: "createdAt", order: "DESC" }}>
     <Datagrid>
       <ImageField source="coverUrl" label="Cover" />
       <TextField source="title" label="Título" />

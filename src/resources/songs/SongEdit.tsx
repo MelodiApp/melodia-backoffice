@@ -5,7 +5,7 @@ import {
   BooleanInput,
   NumberInput,
   required,
-} from 'react-admin';
+} from "react-admin";
 
 export const SongEdit = () => (
   <Edit>
@@ -15,7 +15,11 @@ export const SongEdit = () => (
       <TextInput source="artist" label="Artista" validate={required()} />
       <TextInput source="album" label="Álbum" validate={required()} />
       <TextInput source="genre" label="Género" validate={required()} />
-      <NumberInput source="duration" label="Duración (segundos)" validate={required()} />
+      <NumberInput
+        source="duration"
+        label="Duración (segundos)"
+        validate={required()}
+      />
       <TextInput source="coverUrl" label="URL de Portada" fullWidth />
       <BooleanInput source="isActive" label="Activo" />
       <BooleanInput source="isHidden" label="Oculto" />

@@ -12,7 +12,7 @@ import {
   SelectInput,
   ImageField,
   ChipField,
-} from 'react-admin';
+} from "react-admin";
 
 const playlistFilters = [
   <TextInput label="Buscar" source="q" alwaysOn />,
@@ -20,17 +20,17 @@ const playlistFilters = [
     label="Tipo"
     source="type"
     choices={[
-      { id: 'weekly_top', name: 'Top Semanal' },
-      { id: 'monthly_top', name: 'Top Mensual' },
-      { id: 'trending', name: 'Tendencias' },
-      { id: 'custom', name: 'Personalizada' },
+      { id: "weekly_top", name: "Top Semanal" },
+      { id: "monthly_top", name: "Top Mensual" },
+      { id: "trending", name: "Tendencias" },
+      { id: "custom", name: "Personalizada" },
     ]}
   />,
   <BooleanInput label="Activo" source="isActive" />,
 ];
 
 export const PlaylistList = () => (
-  <List filters={playlistFilters} sort={{ field: 'createdAt', order: 'DESC' }}>
+  <List filters={playlistFilters} sort={{ field: "createdAt", order: "DESC" }}>
     <Datagrid>
       <ImageField source="coverUrl" label="Cover" />
       <TextField source="name" label="Nombre" />

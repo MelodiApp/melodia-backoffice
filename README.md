@@ -109,6 +109,7 @@ src/
 - **📝 Playlists** - Listas de reproducción
 
 Cada recurso tiene:
+
 - Lista con filtros y búsqueda
 - Crear nuevo
 - Editar existente
@@ -140,6 +141,7 @@ DELETE /api/playlists/:id
 ```
 
 **Importante:** Las respuestas de listas deben incluir el header:
+
 ```
 Content-Range: users 0-9/100
 ```
@@ -147,6 +149,7 @@ Content-Range: users 0-9/100
 ## � Tema
 
 El tema usa la paleta de Spotify:
+
 - Verde primario: `#1db954`
 - Fondo oscuro: `#121212`
 - Modo oscuro por defecto

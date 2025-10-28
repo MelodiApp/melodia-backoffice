@@ -6,7 +6,7 @@ import {
   NumberField,
   DateField,
   ImageField,
-} from 'react-admin';
+} from "react-admin";
 
 export const SongShow = () => (
   <Show>

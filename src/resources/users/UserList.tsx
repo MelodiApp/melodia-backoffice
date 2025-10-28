@@ -8,8 +8,8 @@ import {
   DeleteButton,
   ChipField,
   FunctionField,
-} from 'react-admin';
-import type { User } from '../../types/user';
+} from "react-admin";
+import type { User } from "../../types/user";
 
 export const UserList = () => (
   <List actions={false} title="Gestión de Usuarios">
@@ -20,11 +20,13 @@ export const UserList = () => (
       <FunctionField
         label="Estado"
         render={(record: User) => (
-          <span style={{ 
-            color: record.isActive ? '#1db954' : '#f44336',
-            fontWeight: 'bold'
-          }}>
-            {record.isActive ? 'Activo' : 'Bloqueado'}
+          <span
+            style={{
+              color: record.isActive ? "#1db954" : "#f44336",
+              fontWeight: "bold",
+            }}
+          >
+            {record.isActive ? "Activo" : "Bloqueado"}
           </span>
         )}
       />

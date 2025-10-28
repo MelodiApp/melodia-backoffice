@@ -4,7 +4,7 @@ import {
   BooleanInput,
   SelectInput,
   required,
-} from 'react-admin';
+} from "react-admin";
 
 export const UserEdit = () => (
   <Edit>
@@ -12,9 +12,9 @@ export const UserEdit = () => (
       <SelectInput
         source="role"
         choices={[
-          { id: 'admin', name: 'Administrador' },
-          { id: 'listener', name: 'Oyente' },
-          { id: 'artist', name: 'Artista' },
+          { id: "admin", name: "Administrador" },
+          { id: "listener", name: "Oyente" },
+          { id: "artist", name: "Artista" },
         ]}
         validate={required()}
       />
