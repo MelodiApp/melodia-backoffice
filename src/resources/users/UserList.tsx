@@ -13,7 +13,7 @@ import type { User } from '../../types/user';
 
 export const UserList = () => (
   <List actions={false} title="Gestión de Usuarios">
-    <Datagrid>
+    <Datagrid bulkActionButtons={false}>
       <TextField source="username" label="Nombre de Usuario" />
       <EmailField source="email" label="Correo Electrónico" />
       <ChipField source="role" label="Rol" />
