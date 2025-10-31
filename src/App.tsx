@@ -2,7 +2,7 @@ import { Admin, Resource } from "react-admin";
 import { People } from "@mui/icons-material";
 
 // Providers
-import { authProvider, dataProvider } from "./providers";
+import { authProvider, realDataProvider } from "./providers";
 import { i18nProvider } from "./providers/i18nProvider";
 
 // Tema
@@ -12,14 +12,14 @@ import { spotifyTheme } from "./theme/adminTheme";
 import { Dashboard } from "./components/Dashboard";
 
 // Recursos - Solo Usuarios por ahora
-import { UserList, UserEdit, UserCreate, UserShow } from "./resources/users";
+import { UserList, UserEdit, UserShow } from "./resources/users";
 
 /**
  * Aplicación principal de React Admin
  *
  * CONFIGURACIÓN:
- * - authProvider: Maneja la autenticación (login/logout)
- * - dataProvider: Datos mockeados para desarrollo
+ * - authProvider: Conectado con POST /api/admin/login
+ * - dataProvider: Conectado con endpoints /api/admin/users
  * - theme: Tema personalizado con estilo Spotify
  *
  * ROLES DISPONIBLES:
@@ -31,19 +31,18 @@ function App() {
   return (
     <Admin
       authProvider={authProvider}
-      dataProvider={dataProvider}
+      dataProvider={realDataProvider}
       i18nProvider={i18nProvider}
       theme={spotifyTheme}
       dashboard={Dashboard}
       title="Melodia Backoffice"
       disableTelemetry
     >
-      {/* Recurso de Usuarios */}
+      {/* Recurso de Usuarios - Sin create (no implementado en backend) */}
       <Resource
         name="users"
         list={UserList}
         edit={UserEdit}
-        create={UserCreate}
         show={UserShow}
         icon={People}
         options={{ label: "Usuarios" }}

@@ -24,18 +24,27 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Log request in development
+    // Log request in development with more details
     if (import.meta.env.DEV) {
       console.log(
-        `🚀 ${config.method?.toUpperCase()} ${config.url}`,
-        config.data,
+        `🚀 REQUEST: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`,
+        {
+          hasToken: !!token,
+          tokenLength: token?.length || 0,
+          headers: {
+            ...config.headers,
+            Authorization: config.headers.Authorization ? "***TOKEN_PRESENT***" : "NO_TOKEN"
+          },
+          data: config.data,
+          params: config.params,
+        }
       );
     }
 
     return config;
   },
   (error) => {
-    console.error("Request interceptor error:", error);
+    console.error("❌ Request interceptor error:", error);
     return Promise.reject(error);
   },
 );
@@ -43,11 +52,14 @@ apiClient.interceptors.request.use(
 // Response interceptor for handling common responses
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
-    // Log response in development
+    // Log response in development with more details
     if (import.meta.env.DEV) {
       console.log(
-        `✅ ${response.config.method?.toUpperCase()} ${response.config.url}`,
-        response.data,
+        `✅ RESPONSE: ${response.config.method?.toUpperCase()} ${response.config.url}`,
+        {
+          status: response.status,
+          data: response.data,
+        }
       );
     }
 
@@ -55,6 +67,13 @@ apiClient.interceptors.response.use(
   },
   (error) => {
     // Handle common error responses
+    console.error("❌ ERROR:", {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      url: error.config?.url,
+    });
+
     if (error.response) {
       const { status, data } = error.response;
 
@@ -62,25 +81,24 @@ apiClient.interceptors.response.use(
         case 401:
           // Unauthorized - clear token and redirect to login
           localStorage.removeItem("auth_token");
-          // You can dispatch a logout action here or redirect to login
-          console.error("Unauthorized access - redirecting to login");
+          console.error("🔒 Unauthorized access - redirecting to login");
           break;
         case 403:
-          console.error("Forbidden access");
+          console.error("🚫 Forbidden access");
           break;
         case 404:
-          console.error("Resource not found");
+          console.error("❓ Resource not found");
           break;
         case 500:
-          console.error("Internal server error");
+          console.error("💥 Internal server error");
           break;
         default:
-          console.error(`HTTP Error ${status}:`, data);
+          console.error(`⚠️ HTTP Error ${status}:`, data);
       }
     } else if (error.request) {
-      console.error("Network error - no response received:", error.request);
+      console.error("🌐 Network error - no response received:", error.request);
     } else {
-      console.error("Request setup error:", error.message);
+      console.error("⚙️ Request setup error:", error.message);
     }
 
     return Promise.reject(error);

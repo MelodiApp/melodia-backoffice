@@ -1,52 +1,106 @@
 import type { AuthProvider } from "react-admin";
+import { adminService } from "../services/adminService";
 
 /**
- * AuthProvider para React Admin
- *
- * IMPORTANTE: Esta es una implementación básica para desarrollo.
- * En producción, debes implementar autenticación real con JWT, OAuth, etc.
- *
- * Buenas prácticas:
- * - Almacenar tokens en localStorage de forma segura
- * - Implementar refresh tokens
- * - Validar tokens en cada request
- * - Manejar expiración de sesiones
+ * AuthProvider para React Admin - Conectado con el gateway
+ * 
+ * Utiliza los endpoints:
+ * - POST /api/admin/login
+ * - POST /api/admin/refresh-token
  */
+
+interface AuthData {
+  access_token: string;
+  refresh_token: string;
+  user: {
+    id: number;
+    username: string;
+    email: string;
+    type: string;
+  };
+}
+
 export const authProvider: AuthProvider = {
   // Método llamado cuando el usuario intenta iniciar sesión
   login: async ({ username, password }) => {
-    // TODO: Implementar llamada real a tu API de autenticación
-    // Por ahora, acepta cualquier credencial para desarrollo
+    try {
+      // Llamar al endpoint POST /admin/login (el backend espera 'username')
+      const response = await adminService.login({
+        username, // El backend de admin espera 'username', no 'email'
+        password,
+      });
 
-    if (username && password) {
-      // Simular un token de autenticación
-      localStorage.setItem(
-        "auth",
-        JSON.stringify({ username, token: "fake-jwt-token" }),
-      );
+      // Guardar tokens y datos del usuario en localStorage
+      const authData: AuthData = {
+        access_token: response.tokens.access_token,
+        refresh_token: response.tokens.refresh_token,
+        user: response.user,
+      };
+
+      localStorage.setItem("auth", JSON.stringify(authData));
+      localStorage.setItem("auth_token", response.tokens.access_token);
+
+      // Debug: verificar que se guardó correctamente
+      console.log("🔐 LOGIN SUCCESS - Token saved:", {
+        hasAuth: !!localStorage.getItem("auth"),
+        hasToken: !!localStorage.getItem("auth_token"),
+        tokenLength: response.tokens.access_token.length,
+      });
+
       return Promise.resolve();
+    } catch (error) {
+      console.error("Error en login:", error);
+      return Promise.reject(
+        new Error("Error de autenticación. Verifica tus credenciales.")
+      );
     }
-
-    return Promise.reject(new Error("Usuario o contraseña inválidos"));
   },
 
   // Método llamado cuando el usuario hace clic en logout
   logout: async () => {
     localStorage.removeItem("auth");
+    localStorage.removeItem("auth_token");
     return Promise.resolve();
   },
 
   // Método llamado cuando la API retorna un error de autenticación
   checkError: async ({ status }) => {
     if (status === 401 || status === 403) {
+      // Intentar renovar el token si tenemos un refresh_token
+      const authStr = localStorage.getItem("auth");
+      if (authStr) {
+        try {
+          const auth: AuthData = JSON.parse(authStr);
+          const response = await adminService.refreshToken(auth.refresh_token);
+
+          // Actualizar tokens (respuesta tiene la misma estructura que login)
+          const newAuthData: AuthData = {
+            access_token: response.tokens.access_token,
+            refresh_token: response.tokens.refresh_token,
+            user: response.user,
+          };
+
+          localStorage.setItem("auth", JSON.stringify(newAuthData));
+          localStorage.setItem("auth_token", response.tokens.access_token);
+
+          return Promise.resolve();
+        } catch (refreshError) {
+          // Si falla el refresh, hacer logout
+          localStorage.removeItem("auth");
+          localStorage.removeItem("auth_token");
+          return Promise.reject();
+        }
+      }
+
+      // Si no hay refresh token, hacer logout
       localStorage.removeItem("auth");
+      localStorage.removeItem("auth_token");
       return Promise.reject();
     }
     return Promise.resolve();
   },
 
   // Método llamado cuando el usuario navega a una nueva ubicación
-  // para verificar si la sesión sigue activa
   checkAuth: async () => {
     const auth = localStorage.getItem("auth");
     return auth ? Promise.resolve() : Promise.reject();
@@ -54,23 +108,27 @@ export const authProvider: AuthProvider = {
 
   // Método llamado para obtener la identidad del usuario
   getIdentity: async () => {
-    const auth = localStorage.getItem("auth");
-    if (!auth) {
+    const authStr = localStorage.getItem("auth");
+    if (!authStr) {
       return Promise.reject();
     }
 
-    const { username } = JSON.parse(auth);
+    const auth: AuthData = JSON.parse(authStr);
     return Promise.resolve({
-      id: username,
-      fullName: username,
+      id: String(auth.user.id),
+      fullName: auth.user.username || auth.user.email,
       avatar: undefined,
     });
   },
 
   // Método llamado para obtener los permisos del usuario
   getPermissions: async () => {
-    // TODO: Implementar lógica de permisos según tu backend
-    // Por ahora, retorna 'admin' para todos
-    return Promise.resolve("admin");
+    const authStr = localStorage.getItem("auth");
+    if (!authStr) {
+      return Promise.reject();
+    }
+
+    const auth: AuthData = JSON.parse(authStr);
+    return Promise.resolve(auth.user.type);
   },
 };
