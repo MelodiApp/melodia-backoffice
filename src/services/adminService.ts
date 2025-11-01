@@ -18,9 +18,9 @@ export interface User {
   email: string;
   fullName?: string;
   role: "admin" | "listener" | "artist";
-  isActive: boolean;
+  status: string;
   createdAt: string;
-  updatedAt: string;
+  lastLogin?: string;
 }
 
 export interface LoginRequest {
@@ -64,9 +64,9 @@ export class AdminService extends BaseApiService {
       email: backendUser.email,
       fullName: backendUser.username,
       role: backendUser.type,
-      isActive: backendUser.status === "active",
+      status: backendUser.status,
       createdAt: backendUser.created_at || now,
-      updatedAt: backendUser.last_login || now,
+      lastLogin: backendUser.last_login,
     };
   }
 
@@ -80,8 +80,8 @@ export class AdminService extends BaseApiService {
       backendData.type = user.role;
     }
     
-    if (user.isActive !== undefined) {
-      backendData.status = user.isActive ? "active" : "inactive";
+    if (user.status !== undefined) {
+      backendData.status = user.status;
     }
     
     return backendData;

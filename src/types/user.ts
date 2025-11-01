@@ -4,10 +4,9 @@ export interface User {
   username: string;
   fullName: string;
   role: "admin" | "listener" | "artist";
-  isActive: boolean;
+  status: string;
   avatar?: string;
   createdAt: string;
-  updatedAt: string;
   lastLogin?: string;
 }
 

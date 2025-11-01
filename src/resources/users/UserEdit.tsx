@@ -1,7 +1,6 @@
 import {
   Edit,
   SimpleForm,
-  BooleanInput,
   SelectInput,
   required,
 } from "react-admin";
@@ -18,7 +17,15 @@ export const UserEdit = () => (
         ]}
         validate={required()}
       />
-      <BooleanInput source="isActive" label="Activo" />
+      <SelectInput
+        source="status"
+        label="Estado"
+        choices={[
+          { id: "active", name: "Activo" },
+          { id: "blocked", name: "Bloqueado" },
+        ]}
+        validate={required()}
+      />
     </SimpleForm>
   </Edit>
 );

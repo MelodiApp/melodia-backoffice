@@ -114,7 +114,7 @@ El backend usa nombres diferentes a React Admin:
 |---------|----------|
 | `id` (number) | `id` (string) |
 | `type` | `role` |
-| `status` ("active"/"inactive") | `isActive` (boolean) |
+| `status` ("active"/"blocked") | `isActive` (boolean) |
 | `created_at` | `createdAt` |
 | `last_login` | `updatedAt` |
 

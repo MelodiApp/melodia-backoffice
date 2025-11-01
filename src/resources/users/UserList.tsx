@@ -22,11 +22,11 @@ export const UserList = () => (
         render={(record: User) => (
           <span
             style={{
-              color: record.isActive ? "#1db954" : "#f44336",
+              color: record.status === "active" ? "#1db954" : "#f44336",
               fontWeight: "bold",
             }}
           >
-            {record.isActive ? "Activo" : "Bloqueado"}
+            {record.status === "active" ? "Activo" : "Bloqueado"}
           </span>
         )}
       />
