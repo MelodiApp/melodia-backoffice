@@ -6,17 +6,49 @@ import {
   EditButton,
   ShowButton,
   DeleteButton,
-  ChipField,
   FunctionField,
+  SelectInput,
 } from "react-admin";
 import type { User } from "../../types/user";
 
+const userFilters = [
+  <SelectInput
+    source="role"
+    label="Rol"
+    choices={[
+      { id: "admin", name: "Administrador" },
+      { id: "listener", name: "Oyente" },
+      { id: "artist", name: "Artista" },
+    ]}
+    alwaysOn
+  />,
+  <SelectInput
+    source="status"
+    label="Estado"
+    choices={[
+      { id: "active", name: "Activo" },
+      { id: "blocked", name: "Bloqueado" },
+    ]}
+    alwaysOn
+  />,
+];
+
 export const UserList = () => (
-  <List actions={false} title="Gestión de Usuarios">
+  <List filters={userFilters} title="Gestión de Usuarios">
     <Datagrid bulkActionButtons={false}>
       <TextField source="username" label="Nombre de Usuario" />
       <EmailField source="email" label="Correo Electrónico" />
-      <ChipField source="role" label="Rol" />
+      <FunctionField
+        label="Rol"
+        render={(record: User) => {
+          const roleMap: Record<string, string> = {
+            admin: "Administrador",
+            listener: "Oyente",
+            artist: "Artista",
+          };
+          return <span>{roleMap[record.role] || record.role}</span>;
+        }}
+      />
       <FunctionField
         label="Estado"
         render={(record: User) => (

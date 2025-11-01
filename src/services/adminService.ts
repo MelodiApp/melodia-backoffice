@@ -117,12 +117,16 @@ export class AdminService extends BaseApiService {
     page?: number;
     limit?: number;
     search?: string;
+    role?: string;
+    status?: string;
   }): Promise<UsersListResponse> {
     const queryParams = new URLSearchParams();
     
     if (params?.page) queryParams.append("page", params.page.toString());
     if (params?.limit) queryParams.append("limit", params.limit.toString());
     if (params?.search) queryParams.append("search", params.search);
+    if (params?.role) queryParams.append("type", params.role);
+    if (params?.status) queryParams.append("status", params.status);
 
     const url = `${this.BASE_PATH}/users${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
     const response = await this.get<{ users: BackendUser[]; total: number }>(url);

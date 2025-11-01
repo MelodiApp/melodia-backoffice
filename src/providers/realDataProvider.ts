@@ -24,8 +24,18 @@ export const realDataProvider: DataProvider = {
           search: filter.q,
         });
 
+        let filteredData = response.users as any[];
+
+        if (filter.role) {
+          filteredData = filteredData.filter((user) => user.role === filter.role);
+        }
+
+        if (filter.status) {
+          filteredData = filteredData.filter((user) => user.status === filter.status);
+        }
+
         return {
-          data: response.users as any[],
+          data: filteredData,
           total: response.total,
         };
       } catch (error) {
