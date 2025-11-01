@@ -23,6 +23,10 @@ const customSpanishMessages = {
       close: "Cerrar",
       clear_filters: "Limpiar filtros",
     },
+    filter: {
+      ...(spanishMessages as any).ra.filter,
+      clear_filters: "Limpiar filtros",
+    },
     notification: {
       ...(spanishMessages as any).ra.notification,
       deleted: "Usuario eliminado",
