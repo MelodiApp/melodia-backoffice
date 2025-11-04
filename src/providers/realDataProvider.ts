@@ -7,7 +7,7 @@ import { adminService } from "../services/adminService";
  * Utiliza los endpoints:
  * - GET /api/admin/users
  * - GET /api/admin/users/:id
- * - PUT /api/admin/users/:id
+ * - PATCH /api/admin/users/:id
  * - DELETE /api/admin/users/:id
  */
 export const realDataProvider: DataProvider = {
@@ -95,7 +95,7 @@ export const realDataProvider: DataProvider = {
     throw new Error(`Recurso ${resource} no soportado`);
   },
 
-  // PUT /api/admin/users/:id - Actualizar un recurso
+  // PATCH /api/admin/users/:id - Actualizar un recurso
   update: async (resource, params) => {
     if (resource === "users") {
       try {

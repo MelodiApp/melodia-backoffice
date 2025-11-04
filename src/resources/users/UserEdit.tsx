@@ -41,6 +41,7 @@ const RoleInput = () => {
   return (
     <SelectInput
       source="role"
+      label="Rol"
       choices={getRoleChoices()}
       validate={required()}
       disabled={record.role === "listener"}

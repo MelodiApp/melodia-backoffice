@@ -147,12 +147,12 @@ export class AdminService extends BaseApiService {
   }
 
   /**
-   * PUT /api/admin/users/:id
+   * PATCH /api/admin/users/:id
    * Actualizar un usuario
    */
   async updateUser(id: string, data: Partial<User>): Promise<User> {
     const backendData = this.mapFrontendUserToBackend(data);
-    const updatedUser = await this.put<BackendUser, any>(
+    const updatedUser = await this.patch<BackendUser, any>(
       `${this.BASE_PATH}/users/${id}`,
       backendData
     );
