@@ -3,20 +3,55 @@ import {
   SimpleForm,
   SelectInput,
   required,
+  useRecordContext,
 } from "react-admin";
+
+const RoleInput = () => {
+  const record = useRecordContext();
+  
+  if (!record) return null;
+  
+  // Definir las opciones según el rol actual
+  const getRoleChoices = () => {
+    switch (record.role) {
+      case "listener":
+        // Listener no puede cambiar de rol
+        return [
+          { id: "listener", name: "Oyente" },
+        ];
+      case "artist":
+        // Artist solo puede cambiar a listener
+        return [
+          { id: "listener", name: "Oyente" },
+          { id: "artist", name: "Artista" },
+        ];
+      case "admin":
+        // Admin solo puede cambiar a listener
+        return [
+          { id: "listener", name: "Oyente" },
+          { id: "admin", name: "Administrador" },
+        ];
+      default:
+        return [
+          { id: "listener", name: "Oyente" },
+        ];
+    }
+  };
+
+  return (
+    <SelectInput
+      source="role"
+      choices={getRoleChoices()}
+      validate={required()}
+      disabled={record.role === "listener"}
+    />
+  );
+};
 
 export const UserEdit = () => (
   <Edit>
     <SimpleForm>
-      <SelectInput
-        source="role"
-        choices={[
-          { id: "admin", name: "Administrador" },
-          { id: "listener", name: "Oyente" },
-          { id: "artist", name: "Artista" },
-        ]}
-        validate={required()}
-      />
+      <RoleInput />
       <SelectInput
         source="status"
         label="Estado"
