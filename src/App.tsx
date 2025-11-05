@@ -1,5 +1,5 @@
 import { Admin, Resource } from "react-admin";
-import { People } from "@mui/icons-material";
+import { People, LibraryMusic } from "@mui/icons-material";
 
 // Providers
 import { authProvider, realDataProvider } from "./providers";
@@ -11,8 +11,9 @@ import { spotifyTheme } from "./theme/adminTheme";
 // Dashboard
 import { Dashboard } from "./components/Dashboard";
 
-// Recursos - Solo Usuarios por ahora
+// Recursos - Usuarios y Catálogo
 import { UserList, UserEdit, UserShow } from "./resources/users";
+import { CatalogList } from "./resources/catalog";
 
 /**
  * Aplicación principal de React Admin
@@ -46,6 +47,14 @@ function App() {
         show={UserShow}
         icon={People}
         options={{ label: "Usuarios" }}
+      />
+
+      {/* Recurso de Catálogo - Gestión de contenido */}
+      <Resource
+        name="catalog"
+        list={CatalogList}
+        icon={LibraryMusic}
+        options={{ label: "Catálogo" }}
       />
     </Admin>
   );
