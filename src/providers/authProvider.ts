@@ -85,17 +85,17 @@ export const authProvider: AuthProvider = {
 
           return Promise.resolve();
         } catch (refreshError) {
-          // Si falla el refresh, hacer logout
+          // Si falla el refresh, hacer logout silenciosamente
           localStorage.removeItem("auth");
           localStorage.removeItem("auth_token");
-          return Promise.reject();
+          return Promise.reject({ message: false }); // false suprime la notificación
         }
       }
 
-      // Si no hay refresh token, hacer logout
+      // Si no hay refresh token, hacer logout silenciosamente
       localStorage.removeItem("auth");
       localStorage.removeItem("auth_token");
-      return Promise.reject();
+      return Promise.reject({ message: false }); // false suprime la notificación
     }
     return Promise.resolve();
   },
@@ -103,7 +103,7 @@ export const authProvider: AuthProvider = {
   // Método llamado cuando el usuario navega a una nueva ubicación
   checkAuth: async () => {
     const auth = localStorage.getItem("auth");
-    return auth ? Promise.resolve() : Promise.reject();
+    return auth ? Promise.resolve() : Promise.reject({ message: false, logoutUser: false });
   },
 
   // Método llamado para obtener la identidad del usuario
