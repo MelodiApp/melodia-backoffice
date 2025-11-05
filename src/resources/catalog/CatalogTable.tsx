@@ -56,9 +56,15 @@ export function CatalogTable({
   };
 
   const handleAction = (action: string) => {
-    console.log(`Action: ${action}`, selectedItem);
+    if (!selectedItem) return;
+    
+    if (action === 'view') {
+      window.location.href = `/#/catalog/${selectedItem.id}/show`;
+    } else {
+      console.log(`Action: ${action}`, selectedItem);
+    }
+    
     handleMenuClose();
-    // Aquí implementarías las acciones reales
   };
 
   const highlightText = (text: string) => {

@@ -13,7 +13,7 @@ import { Dashboard } from "./components/Dashboard";
 
 // Recursos - Usuarios y Catálogo
 import { UserList, UserEdit, UserShow } from "./resources/users";
-import { CatalogList } from "./resources/catalog";
+import { CatalogList, CatalogShow } from "./resources/catalog";
 
 /**
  * Aplicación principal de React Admin
@@ -53,6 +53,7 @@ function App() {
       <Resource
         name="catalog"
         list={CatalogList}
+        show={CatalogShow}
         icon={LibraryMusic}
         options={{ label: "Catálogo" }}
       />

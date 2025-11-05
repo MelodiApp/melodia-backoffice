@@ -1,0 +1,202 @@
+import {
+  Typography,
+  Card,
+  CardContent,
+  Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Chip,
+  IconButton,
+} from '@mui/material';
+import { OpenInNew, MusicNote, Album, List } from '@mui/icons-material';
+import type { CatalogDetail } from '../../../types/catalogDetail';
+import {
+  getSongAppearances,
+  getCollectionAppearances,
+} from '../../../providers/catalogDetailMockData';
+
+interface AppearancesTabProps {
+  item: CatalogDetail;
+}
+
+export function AppearancesTab({ item }: AppearancesTabProps) {
+  const isSong = item.type === 'song';
+
+  if (isSong) {
+    return <SongAppearances itemId={item.id} />;
+  } else {
+    return <CollectionAppearances itemId={item.id} />;
+  }
+}
+
+function SongAppearances({ itemId }: { itemId: string }) {
+  const appearances = getSongAppearances(itemId);
+
+  const getTypeConfig = (type: string) => {
+    const configs: Record<string, { icon: React.ReactElement; label: string; color: any }> = {
+      album: { icon: <Album fontSize="small" />, label: 'Álbum', color: 'primary' },
+      ep: { icon: <Album fontSize="small" />, label: 'EP', color: 'secondary' },
+      single: { icon: <MusicNote fontSize="small" />, label: 'Single', color: 'info' },
+      playlist: { icon: <List fontSize="small" />, label: 'Playlist', color: 'success' },
+    };
+
+    return configs[type] || configs.album;
+  };
+
+  const handleOpenDetail = (collectionId: string) => {
+    window.location.href = `/#/catalog/${collectionId}/show`;
+  };
+
+  return (
+    <Card>
+      <CardContent>
+        <Typography variant="h6" gutterBottom>
+          Apariciones de la canción
+        </Typography>
+
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Colecciones (Álbumes, EPs, Singles y Playlists públicas) que incluyen esta canción
+        </Typography>
+
+        {appearances.length === 0 ? (
+          <Alert severity="info">
+            Esta canción no aparece en ninguna colección
+          </Alert>
+        ) : (
+          <TableContainer component={Paper} variant="outlined">
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Tipo</TableCell>
+                  <TableCell>Título</TableCell>
+                  <TableCell align="center">Posición</TableCell>
+                  <TableCell>Propietario</TableCell>
+                  <TableCell align="center">Acciones</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {appearances.map((appearance) => {
+                  const typeConfig = getTypeConfig(appearance.type);
+
+                  return (
+                    <TableRow key={appearance.id} hover>
+                      <TableCell>
+                        <Chip
+                          icon={typeConfig.icon}
+                          label={typeConfig.label}
+                          size="small"
+                          color={typeConfig.color}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" fontWeight="medium">
+                          {appearance.title}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Chip label={`#${appearance.position}`} size="small" variant="outlined" />
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" color="text.secondary">
+                          {appearance.owner || '—'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenDetail(appearance.id)}
+                          title="Ver detalle"
+                        >
+                          <OpenInNew fontSize="small" />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function CollectionAppearances({ itemId }: { itemId: string }) {
+  const appearances = getCollectionAppearances(itemId);
+
+  const handleOpenDetail = (playlistId: string) => {
+    window.location.href = `/#/catalog/${playlistId}/show`;
+  };
+
+  return (
+    <Card>
+      <CardContent>
+        <Typography variant="h6" gutterBottom>
+          Apariciones de la colección
+        </Typography>
+
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Playlists que contienen canciones de esta colección
+        </Typography>
+
+        {appearances.length === 0 ? (
+          <Alert severity="info">
+            Las canciones de esta colección no aparecen en ninguna playlist
+          </Alert>
+        ) : (
+          <TableContainer component={Paper} variant="outlined">
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Título</TableCell>
+                  <TableCell>Propietario</TableCell>
+                  <TableCell align="center">Canciones incluidas</TableCell>
+                  <TableCell align="center">Acciones</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {appearances.map((appearance) => (
+                  <TableRow key={appearance.id} hover>
+                    <TableCell>
+                      <Typography variant="body2" fontWeight="medium">
+                        {appearance.title}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" color="text.secondary">
+                        {appearance.owner}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Chip
+                        label={`${appearance.includedCount} de ${appearance.totalTracksInCollection}`}
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <IconButton
+                        size="small"
+                        onClick={() => handleOpenDetail(appearance.id)}
+                        title="Ver detalle"
+                      >
+                        <OpenInNew fontSize="small" />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
