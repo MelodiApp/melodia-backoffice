@@ -31,9 +31,9 @@ export interface LoginRequest {
 export interface LoginResponse {
   user: BackendUser;
   tokens: {
-    access_token: string;
-    refresh_token: string;
-    ip_token: string;
+    accessToken: string;
+    refreshToken: string;
+    ipToken: string;
   };
 }
 

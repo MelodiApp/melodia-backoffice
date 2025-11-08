@@ -32,19 +32,19 @@ export const authProvider: AuthProvider = {
 
       // Guardar tokens y datos del usuario en localStorage
       const authData: AuthData = {
-        access_token: response.tokens.access_token,
-        refresh_token: response.tokens.refresh_token,
+        access_token: response.tokens.accessToken,
+        refresh_token: response.tokens.refreshToken,
         user: response.user,
       };
 
       localStorage.setItem("auth", JSON.stringify(authData));
-      localStorage.setItem("auth_token", response.tokens.access_token);
+      localStorage.setItem("auth_token", response.tokens.accessToken);
 
       // Debug: verificar que se guardó correctamente
       console.log("🔐 LOGIN SUCCESS - Token saved:", {
         hasAuth: !!localStorage.getItem("auth"),
         hasToken: !!localStorage.getItem("auth_token"),
-        tokenLength: response.tokens.access_token.length,
+        tokenLength: response.tokens.accessToken.length,
       });
 
       return Promise.resolve();
@@ -75,13 +75,13 @@ export const authProvider: AuthProvider = {
 
           // Actualizar tokens (respuesta tiene la misma estructura que login)
           const newAuthData: AuthData = {
-            access_token: response.tokens.access_token,
-            refresh_token: response.tokens.refresh_token,
+            access_token: response.tokens.accessToken,
+            refresh_token: response.tokens.refreshToken,
             user: response.user,
           };
 
           localStorage.setItem("auth", JSON.stringify(newAuthData));
-          localStorage.setItem("auth_token", response.tokens.access_token);
+          localStorage.setItem("auth_token", response.tokens.accessToken);
 
           return Promise.resolve();
         } catch (refreshError) {
