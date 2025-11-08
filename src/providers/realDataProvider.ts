@@ -49,9 +49,13 @@ export const realDataProvider: DataProvider = {
 
   // GET /api/admin/users/:id - Obtener un recurso por ID
   getOne: async (resource, params) => {
+    console.log('🚀 getOne llamado para:', resource, 'con ID:', params.id);
     if (resource === "users") {
       try {
         const user = await adminService.getUserById(String(params.id));
+        console.log('✅ Usuario obtenido:', user);
+        console.log('✅ lastLogin:', user.lastLogin);
+        console.log('✅ createdAt:', user.createdAt);
         return { data: user as any };
       } catch (error) {
         console.error("Error obteniendo usuario:", error);

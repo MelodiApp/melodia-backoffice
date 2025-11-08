@@ -7,8 +7,8 @@ interface BackendUser {
   email: string;
   type: "admin" | "listener" | "artist";
   status: string;
-  created_at?: string;
-  last_login?: string;
+  createdAt?: string;
+  lastLogin?: string;
 }
 
 // Frontend types (React Admin compatible)
@@ -58,6 +58,9 @@ export class AdminService extends BaseApiService {
    */
   private mapBackendUserToFrontend(backendUser: BackendUser): User {
     const now = new Date().toISOString();
+    console.log('🔍 Backend user data:', backendUser);
+    console.log('🔍 lastLogin:', backendUser.lastLogin);
+    console.log('🔍 createdAt:', backendUser.createdAt);
     return {
       id: String(backendUser.id),
       username: backendUser.username,
@@ -65,8 +68,8 @@ export class AdminService extends BaseApiService {
       fullName: backendUser.username,
       role: backendUser.type,
       status: backendUser.status,
-      createdAt: backendUser.created_at || now,
-      lastLogin: backendUser.last_login,
+      createdAt: backendUser.createdAt || now,
+      lastLogin: backendUser.lastLogin,
     };
   }
 

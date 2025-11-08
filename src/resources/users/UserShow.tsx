@@ -6,12 +6,20 @@ import {
   DateField,
   ChipField,
   FunctionField,
+  useRecordContext,
 } from "react-admin";
 import type { User } from "../../types/user";
+
+const DebugField = () => {
+  const record = useRecordContext();
+  console.log('📋 Record en UserShow:', record);
+  return null;
+};
 
 export const UserShow = () => (
   <Show>
     <SimpleShowLayout>
+      <DebugField />
       <TextField source="username" label="Nombre de Usuario" />
       <EmailField source="email" label="Correo Electrónico" />
       <ChipField source="role" label="Rol" />
