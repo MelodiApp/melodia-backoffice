@@ -11,15 +11,16 @@ import {
   Divider,
   Chip,
 } from '@mui/material';
-import { Lock, LockOpen } from '@mui/icons-material';
-import { getAuditEvents } from '../../../providers/catalogDetailMockData';
+import { Schedule, CheckCircle, Block } from '@mui/icons-material';
+import { getStateChangeEvents } from '../../../services/catalogStateService';
+import { STATE_LABELS } from '../../../types/catalogStates';
 
 interface AuditTabProps {
   itemId: string;
 }
 
 export function AuditTab({ itemId }: AuditTabProps) {
-  const auditEvents = getAuditEvents(itemId);
+  const auditEvents = getStateChangeEvents(itemId);
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -32,42 +33,52 @@ export function AuditTab({ itemId }: AuditTabProps) {
     });
   };
 
-  const getEventConfig = (event: string) => {
-    const configs: Record<string, { icon: React.ReactElement; color: any; label: string }> = {
-      blocked: {
-        icon: <Lock />,
-        color: 'error',
-        label: 'Bloqueado',
-      },
-      unblocked: {
-        icon: <LockOpen />,
-        color: 'success',
-        label: 'Desbloqueado',
-      },
-    };
+  const getEventIcon = (newState: string) => {
+    switch (newState) {
+      case 'scheduled':
+        return <Schedule />;
+      case 'published':
+        return <CheckCircle />;
+      case 'blocked':
+        return <Block />;
+      default:
+        return <CheckCircle />;
+    }
+  };
 
-    return configs[event] || configs.blocked;
+  const getEventColor = (newState: string): 'info' | 'success' | 'error' => {
+    switch (newState) {
+      case 'scheduled':
+        return 'info';
+      case 'published':
+        return 'success';
+      case 'blocked':
+        return 'error';
+      default:
+        return 'info';
+    }
   };
 
   return (
     <Card>
       <CardContent>
         <Typography variant="h6" gutterBottom>
-          Auditoría
+          Auditoría de cambios de estado
         </Typography>
 
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          Historial de cambios de estado de bloqueo (últimos eventos)
+          Historial completo de transiciones de estado con usuario, fecha y razón
         </Typography>
 
         {auditEvents.length === 0 ? (
           <Alert severity="info">
-            No hay eventos de auditoría registrados para esta canción
+            No hay eventos de auditoría registrados para este ítem
           </Alert>
         ) : (
           <List>
             {auditEvents.map((event, index) => {
-              const config = getEventConfig(event.event);
+              const icon = getEventIcon(event.newState);
+              const color = getEventColor(event.newState);
 
               return (
                 <Box key={event.id}>
@@ -90,11 +101,11 @@ export function AuditTab({ itemId }: AuditTabProps) {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          bgcolor: `${config.color}.light`,
-                          color: `${config.color}.main`,
+                          bgcolor: `${color}.light`,
+                          color: `${color}.main`,
                         }}
                       >
-                        {config.icon}
+                        {icon}
                       </Box>
                     </ListItemIcon>
 
@@ -102,7 +113,7 @@ export function AuditTab({ itemId }: AuditTabProps) {
                       primary={
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                           <Typography variant="body1" fontWeight="medium">
-                            {config.label}
+                            {STATE_LABELS[event.previousState]} → {STATE_LABELS[event.newState]}
                           </Typography>
                           <Chip
                             label={formatDateTime(event.timestamp)}
@@ -119,6 +130,11 @@ export function AuditTab({ itemId }: AuditTabProps) {
                           {event.reason && (
                             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                               Razón: {event.reason}
+                            </Typography>
+                          )}
+                          {event.scheduledDate && (
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                              Fecha programada: {formatDateTime(event.scheduledDate)}
                             </Typography>
                           )}
                         </Box>

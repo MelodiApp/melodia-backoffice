@@ -85,6 +85,96 @@ export const mockSongDetails: Record<string, SongDetail> = {
     createdAt: '2024-01-25T10:00:00Z',
     updatedAt: '2024-01-25T10:00:00Z',
   },
+  '4': {
+    id: '4',
+    type: 'song',
+    title: 'Stairway to Heaven',
+    artists: [{ id: 'a4', name: 'Led Zeppelin' }],
+    collection: {
+      id: 'col-4',
+      title: 'Led Zeppelin IV',
+      year: 1971,
+    },
+    trackNumber: 4,
+    duration: 482, // 8:02
+    explicit: false,
+    hasVideo: false,
+    status: 'published',
+    createdAt: '2024-01-14T10:00:00Z',
+    updatedAt: '2024-01-14T10:00:00Z',
+  },
+  '8': {
+    id: '8',
+    type: 'song',
+    title: 'Billie Jean',
+    artists: [{ id: 'a8', name: 'Michael Jackson' }],
+    collection: {
+      id: 'col-8',
+      title: 'Thriller',
+      year: 1983,
+    },
+    trackNumber: 6,
+    duration: 294, // 4:54
+    explicit: false,
+    hasVideo: true,
+    status: 'published',
+    createdAt: '2024-01-18T10:00:00Z',
+    updatedAt: '2024-01-18T10:00:00Z',
+  },
+  '10': {
+    id: '10',
+    type: 'song',
+    title: 'Sweet Child O Mine',
+    artists: [{ id: 'a10', name: "Guns N' Roses" }],
+    collection: {
+      id: 'col-10',
+      title: 'Appetite for Destruction',
+      year: 1987,
+    },
+    trackNumber: 3,
+    duration: 356, // 5:56
+    explicit: false,
+    hasVideo: true,
+    status: 'published',
+    createdAt: '2024-01-16T10:00:00Z',
+    updatedAt: '2024-01-16T10:00:00Z',
+  },
+  '11': {
+    id: '11',
+    type: 'song',
+    title: 'Rolling in the Deep',
+    artists: [{ id: 'a11', name: 'Adele' }],
+    collection: {
+      id: 'col-11',
+      title: '21',
+      year: 2011,
+    },
+    trackNumber: 1,
+    duration: 228, // 3:48
+    explicit: false,
+    hasVideo: true,
+    status: 'scheduled',
+    createdAt: '2024-02-05T10:00:00Z',
+    updatedAt: '2024-02-05T10:00:00Z',
+  },
+  '12': {
+    id: '12',
+    type: 'song',
+    title: 'Lose Yourself',
+    artists: [{ id: 'a12', name: 'Eminem' }],
+    collection: {
+      id: 'col-12',
+      title: '8 Mile Soundtrack',
+      year: 2002,
+    },
+    trackNumber: 1,
+    duration: 326, // 5:26
+    explicit: true,
+    hasVideo: false,
+    status: 'published',
+    createdAt: '2024-01-28T10:00:00Z',
+    updatedAt: '2024-01-28T10:00:00Z',
+  },
 };
 
 // Datos mock para colecciones
@@ -148,38 +238,81 @@ export const mockCollectionDetails: Record<string, CollectionDetail> = {
     createdAt: '2024-01-15T10:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z',
   },
+  '9': {
+    id: '9',
+    type: 'collection',
+    coverUrl: 'https://picsum.photos/300/300?random=9',
+    title: 'Back in Black',
+    collectionType: 'album',
+    year: 1980,
+    tracks: [
+      { position: 1, id: 's30', title: 'Hells Bells', duration: 312, explicit: false, hasVideo: true },
+      { position: 2, id: 's31', title: 'Shoot to Thrill', duration: 317, explicit: false, hasVideo: false },
+      { position: 3, id: 's32', title: 'What Do You Do for Money Honey', duration: 215, explicit: false, hasVideo: false },
+      { position: 4, id: 's33', title: 'Back in Black', duration: 255, explicit: false, hasVideo: true },
+    ],
+    totalDuration: 1099,
+    hasExplicit: false,
+    hasVideo: true,
+    status: 'published',
+    createdAt: '2024-01-22T10:00:00Z',
+    updatedAt: '2024-01-22T10:00:00Z',
+  },
 };
 
 // Disponibilidad mock
 export const mockAvailability: Record<string, Availability> = {
   '1': {
     effectiveStatus: 'published',
-    regions: [
-      { region: 'Argentina', available: true },
-      { region: 'Uruguay', available: true },
-      { region: 'Chile', available: true },
-      { region: 'Brasil', available: false, reason: 'Restricción de licencia' },
-    ],
+    regions: [],
+  },
+  '2': {
+    effectiveStatus: 'published',
+    regions: [],
+  },
+  '3': {
+    effectiveStatus: 'published',
+    regions: [],
+  },
+  '4': {
+    effectiveStatus: 'published',
+    regions: [],
   },
   '5': {
     effectiveStatus: 'scheduled',
     scheduledDate: '2025-12-01T00:00:00Z',
-    regions: [
-      { region: 'Argentina', available: true },
-      { region: 'Uruguay', available: true },
-      { region: 'Chile', available: true },
-      { region: 'Brasil', available: true },
-    ],
+    regions: [],
+  },
+  '6': {
+    effectiveStatus: 'blocked',
+    blockedReason: 'Revisión de contenido pendiente',
+    regions: [],
   },
   '7': {
     effectiveStatus: 'blocked',
     blockedReason: 'Solicitud de derechos de autor',
-    regions: [
-      { region: 'Argentina', available: false, reason: 'Bloqueado por admin' },
-      { region: 'Uruguay', available: false, reason: 'Bloqueado por admin' },
-      { region: 'Chile', available: false, reason: 'Bloqueado por admin' },
-      { region: 'Brasil', available: false, reason: 'Bloqueado por admin' },
-    ],
+    regions: [],
+  },
+  '8': {
+    effectiveStatus: 'published',
+    regions: [],
+  },
+  '9': {
+    effectiveStatus: 'published',
+    regions: [],
+  },
+  '10': {
+    effectiveStatus: 'published',
+    regions: [],
+  },
+  '11': {
+    effectiveStatus: 'scheduled',
+    scheduledDate: '2025-11-15T00:00:00Z',
+    regions: [],
+  },
+  '12': {
+    effectiveStatus: 'published',
+    regions: [],
   },
 };
 

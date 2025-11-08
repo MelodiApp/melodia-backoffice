@@ -87,13 +87,6 @@ export function AvailabilityTab({ itemId }: AvailabilityTabProps) {
               </Typography>
             </Alert>
           )}
-
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-            El estado efectivo se determina aplicando la siguiente prioridad:
-            <br />
-            <strong>Bloqueado-admin</strong> &gt; <strong>Programado</strong> &gt;{' '}
-            <strong>Publicado</strong>
-          </Typography>
         </CardContent>
       </Card>
     </Box>

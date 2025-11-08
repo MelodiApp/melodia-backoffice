@@ -33,8 +33,14 @@ function TabPanel(props: TabPanelProps) {
 export default function CatalogShow() {
   const { id } = useParams<{ id: string }>();
   const [currentTab, setCurrentTab] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const catalogItem = id ? getCatalogDetail(id) : null;
+
+  const handleRefresh = () => {
+    setRefreshKey((prev) => prev + 1);
+    // En producción, aquí recargarías los datos del backend
+  };
 
   if (!catalogItem) {
     return (
@@ -90,7 +96,7 @@ export default function CatalogShow() {
 
       {/* Tab Panels */}
       <TabPanel value={currentTab} index={0}>
-        <SummaryTab item={catalogItem} />
+        <SummaryTab item={catalogItem} onRefresh={handleRefresh} />
       </TabPanel>
 
       <TabPanel value={currentTab} index={1}>
@@ -103,7 +109,7 @@ export default function CatalogShow() {
 
       {isSong && (
         <TabPanel value={currentTab} index={3}>
-          <AuditTab itemId={catalogItem.id} />
+          <AuditTab itemId={catalogItem.id} key={refreshKey} />
         </TabPanel>
       )}
     </Box>

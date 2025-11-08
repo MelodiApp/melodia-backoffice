@@ -25,6 +25,7 @@ import {
   VideocamOff,
 } from '@mui/icons-material';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { CatalogItem } from '../../types/catalog';
 
 interface CatalogTableProps {
@@ -42,6 +43,7 @@ export function CatalogTable({
   currentSort,
   sortOrder,
 }: CatalogTableProps) {
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedItem, setSelectedItem] = useState<CatalogItem | null>(null);
 
@@ -59,7 +61,7 @@ export function CatalogTable({
     if (!selectedItem) return;
     
     if (action === 'view') {
-      window.location.href = `/#/catalog/${selectedItem.id}/show`;
+      navigate(`/catalog/${selectedItem.id}/show`);
     } else {
       console.log(`Action: ${action}`, selectedItem);
     }

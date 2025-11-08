@@ -1,0 +1,219 @@
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+  Alert,
+  Box,
+  Typography,
+  Chip,
+} from '@mui/material';
+import type { CatalogState } from '../../../types/catalogStates';
+import {
+  STATE_LABELS,
+  STATE_COLORS,
+  isTransitionAllowed,
+  getTransitionConfig,
+  validateTransition,
+} from '../../../types/catalogStates';
+import { changeItemState } from '../../../services/catalogStateService';
+
+interface ChangeStateDialogProps {
+  open: boolean;
+  onClose: () => void;
+  itemId: string;
+  itemType: 'song' | 'collection';
+  itemTitle: string;
+  currentState: CatalogState;
+  currentScheduledDate?: string;
+  onSuccess: () => void;
+}
+
+export function ChangeStateDialog({
+  open,
+  onClose,
+  itemId,
+  itemType,
+  itemTitle,
+  currentState,
+  currentScheduledDate,
+  onSuccess,
+}: ChangeStateDialogProps) {
+  const [newState, setNewState] = useState<CatalogState>(currentState);
+  const [reason, setReason] = useState('');
+  const [scheduledDate, setScheduledDate] = useState<string>(
+    currentScheduledDate || ''
+  );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const availableStates: CatalogState[] = ['scheduled', 'published', 'blocked'];
+
+  const handleSubmit = async () => {
+    setError(null);
+
+    // Validar transición
+    const validation = validateTransition(currentState, newState, {
+      reason,
+      scheduledDate: scheduledDate || undefined,
+    });
+
+    if (!validation.valid) {
+      setError(validation.error || 'Error de validación');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const result = await changeItemState({
+        itemId,
+        itemType,
+        currentState,
+        newState,
+        user: 'admin@melodia.com', // En producción, obtener del auth
+        reason: reason || undefined,
+        scheduledDate: scheduledDate || undefined,
+      });
+
+      if (result.success) {
+        onSuccess();
+        handleClose();
+      } else {
+        setError(result.error || 'Error al cambiar el estado');
+      }
+    } catch (err) {
+      setError('Error al cambiar el estado');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClose = () => {
+    setNewState(currentState);
+    setReason('');
+    setScheduledDate(currentScheduledDate || '');
+    setError(null);
+    onClose();
+  };
+
+  const transitionConfig = getTransitionConfig(currentState, newState);
+  const requiresReason = transitionConfig?.requiresReason;
+  const requiresScheduleDate = transitionConfig?.requiresScheduleDate || newState === 'scheduled';
+  const isValidTransition = isTransitionAllowed(currentState, newState);
+  const hasChanges = newState !== currentState;
+
+  return (
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+      <DialogTitle>Cambiar estado</DialogTitle>
+
+      <DialogContent>
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="body2" color="text.secondary" gutterBottom>
+            Ítem
+          </Typography>
+          <Typography variant="body1" fontWeight="medium">
+            {itemTitle}
+          </Typography>
+        </Box>
+
+        <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Estado actual
+            </Typography>
+            <Chip
+              label={STATE_LABELS[currentState]}
+              color={STATE_COLORS[currentState]}
+              size="small"
+            />
+          </Box>
+        </Box>
+
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel>Nuevo estado</InputLabel>
+          <Select
+            value={newState}
+            label="Nuevo estado"
+            onChange={(e) => setNewState(e.target.value as CatalogState)}
+          >
+            {availableStates.map((state) => (
+              <MenuItem key={state} value={state}>
+                {STATE_LABELS[state]}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        {!isValidTransition && hasChanges && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            Esta transición no está permitida
+          </Alert>
+        )}
+
+        {requiresScheduleDate && (
+          <Box sx={{ mb: 2 }}>
+            <TextField
+              fullWidth
+              label="Fecha y hora de publicación"
+              type="datetime-local"
+              value={scheduledDate}
+              onChange={(e) => setScheduledDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              helperText="Debe ser una fecha futura"
+              inputProps={{
+                min: new Date().toISOString().slice(0, 16),
+              }}
+            />
+          </Box>
+        )}
+
+        {(requiresReason || newState === 'blocked') && (
+          <TextField
+            fullWidth
+            label={requiresReason ? 'Razón (requerida)' : 'Razón (opcional)'}
+            multiline
+            rows={3}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            required={requiresReason}
+            placeholder="Describe el motivo del cambio de estado..."
+            sx={{ mb: 2 }}
+          />
+        )}
+
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        )}
+
+        <Alert severity="info" sx={{ mt: 2 }}>
+          <Typography variant="body2">
+            <strong>Prioridad de estados:</strong> Bloqueado &gt; Programado &gt; Publicado
+          </Typography>
+        </Alert>
+      </DialogContent>
+
+      <DialogActions>
+        <Button onClick={handleClose} disabled={loading}>
+          Cancelar
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          variant="contained"
+          disabled={loading || !isValidTransition || !hasChanges}
+        >
+          {loading ? 'Guardando...' : 'Cambiar estado'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}

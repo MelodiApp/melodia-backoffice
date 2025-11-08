@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Box,
   Typography,
@@ -23,28 +24,50 @@ import {
   Explicit,
   Videocam,
   AccessTime,
+  Sync,
 } from '@mui/icons-material';
 import type { CatalogDetail, SongDetail, CollectionDetail } from '../../../types/catalogDetail';
+import { ChangeStateDialog } from '../components/ChangeStateDialog';
+import { EditMetadataDialog } from '../components/EditMetadataDialog';
+import { STATE_LABELS, STATE_COLORS } from '../../../types/catalogStates';
 
 interface SummaryTabProps {
   item: CatalogDetail;
+  onRefresh?: () => void;
 }
 
-export function SummaryTab({ item }: SummaryTabProps) {
+export function SummaryTab({ item, onRefresh }: SummaryTabProps) {
   const isSong = item.type === 'song';
 
   if (isSong) {
-    return <SongSummary item={item as SongDetail} />;
+    return <SongSummary item={item as SongDetail} onRefresh={onRefresh} />;
   } else {
-    return <CollectionSummary item={item as CollectionDetail} />;
+    return <CollectionSummary item={item as CollectionDetail} onRefresh={onRefresh} />;
   }
 }
 
-function SongSummary({ item }: { item: SongDetail }) {
+function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => void }) {
+  const [stateDialogOpen, setStateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleStateChange = () => {
+    setStateDialogOpen(false);
+    if (onRefresh) {
+      onRefresh();
+    }
+  };
+
+  const handleMetadataChange = (newTitle: string) => {
+    console.log('Título actualizado:', newTitle);
+    if (onRefresh) {
+      onRefresh();
+    }
   };
 
   return (
@@ -112,6 +135,17 @@ function SongSummary({ item }: { item: SongDetail }) {
 
                 <Box>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    Estado
+                  </Typography>
+                  <Chip
+                    label={STATE_LABELS[item.status]}
+                    color={STATE_COLORS[item.status]}
+                    size="small"
+                  />
+                </Box>
+
+                <Box>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                     Características
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -149,9 +183,19 @@ function SongSummary({ item }: { item: SongDetail }) {
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
                 <Button
                   variant="contained"
+                  color="primary"
+                  startIcon={<Sync />}
+                  fullWidth
+                  onClick={() => setStateDialogOpen(true)}
+                >
+                  Cambiar estado
+                </Button>
+
+                <Button
+                  variant="outlined"
                   startIcon={<Edit />}
                   fullWidth
-                  onClick={() => console.log('Editar metadatos')}
+                  onClick={() => setEditDialogOpen(true)}
                 >
                   Editar metadatos
                 </Button>
@@ -173,15 +217,51 @@ function SongSummary({ item }: { item: SongDetail }) {
           </Card>
         </Grid>
       </Grid>
+
+      <ChangeStateDialog
+        open={stateDialogOpen}
+        onClose={() => setStateDialogOpen(false)}
+        itemId={item.id}
+        itemType="song"
+        itemTitle={item.title}
+        currentState={item.status}
+        onSuccess={handleStateChange}
+      />
+
+      <EditMetadataDialog
+        open={editDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+        itemId={item.id}
+        itemType="song"
+        currentTitle={item.title}
+        onSuccess={handleMetadataChange}
+      />
     </Box>
   );
 }
 
-function CollectionSummary({ item }: { item: CollectionDetail }) {
+function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefresh?: () => void }) {
+  const [stateDialogOpen, setStateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleStateChange = () => {
+    setStateDialogOpen(false);
+    if (onRefresh) {
+      onRefresh();
+    }
+  };
+
+  const handleMetadataChange = (newTitle: string) => {
+    console.log('Título actualizado:', newTitle);
+    if (onRefresh) {
+      onRefresh();
+    }
   };
 
   const getCollectionTypeLabel = (type: string) => {
@@ -283,6 +363,17 @@ function CollectionSummary({ item }: { item: CollectionDetail }) {
 
                     <Box>
                       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                        Estado
+                      </Typography>
+                      <Chip
+                        label={STATE_LABELS[item.status]}
+                        color={STATE_COLORS[item.status]}
+                        size="small"
+                      />
+                    </Box>
+
+                    <Box>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                         Características
                       </Typography>
                       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -369,12 +460,22 @@ function CollectionSummary({ item }: { item: CollectionDetail }) {
                 Acciones
               </Typography>
 
-              <Box sx={{ mt: 2 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
                 <Button
                   variant="contained"
+                  color="primary"
+                  startIcon={<Sync />}
+                  fullWidth
+                  onClick={() => setStateDialogOpen(true)}
+                >
+                  Cambiar estado
+                </Button>
+
+                <Button
+                  variant="outlined"
                   startIcon={<Edit />}
                   fullWidth
-                  onClick={() => console.log('Editar metadatos')}
+                  onClick={() => setEditDialogOpen(true)}
                 >
                   Editar metadatos
                 </Button>
@@ -383,6 +484,25 @@ function CollectionSummary({ item }: { item: CollectionDetail }) {
           </Card>
         </Grid>
       </Grid>
+
+      <ChangeStateDialog
+        open={stateDialogOpen}
+        onClose={() => setStateDialogOpen(false)}
+        itemId={item.id}
+        itemType="collection"
+        itemTitle={item.title}
+        currentState={item.status}
+        onSuccess={handleStateChange}
+      />
+
+      <EditMetadataDialog
+        open={editDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+        itemId={item.id}
+        itemType="collection"
+        currentTitle={item.title}
+        onSuccess={handleMetadataChange}
+      />
     </Box>
   );
 }

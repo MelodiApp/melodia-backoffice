@@ -11,9 +11,8 @@ import {
   TableRow,
   Paper,
   Chip,
-  IconButton,
 } from '@mui/material';
-import { OpenInNew, MusicNote, Album, List } from '@mui/icons-material';
+import { MusicNote, Album, List } from '@mui/icons-material';
 import type { CatalogDetail } from '../../../types/catalogDetail';
 import {
   getSongAppearances,
@@ -48,10 +47,6 @@ function SongAppearances({ itemId }: { itemId: string }) {
     return configs[type] || configs.album;
   };
 
-  const handleOpenDetail = (collectionId: string) => {
-    window.location.href = `/#/catalog/${collectionId}/show`;
-  };
-
   return (
     <Card>
       <CardContent>
@@ -76,7 +71,6 @@ function SongAppearances({ itemId }: { itemId: string }) {
                   <TableCell>Título</TableCell>
                   <TableCell align="center">Posición</TableCell>
                   <TableCell>Propietario</TableCell>
-                  <TableCell align="center">Acciones</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -106,15 +100,6 @@ function SongAppearances({ itemId }: { itemId: string }) {
                           {appearance.owner || '—'}
                         </Typography>
                       </TableCell>
-                      <TableCell align="center">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleOpenDetail(appearance.id)}
-                          title="Ver detalle"
-                        >
-                          <OpenInNew fontSize="small" />
-                        </IconButton>
-                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -129,10 +114,6 @@ function SongAppearances({ itemId }: { itemId: string }) {
 
 function CollectionAppearances({ itemId }: { itemId: string }) {
   const appearances = getCollectionAppearances(itemId);
-
-  const handleOpenDetail = (playlistId: string) => {
-    window.location.href = `/#/catalog/${playlistId}/show`;
-  };
 
   return (
     <Card>
@@ -157,7 +138,6 @@ function CollectionAppearances({ itemId }: { itemId: string }) {
                   <TableCell>Título</TableCell>
                   <TableCell>Propietario</TableCell>
                   <TableCell align="center">Canciones incluidas</TableCell>
-                  <TableCell align="center">Acciones</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -180,15 +160,6 @@ function CollectionAppearances({ itemId }: { itemId: string }) {
                         color="primary"
                         variant="outlined"
                       />
-                    </TableCell>
-                    <TableCell align="center">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleOpenDetail(appearance.id)}
-                        title="Ver detalle"
-                      >
-                        <OpenInNew fontSize="small" />
-                      </IconButton>
                     </TableCell>
                   </TableRow>
                 ))}
