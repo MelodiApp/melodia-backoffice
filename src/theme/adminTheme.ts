@@ -124,6 +124,8 @@ export const spotifyTheme = deepmerge(defaultDarkTheme, {
       styleOverrides: {
         root: {
           backgroundColor: "#121212",
+          borderRight: "1px solid #282828",
+          boxShadow: "2px 0 8px rgba(0, 0, 0, 0.5)",
           "& .MuiPaper-root": {
             backgroundColor: "#121212",
           },
@@ -141,6 +143,8 @@ export const spotifyTheme = deepmerge(defaultDarkTheme, {
       styleOverrides: {
         paper: {
           backgroundColor: "#121212",
+          borderRight: "1px solid #282828",
+          boxShadow: "2px 0 8px rgba(0, 0, 0, 0.5)",
         },
       },
     },
