@@ -57,9 +57,9 @@ export function AvailabilityTab({ itemId }: AvailabilityTabProps) {
   return (
     <Box>
       {/* Estado efectivo */}
-      <Card>
+      <Card sx={{ backgroundColor: '#181818' }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h6" gutterBottom sx={{ color: '#ffffff' }}>
             Estado efectivo
           </Typography>
 

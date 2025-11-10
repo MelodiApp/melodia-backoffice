@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, Tabs, Tab, Paper, Breadcrumbs, Link } from '@mui/material';
 import { useState } from 'react';
 import { getCatalogDetail } from '../../providers/catalogDetailMockData';
@@ -32,6 +32,7 @@ function TabPanel(props: TabPanelProps) {
 
 export default function CatalogShow() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [currentTab, setCurrentTab] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -59,33 +60,48 @@ export default function CatalogShow() {
   const isSong = catalogItem.type === 'song';
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 3, backgroundColor: '#121212', minHeight: '100vh' }}>
       {/* Breadcrumbs */}
       <Breadcrumbs separator={<NavigateNext fontSize="small" />} sx={{ mb: 2 }}>
-        <Link underline="hover" color="inherit" href="/#/catalog">
+        <Link 
+          underline="hover" 
+          sx={{ color: '#1db954', cursor: 'pointer' }}
+          onClick={() => navigate('/catalog')}
+        >
           Catálogo
         </Link>
-        <Typography color="text.primary">
+        <Typography sx={{ color: '#ffffff' }}>
           {catalogItem.title}
         </Typography>
       </Breadcrumbs>
 
       {/* Header */}
       <Box sx={{ mb: 3 }}>
-        <Typography variant="overline" color="text.secondary">
+        <Typography variant="overline" sx={{ color: '#b3b3b3' }}>
           {isSong ? 'Canción' : 'Colección'}
         </Typography>
-        <Typography variant="h4" component="h1" gutterBottom>
+        <Typography variant="h4" component="h1" gutterBottom sx={{ color: '#ffffff' }}>
           {catalogItem.title}
         </Typography>
       </Box>
 
       {/* Tabs */}
-      <Paper sx={{ mb: 2 }}>
+      <Paper sx={{ mb: 2, backgroundColor: '#181818' }}>
         <Tabs
           value={currentTab}
           onChange={handleTabChange}
           aria-label="catalog detail tabs"
+          sx={{
+            '& .MuiTab-root': {
+              color: '#b3b3b3',
+            },
+            '& .Mui-selected': {
+              color: '#1db954 !important',
+            },
+            '& .MuiTabs-indicator': {
+              backgroundColor: '#1db954',
+            },
+          }}
         >
           <Tab label="Resumen" id="catalog-tab-0" />
           <Tab label="Disponibilidad" id="catalog-tab-1" />

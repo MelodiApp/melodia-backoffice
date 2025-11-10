@@ -65,12 +65,23 @@ export function EditMetadataDialog({
   const hasChanges = title.trim() !== currentTitle;
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Editar metadatos</DialogTitle>
+    <Dialog 
+      open={open} 
+      onClose={handleClose} 
+      maxWidth="sm" 
+      fullWidth
+      PaperProps={{
+        sx: {
+          backgroundColor: '#181818',
+          color: '#ffffff',
+        }
+      }}
+    >
+      <DialogTitle sx={{ color: '#ffffff' }}>Editar metadatos</DialogTitle>
 
       <DialogContent>
         <Box sx={{ mb: 2, mt: 1 }}>
-          <Typography variant="body2" color="text.secondary" gutterBottom>
+          <Typography variant="body2" sx={{ color: '#b3b3b3' }} gutterBottom>
             Tipo: {itemType === 'song' ? 'Canción' : 'Colección'}
           </Typography>
         </Box>
@@ -83,7 +94,17 @@ export function EditMetadataDialog({
           autoFocus
           placeholder="Ingrese el título"
           helperText="El título debe tener al menos 1 carácter"
-          sx={{ mb: 2 }}
+          sx={{ 
+            mb: 2,
+            '& .MuiInputLabel-root': { color: '#b3b3b3' },
+            '& .MuiOutlinedInput-root': {
+              color: '#ffffff',
+              '& fieldset': { borderColor: '#404040' },
+              '&:hover fieldset': { borderColor: '#1db954' },
+              '&.Mui-focused fieldset': { borderColor: '#1db954' },
+            },
+            '& .MuiFormHelperText-root': { color: '#b3b3b3' },
+          }}
         />
 
         {error && (
@@ -94,7 +115,7 @@ export function EditMetadataDialog({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={handleClose} disabled={loading}>
+        <Button onClick={handleClose} disabled={loading} sx={{ color: '#b3b3b3' }}>
           Cancelar
         </Button>
         <Button

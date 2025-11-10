@@ -48,13 +48,13 @@ function SongAppearances({ itemId }: { itemId: string }) {
   };
 
   return (
-    <Card>
+    <Card sx={{ backgroundColor: '#181818' }}>
       <CardContent>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h6" gutterBottom sx={{ color: '#ffffff' }}>
           Apariciones de la canción
         </Typography>
 
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography variant="body2" sx={{ mb: 2, color: '#b3b3b3' }}>
           Colecciones (Álbumes, EPs, Singles y Playlists públicas) que incluyen esta canción
         </Typography>
 
@@ -63,14 +63,14 @@ function SongAppearances({ itemId }: { itemId: string }) {
             Esta canción no aparece en ninguna colección
           </Alert>
         ) : (
-          <TableContainer component={Paper} variant="outlined">
+          <TableContainer component={Paper} variant="outlined" sx={{ backgroundColor: '#121212' }}>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Tipo</TableCell>
-                  <TableCell>Título</TableCell>
-                  <TableCell align="center">Posición</TableCell>
-                  <TableCell>Propietario</TableCell>
+                  <TableCell sx={{ color: '#ffffff', fontWeight: 600 }}>Tipo</TableCell>
+                  <TableCell sx={{ color: '#ffffff', fontWeight: 600 }}>Título</TableCell>
+                  <TableCell align="center" sx={{ color: '#ffffff', fontWeight: 600 }}>Posición</TableCell>
+                  <TableCell sx={{ color: '#ffffff', fontWeight: 600 }}>Propietario</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -88,7 +88,7 @@ function SongAppearances({ itemId }: { itemId: string }) {
                         />
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2" fontWeight="medium">
+                        <Typography variant="body2" fontWeight="medium" sx={{ color: '#ffffff' }}>
                           {appearance.title}
                         </Typography>
                       </TableCell>
@@ -96,7 +96,7 @@ function SongAppearances({ itemId }: { itemId: string }) {
                         <Chip label={`#${appearance.position}`} size="small" variant="outlined" />
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" sx={{ color: '#b3b3b3' }}>
                           {appearance.owner || '—'}
                         </Typography>
                       </TableCell>
@@ -116,13 +116,13 @@ function CollectionAppearances({ itemId }: { itemId: string }) {
   const appearances = getCollectionAppearances(itemId);
 
   return (
-    <Card>
+    <Card sx={{ backgroundColor: '#181818' }}>
       <CardContent>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h6" gutterBottom sx={{ color: '#ffffff' }}>
           Apariciones de la colección
         </Typography>
 
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography variant="body2" sx={{ mb: 2, color: '#b3b3b3' }}>
           Playlists que contienen canciones de esta colección
         </Typography>
 
@@ -131,25 +131,25 @@ function CollectionAppearances({ itemId }: { itemId: string }) {
             Las canciones de esta colección no aparecen en ninguna playlist
           </Alert>
         ) : (
-          <TableContainer component={Paper} variant="outlined">
+          <TableContainer component={Paper} variant="outlined" sx={{ backgroundColor: '#121212' }}>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Título</TableCell>
-                  <TableCell>Propietario</TableCell>
-                  <TableCell align="center">Canciones incluidas</TableCell>
+                  <TableCell sx={{ color: '#ffffff', fontWeight: 600 }}>Título</TableCell>
+                  <TableCell sx={{ color: '#ffffff', fontWeight: 600 }}>Propietario</TableCell>
+                  <TableCell align="center" sx={{ color: '#ffffff', fontWeight: 600 }}>Canciones incluidas</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {appearances.map((appearance) => (
                   <TableRow key={appearance.id} hover>
                     <TableCell>
-                      <Typography variant="body2" fontWeight="medium">
+                      <Typography variant="body2" fontWeight="medium" sx={{ color: '#ffffff' }}>
                         {appearance.title}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" sx={{ color: '#b3b3b3' }}>
                         {appearance.owner}
                       </Typography>
                     </TableCell>

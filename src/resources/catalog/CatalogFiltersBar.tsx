@@ -45,7 +45,7 @@ export function CatalogFiltersBar({
     filters.publishDateTo;
 
   return (
-    <Paper sx={{ p: 3 }}>
+    <Paper sx={{ p: 3, backgroundColor: '#181818' }}>
       <Box sx={{ mb: 3, display: 'flex', gap: 2, alignItems: 'flex-end' }}>
         <TextField
           fullWidth
@@ -59,6 +59,15 @@ export function CatalogFiltersBar({
                 <Search />
               </InputAdornment>
             ),
+          }}
+          sx={{
+            '& .MuiInputLabel-root': { color: '#b3b3b3' },
+            '& .MuiOutlinedInput-root': {
+              color: '#ffffff',
+              '& fieldset': { borderColor: '#404040' },
+              '&:hover fieldset': { borderColor: '#1db954' },
+              '&.Mui-focused fieldset': { borderColor: '#1db954' },
+            },
           }}
         />
 
@@ -77,11 +86,37 @@ export function CatalogFiltersBar({
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6} md={2.4}>
           <FormControl fullWidth>
-            <InputLabel>Tipo</InputLabel>
+            <InputLabel sx={{ color: '#b3b3b3' }}>Tipo</InputLabel>
             <Select
               value={filters.type || 'all'}
               label="Tipo"
               onChange={(e) => onFiltersChange({ type: e.target.value as any })}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    backgroundColor: '#282828',
+                    '& .MuiMenuItem-root': {
+                      color: '#ffffff',
+                      '&:hover': {
+                        backgroundColor: '#404040',
+                      },
+                      '&.Mui-selected': {
+                        backgroundColor: '#1db954',
+                        '&:hover': {
+                          backgroundColor: '#1ed760',
+                        },
+                      },
+                    },
+                  },
+                },
+              }}
+              sx={{
+                color: '#ffffff',
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: '#404040' },
+                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#1db954' },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#1db954' },
+                '& .MuiSvgIcon-root': { color: '#b3b3b3' },
+              }}
             >
               <MenuItem value="all">Todos</MenuItem>
               <MenuItem value="song">Canción</MenuItem>
@@ -92,11 +127,37 @@ export function CatalogFiltersBar({
 
         <Grid item xs={12} sm={6} md={2.4}>
           <FormControl fullWidth>
-            <InputLabel>Estado</InputLabel>
+            <InputLabel sx={{ color: '#b3b3b3' }}>Estado</InputLabel>
             <Select
               value={filters.status || 'all'}
               label="Estado"
               onChange={(e) => onFiltersChange({ status: e.target.value as any })}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    backgroundColor: '#282828',
+                    '& .MuiMenuItem-root': {
+                      color: '#ffffff',
+                      '&:hover': {
+                        backgroundColor: '#404040',
+                      },
+                      '&.Mui-selected': {
+                        backgroundColor: '#1db954',
+                        '&:hover': {
+                          backgroundColor: '#1ed760',
+                        },
+                      },
+                    },
+                  },
+                },
+              }}
+              sx={{
+                color: '#ffffff',
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: '#404040' },
+                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#1db954' },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#1db954' },
+                '& .MuiSvgIcon-root': { color: '#b3b3b3' },
+              }}
             >
               <MenuItem value="all">Todos</MenuItem>
               <MenuItem value="published">Publicado</MenuItem>
@@ -108,7 +169,7 @@ export function CatalogFiltersBar({
 
         <Grid item xs={12} sm={6} md={2.4}>
           <FormControl fullWidth>
-            <InputLabel>Tiene video</InputLabel>
+            <InputLabel sx={{ color: '#b3b3b3' }}>Tiene video</InputLabel>
             <Select
               value={String(filters.hasVideo)}
               label="Tiene video"
@@ -117,6 +178,32 @@ export function CatalogFiltersBar({
                   hasVideo: e.target.value === 'all' ? 'all' : e.target.value === 'true',
                 })
               }
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    backgroundColor: '#282828',
+                    '& .MuiMenuItem-root': {
+                      color: '#ffffff',
+                      '&:hover': {
+                        backgroundColor: '#404040',
+                      },
+                      '&.Mui-selected': {
+                        backgroundColor: '#1db954',
+                        '&:hover': {
+                          backgroundColor: '#1ed760',
+                        },
+                      },
+                    },
+                  },
+                },
+              }}
+              sx={{
+                color: '#ffffff',
+                '& .MuiOutlinedInput-notchedOutline': { borderColor: '#404040' },
+                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#1db954' },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#1db954' },
+                '& .MuiSvgIcon-root': { color: '#b3b3b3' },
+              }}
             >
               <MenuItem value="all">Todos</MenuItem>
               <MenuItem value="true">Sí</MenuItem>
@@ -133,6 +220,15 @@ export function CatalogFiltersBar({
             value={filters.publishDateFrom || ''}
             onChange={(e) => onFiltersChange({ publishDateFrom: e.target.value })}
             InputLabelProps={{ shrink: true }}
+            sx={{
+              '& .MuiInputLabel-root': { color: '#b3b3b3' },
+              '& .MuiOutlinedInput-root': {
+                color: '#ffffff',
+                '& fieldset': { borderColor: '#404040' },
+                '&:hover fieldset': { borderColor: '#1db954' },
+                '&.Mui-focused fieldset': { borderColor: '#1db954' },
+              },
+            }}
           />
         </Grid>
 
@@ -144,11 +240,20 @@ export function CatalogFiltersBar({
             value={filters.publishDateTo || ''}
             onChange={(e) => onFiltersChange({ publishDateTo: e.target.value })}
             InputLabelProps={{ shrink: true }}
+            sx={{
+              '& .MuiInputLabel-root': { color: '#b3b3b3' },
+              '& .MuiOutlinedInput-root': {
+                color: '#ffffff',
+                '& fieldset': { borderColor: '#404040' },
+                '&:hover fieldset': { borderColor: '#1db954' },
+                '&.Mui-focused fieldset': { borderColor: '#1db954' },
+              },
+            }}
           />
         </Grid>
       </Grid>
 
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+      <Typography variant="body2" sx={{ mt: 2, color: '#b3b3b3' }}>
         {resultCount} resultado{resultCount !== 1 ? 's' : ''} encontrado
         {resultCount !== 1 ? 's' : ''}
       </Typography>

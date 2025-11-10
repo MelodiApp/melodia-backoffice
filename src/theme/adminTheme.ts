@@ -1,13 +1,13 @@
-import { defaultTheme } from "react-admin";
+import { defaultDarkTheme } from "react-admin";
 import { deepmerge } from "@mui/utils";
 
 /**
  * Tema personalizado para React Admin con estilo Spotify
  *
  * Basado en el diseño de Spotify con paleta oscura y verde característico
- * Se combina con el tema por defecto de React Admin para mantener compatibilidad
+ * Se combina con el tema oscuro por defecto de React Admin para mantener compatibilidad
  */
-export const spotifyTheme = deepmerge(defaultTheme, {
+export const spotifyTheme = deepmerge(defaultDarkTheme, {
   palette: {
     mode: "dark",
     primary: {
@@ -66,6 +66,7 @@ export const spotifyTheme = deepmerge(defaultTheme, {
     RaMenuItemLink: {
       styleOverrides: {
         root: {
+          color: "#ffffff",
           borderLeft: "3px solid transparent",
           "&.RaMenuItemLink-active": {
             borderLeft: "3px solid #1db954",
@@ -115,6 +116,31 @@ export const spotifyTheme = deepmerge(defaultTheme, {
           "& .RaLayout-content": {
             backgroundColor: "#121212",
           },
+        },
+      },
+    },
+    // Sidebar/Menu
+    RaSidebar: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#121212",
+          "& .MuiPaper-root": {
+            backgroundColor: "#121212",
+          },
+        },
+      },
+    },
+    RaMenu: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#121212",
+        },
+      },
+    },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: "#121212",
         },
       },
     },
@@ -184,6 +210,39 @@ export const spotifyTheme = deepmerge(defaultTheme, {
               borderColor: "#1db954",
             },
           },
+        },
+      },
+    },
+    // Menu y Select dropdowns
+    MuiMenu: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: "#282828",
+          color: "#ffffff",
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          color: "#ffffff",
+          "&:hover": {
+            backgroundColor: "#404040",
+          },
+          "&.Mui-selected": {
+            backgroundColor: "#1db954",
+            color: "#ffffff",
+            "&:hover": {
+              backgroundColor: "#1ed760",
+            },
+          },
+        },
+      },
+    },
+    MuiList: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "#282828",
         },
       },
     },

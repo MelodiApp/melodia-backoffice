@@ -75,37 +75,37 @@ function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => 
       <Grid container spacing={3}>
         {/* Información principal */}
         <Grid item xs={12} md={8}>
-          <Card>
+          <Card sx={{ backgroundColor: '#181818' }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" gutterBottom sx={{ color: '#ffffff' }}>
                 Información de la canción
               </Typography>
 
               <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Box>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" sx={{ color: '#b3b3b3' }}>
                     Título
                   </Typography>
-                  <Typography variant="body1" fontWeight="medium">
+                  <Typography variant="body1" fontWeight="medium" sx={{ color: '#ffffff' }}>
                     {item.title}
                   </Typography>
                 </Box>
 
                 <Box>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" sx={{ color: '#b3b3b3' }}>
                     Artista(s)
                   </Typography>
-                  <Typography variant="body1">
+                  <Typography variant="body1" sx={{ color: '#ffffff' }}>
                     {item.artists.map((a) => a.name).join(', ')}
                   </Typography>
                 </Box>
 
                 {item.collection && (
                   <Box>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{ color: '#b3b3b3' }}>
                       Colección
                     </Typography>
-                    <Typography variant="body1">
+                    <Typography variant="body1" sx={{ color: '#ffffff' }}>
                       {item.collection.title}
                       {item.collection.year && ` (${item.collection.year})`}
                     </Typography>
@@ -114,27 +114,27 @@ function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => 
 
                 {item.trackNumber && (
                   <Box>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{ color: '#b3b3b3' }}>
                       Posición en la lista
                     </Typography>
-                    <Typography variant="body1">#{item.trackNumber}</Typography>
+                    <Typography variant="body1" sx={{ color: '#ffffff' }}>#{item.trackNumber}</Typography>
                   </Box>
                 )}
 
                 <Box>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" sx={{ color: '#b3b3b3' }}>
                     Duración
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <AccessTime fontSize="small" />
-                    <Typography variant="body1">
+                    <AccessTime fontSize="small" sx={{ color: '#b3b3b3' }} />
+                    <Typography variant="body1" sx={{ color: '#ffffff' }}>
                       {formatDuration(item.duration)}
                     </Typography>
                   </Box>
                 </Box>
 
                 <Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  <Typography variant="body2" sx={{ color: '#b3b3b3', mb: 1 }}>
                     Estado
                   </Typography>
                   <Chip
@@ -145,7 +145,7 @@ function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => 
                 </Box>
 
                 <Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                  <Typography variant="body2" sx={{ color: '#b3b3b3', mb: 1 }}>
                     Características
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -174,9 +174,9 @@ function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => 
 
         {/* Acciones */}
         <Grid item xs={12} md={4}>
-          <Card>
+          <Card sx={{ backgroundColor: '#181818' }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" gutterBottom sx={{ color: '#ffffff' }}>
                 Acciones
               </Typography>
 
@@ -279,7 +279,7 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
       <Grid container spacing={3}>
         {/* Cover y información principal */}
         <Grid item xs={12} md={8}>
-          <Card>
+          <Card sx={{ backgroundColor: '#181818' }}>
             <CardContent>
               <Box sx={{ display: 'flex', gap: 3 }}>
                 {/* Cover */}
@@ -291,7 +291,7 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
                       flexShrink: 0,
                       borderRadius: 1,
                       overflow: 'hidden',
-                      bgcolor: 'grey.200',
+                      bgcolor: '#282828',
                     }}
                   >
                     <img
@@ -304,22 +304,22 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
 
                 {/* Información */}
                 <Box sx={{ flex: 1 }}>
-                  <Typography variant="h6" gutterBottom>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#ffffff' }}>
                     Información de la colección
                   </Typography>
 
                   <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <Box>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" sx={{ color: '#b3b3b3' }}>
                         Título
                       </Typography>
-                      <Typography variant="body1" fontWeight="medium">
+                      <Typography variant="body1" fontWeight="medium" sx={{ color: '#ffffff' }}>
                         {item.title}
                       </Typography>
                     </Box>
 
                     <Box>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" sx={{ color: '#b3b3b3' }}>
                         Tipo
                       </Typography>
                       <Chip
@@ -332,24 +332,24 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
 
                     {item.year && (
                       <Box>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" sx={{ color: '#b3b3b3' }}>
                           Año
                         </Typography>
-                        <Typography variant="body1">{item.year}</Typography>
+                        <Typography variant="body1" sx={{ color: '#ffffff' }}>{item.year}</Typography>
                       </Box>
                     )}
 
                     {item.collectionType === 'playlist' && (
                       <>
                         <Box>
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography variant="body2" sx={{ color: '#b3b3b3' }}>
                             Propietario
                           </Typography>
-                          <Typography variant="body1">{item.owner || 'N/A'}</Typography>
+                          <Typography variant="body1" sx={{ color: '#ffffff' }}>{item.owner || 'N/A'}</Typography>
                         </Box>
 
                         <Box>
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography variant="body2" sx={{ color: '#b3b3b3' }}>
                             Privacidad
                           </Typography>
                           <Chip
@@ -362,7 +362,7 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
                     )}
 
                     <Box>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#b3b3b3', mb: 1 }}>
                         Estado
                       </Typography>
                       <Chip
@@ -373,7 +373,7 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
                     </Box>
 
                     <Box>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      <Typography variant="body2" sx={{ color: '#b3b3b3', mb: 1 }}>
                         Características
                       </Typography>
                       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -402,20 +402,20 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
           </Card>
 
           {/* Lista de canciones */}
-          <Card sx={{ mt: 2 }}>
+          <Card sx={{ mt: 2, backgroundColor: '#181818' }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" gutterBottom sx={{ color: '#ffffff' }}>
                 Lista de canciones ({item.tracks.length})
               </Typography>
 
-              <TableContainer component={Paper} variant="outlined" sx={{ mt: 2 }}>
+              <TableContainer component={Paper} variant="outlined" sx={{ mt: 2, backgroundColor: '#121212' }}>
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell width={60}>#</TableCell>
-                      <TableCell>Título</TableCell>
-                      <TableCell width={100}>Duración</TableCell>
-                      <TableCell width={80} align="center">
+                      <TableCell width={60} sx={{ color: '#ffffff', fontWeight: 600 }}>#</TableCell>
+                      <TableCell sx={{ color: '#ffffff', fontWeight: 600 }}>Título</TableCell>
+                      <TableCell width={100} sx={{ color: '#ffffff', fontWeight: 600 }}>Duración</TableCell>
+                      <TableCell width={80} align="center" sx={{ color: '#ffffff', fontWeight: 600 }}>
                         Características
                       </TableCell>
                     </TableRow>
@@ -423,9 +423,9 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
                   <TableBody>
                     {item.tracks.map((track) => (
                       <TableRow key={track.id} hover>
-                        <TableCell>{track.position}</TableCell>
-                        <TableCell>{track.title}</TableCell>
-                        <TableCell>{formatDuration(track.duration)}</TableCell>
+                        <TableCell sx={{ color: '#ffffff' }}>{track.position}</TableCell>
+                        <TableCell sx={{ color: '#ffffff' }}>{track.title}</TableCell>
+                        <TableCell sx={{ color: '#ffffff' }}>{formatDuration(track.duration)}</TableCell>
                         <TableCell align="center">
                           <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
                             {track.explicit && <Explicit fontSize="small" color="warning" />}
@@ -438,13 +438,13 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
                 </Table>
               </TableContainer>
 
-              <Divider sx={{ my: 2 }} />
+              <Divider sx={{ my: 2, borderColor: '#404040' }} />
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{ color: '#b3b3b3' }}>
                   Duración total
                 </Typography>
-                <Typography variant="body2" fontWeight="medium">
+                <Typography variant="body2" fontWeight="medium" sx={{ color: '#ffffff' }}>
                   {formatDuration(item.totalDuration)}
                 </Typography>
               </Box>
@@ -454,9 +454,9 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
 
         {/* Acciones */}
         <Grid item xs={12} md={4}>
-          <Card>
+          <Card sx={{ backgroundColor: '#181818' }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" gutterBottom sx={{ color: '#ffffff' }}>
                 Acciones
               </Typography>
 

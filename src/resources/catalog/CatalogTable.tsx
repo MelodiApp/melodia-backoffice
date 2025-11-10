@@ -118,23 +118,31 @@ export function CatalogTable({
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Tipo</TableCell>
+              <TableCell sx={{ color: '#ffffff', fontWeight: 600 }}>Tipo</TableCell>
               <TableCell>
                 <TableSortLabel
                   active={currentSort === 'title'}
                   direction={currentSort === 'title' ? sortOrder : 'asc'}
                   onClick={() => onSort('title')}
+                  sx={{ 
+                    color: '#ffffff !important',
+                    '& .MuiTableSortLabel-icon': { color: '#ffffff !important' }
+                  }}
                 >
                   Título
                 </TableSortLabel>
               </TableCell>
-              <TableCell>Artista principal</TableCell>
-              <TableCell>Colección</TableCell>
+              <TableCell sx={{ color: '#ffffff', fontWeight: 600 }}>Artista principal</TableCell>
+              <TableCell sx={{ color: '#ffffff', fontWeight: 600 }}>Colección</TableCell>
               <TableCell>
                 <TableSortLabel
                   active={currentSort === 'publishDate'}
                   direction={currentSort === 'publishDate' ? sortOrder : 'asc'}
                   onClick={() => onSort('publishDate')}
+                  sx={{ 
+                    color: '#ffffff !important',
+                    '& .MuiTableSortLabel-icon': { color: '#ffffff !important' }
+                  }}
                 >
                   Fecha de publicación
                 </TableSortLabel>
@@ -144,12 +152,16 @@ export function CatalogTable({
                   active={currentSort === 'status'}
                   direction={currentSort === 'status' ? sortOrder : 'asc'}
                   onClick={() => onSort('status')}
+                  sx={{ 
+                    color: '#ffffff !important',
+                    '& .MuiTableSortLabel-icon': { color: '#ffffff !important' }
+                  }}
                 >
                   Estado
                 </TableSortLabel>
               </TableCell>
-              <TableCell align="center">Video</TableCell>
-              <TableCell align="center">Acciones</TableCell>
+              <TableCell align="center" sx={{ color: '#ffffff', fontWeight: 600 }}>Video</TableCell>
+              <TableCell align="center" sx={{ color: '#ffffff', fontWeight: 600 }}>Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -157,7 +169,7 @@ export function CatalogTable({
               <TableRow>
                 <TableCell colSpan={8} align="center">
                   <Box sx={{ py: 4 }}>
-                    <Typography color="text.secondary">
+                    <Typography sx={{ color: '#b3b3b3' }}>
                       No se encontraron resultados
                     </Typography>
                   </Box>
@@ -169,37 +181,48 @@ export function CatalogTable({
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       {item.type === 'song' ? (
-                        <MusicNote fontSize="small" color="action" />
+                        <MusicNote fontSize="small" sx={{ color: '#b3b3b3' }} />
                       ) : (
-                        <Album fontSize="small" color="action" />
+                        <Album fontSize="small" sx={{ color: '#b3b3b3' }} />
                       )}
-                      <Typography variant="body2">
+                      <Typography variant="body2" sx={{ color: '#ffffff' }}>
                         {item.type === 'song' ? 'Canción' : 'Colección'}
                       </Typography>
                     </Box>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" fontWeight="medium">
+                    <Typography variant="body2" fontWeight="medium" sx={{ color: '#ffffff' }}>
                       {highlightText(item.title)}
                     </Typography>
                   </TableCell>
-                  <TableCell>{highlightText(item.mainArtist)}</TableCell>
                   <TableCell>
-                    {item.collection ? highlightText(item.collection) : '—'}
+                    <Typography variant="body2" sx={{ color: '#ffffff' }}>
+                      {highlightText(item.mainArtist)}
+                    </Typography>
                   </TableCell>
-                  <TableCell>{formatDate(item.publishDate)}</TableCell>
+                  <TableCell>
+                    <Typography variant="body2" sx={{ color: '#ffffff' }}>
+                      {item.collection ? highlightText(item.collection) : '—'}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" sx={{ color: '#ffffff' }}>
+                      {formatDate(item.publishDate)}
+                    </Typography>
+                  </TableCell>
                   <TableCell>{getStatusChip(item.status)}</TableCell>
                   <TableCell align="center">
                     {item.hasVideo ? (
                       <Videocam fontSize="small" color="success" />
                     ) : (
-                      <VideocamOff fontSize="small" color="disabled" />
+                      <VideocamOff fontSize="small" sx={{ color: '#666666' }} />
                     )}
                   </TableCell>
                   <TableCell align="center">
                     <IconButton
                       size="small"
                       onClick={(e) => handleMenuOpen(e, item)}
+                      sx={{ color: '#b3b3b3' }}
                     >
                       <MoreVert />
                     </IconButton>
@@ -211,23 +234,65 @@ export function CatalogTable({
         </Table>
       </TableContainer>
 
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-        <MenuItem onClick={() => handleAction('view')}>
-          <Visibility fontSize="small" sx={{ mr: 1 }} />
+      <Menu 
+        anchorEl={anchorEl} 
+        open={Boolean(anchorEl)} 
+        onClose={handleMenuClose}
+        PaperProps={{
+          sx: {
+            backgroundColor: '#282828',
+            color: '#ffffff',
+          }
+        }}
+      >
+        <MenuItem 
+          onClick={() => handleAction('view')}
+          sx={{
+            color: '#ffffff',
+            '&:hover': {
+              backgroundColor: '#404040',
+            }
+          }}
+        >
+          <Visibility fontSize="small" sx={{ mr: 1, color: '#b3b3b3' }} />
           Ver detalle
         </MenuItem>
-        <MenuItem onClick={() => handleAction('edit')}>
-          <Edit fontSize="small" sx={{ mr: 1 }} />
+        <MenuItem 
+          onClick={() => handleAction('edit')}
+          sx={{
+            color: '#ffffff',
+            '&:hover': {
+              backgroundColor: '#404040',
+            }
+          }}
+        >
+          <Edit fontSize="small" sx={{ mr: 1, color: '#b3b3b3' }} />
           Editar metadatos
         </MenuItem>
         <MenuItem divider />
         {selectedItem?.status === 'blocked' ? (
-          <MenuItem onClick={() => handleAction('unblock')} sx={{ color: 'success.main' }}>
+          <MenuItem 
+            onClick={() => handleAction('unblock')} 
+            sx={{ 
+              color: '#1db954',
+              '&:hover': {
+                backgroundColor: '#404040',
+              }
+            }}
+          >
             <LockOpen fontSize="small" sx={{ mr: 1 }} />
             Desbloquear
           </MenuItem>
         ) : (
-          <MenuItem onClick={() => handleAction('block')} sx={{ color: 'error.main' }}>
+          <MenuItem 
+            onClick={() => handleAction('block')} 
+            sx={{ 
+              color: '#f44336',
+              '&:hover': {
+                backgroundColor: '#404040',
+              }
+            }}
+          >
             <Lock fontSize="small" sx={{ mr: 1 }} />
             Bloquear
           </MenuItem>

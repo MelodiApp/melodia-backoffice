@@ -105,7 +105,7 @@ export default function CatalogContent() {
         resultCount={filteredItems.length}
       />
 
-      <Card>
+      <Card sx={{ backgroundColor: '#181818' }}>
         <CatalogTable
           items={filteredItems}
           searchTerm={filters.search || ''}

@@ -60,13 +60,13 @@ export function AuditTab({ itemId }: AuditTabProps) {
   };
 
   return (
-    <Card>
+    <Card sx={{ backgroundColor: '#181818' }}>
       <CardContent>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h6" gutterBottom sx={{ color: '#ffffff' }}>
           Auditoría de cambios de estado
         </Typography>
 
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+        <Typography variant="body2" sx={{ mb: 3, color: '#b3b3b3' }}>
           Historial completo de transiciones de estado con usuario, fecha y razón
         </Typography>
 
@@ -85,11 +85,11 @@ export function AuditTab({ itemId }: AuditTabProps) {
                   <ListItem
                     alignItems="flex-start"
                     sx={{
-                      bgcolor: 'background.paper',
+                      bgcolor: '#121212',
                       borderRadius: 1,
                       mb: 1,
                       border: '1px solid',
-                      borderColor: 'divider',
+                      borderColor: '#404040',
                     }}
                   >
                     <ListItemIcon>
@@ -112,7 +112,7 @@ export function AuditTab({ itemId }: AuditTabProps) {
                     <ListItemText
                       primary={
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                          <Typography variant="body1" fontWeight="medium">
+                          <Typography variant="body1" fontWeight="medium" sx={{ color: '#ffffff' }}>
                             {STATE_LABELS[event.previousState]} → {STATE_LABELS[event.newState]}
                           </Typography>
                           <Chip
@@ -124,16 +124,16 @@ export function AuditTab({ itemId }: AuditTabProps) {
                       }
                       secondary={
                         <Box sx={{ mt: 1 }}>
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography variant="body2" sx={{ color: '#b3b3b3' }}>
                             Usuario: <strong>{event.user}</strong>
                           </Typography>
                           {event.reason && (
-                            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                            <Typography variant="body2" sx={{ color: '#b3b3b3', mt: 0.5 }}>
                               Razón: {event.reason}
                             </Typography>
                           )}
                           {event.scheduledDate && (
-                            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                            <Typography variant="body2" sx={{ color: '#b3b3b3', mt: 0.5 }}>
                               Fecha programada: {formatDateTime(event.scheduledDate)}
                             </Typography>
                           )}
@@ -141,7 +141,7 @@ export function AuditTab({ itemId }: AuditTabProps) {
                       }
                     />
                   </ListItem>
-                  {index < auditEvents.length - 1 && <Divider sx={{ my: 1 }} />}
+                  {index < auditEvents.length - 1 && <Divider sx={{ my: 1, borderColor: '#404040' }} />}
                 </Box>
               );
             })}

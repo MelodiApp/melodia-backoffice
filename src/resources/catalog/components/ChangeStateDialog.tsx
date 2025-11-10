@@ -111,22 +111,33 @@ export function ChangeStateDialog({
   const hasChanges = newState !== currentState;
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Cambiar estado</DialogTitle>
+    <Dialog 
+      open={open} 
+      onClose={handleClose} 
+      maxWidth="sm" 
+      fullWidth
+      PaperProps={{
+        sx: {
+          backgroundColor: '#181818',
+          color: '#ffffff',
+        }
+      }}
+    >
+      <DialogTitle sx={{ color: '#ffffff' }}>Cambiar estado</DialogTitle>
 
       <DialogContent>
         <Box sx={{ mb: 2 }}>
-          <Typography variant="body2" color="text.secondary" gutterBottom>
+          <Typography variant="body2" sx={{ color: '#b3b3b3' }} gutterBottom>
             Ítem
           </Typography>
-          <Typography variant="body1" fontWeight="medium">
+          <Typography variant="body1" fontWeight="medium" sx={{ color: '#ffffff' }}>
             {itemTitle}
           </Typography>
         </Box>
 
         <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
           <Box>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
+            <Typography variant="body2" sx={{ color: '#b3b3b3' }} gutterBottom>
               Estado actual
             </Typography>
             <Chip
@@ -138,11 +149,37 @@ export function ChangeStateDialog({
         </Box>
 
         <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel>Nuevo estado</InputLabel>
+          <InputLabel sx={{ color: '#b3b3b3' }}>Nuevo estado</InputLabel>
           <Select
             value={newState}
             label="Nuevo estado"
             onChange={(e) => setNewState(e.target.value as CatalogState)}
+            MenuProps={{
+              PaperProps: {
+                sx: {
+                  backgroundColor: '#282828',
+                  '& .MuiMenuItem-root': {
+                    color: '#ffffff',
+                    '&:hover': {
+                      backgroundColor: '#404040',
+                    },
+                    '&.Mui-selected': {
+                      backgroundColor: '#1db954',
+                      '&:hover': {
+                        backgroundColor: '#1ed760',
+                      },
+                    },
+                  },
+                },
+              },
+            }}
+            sx={{
+              color: '#ffffff',
+              '& .MuiOutlinedInput-notchedOutline': { borderColor: '#404040' },
+              '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#1db954' },
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#1db954' },
+              '& .MuiSvgIcon-root': { color: '#b3b3b3' },
+            }}
           >
             {availableStates.map((state) => (
               <MenuItem key={state} value={state}>
@@ -171,6 +208,16 @@ export function ChangeStateDialog({
               inputProps={{
                 min: new Date().toISOString().slice(0, 16),
               }}
+              sx={{
+                '& .MuiInputLabel-root': { color: '#b3b3b3' },
+                '& .MuiOutlinedInput-root': {
+                  color: '#ffffff',
+                  '& fieldset': { borderColor: '#404040' },
+                  '&:hover fieldset': { borderColor: '#1db954' },
+                  '&.Mui-focused fieldset': { borderColor: '#1db954' },
+                },
+                '& .MuiFormHelperText-root': { color: '#b3b3b3' },
+              }}
             />
           </Box>
         )}
@@ -185,7 +232,16 @@ export function ChangeStateDialog({
             onChange={(e) => setReason(e.target.value)}
             required={requiresReason}
             placeholder="Describe el motivo del cambio de estado..."
-            sx={{ mb: 2 }}
+            sx={{ 
+              mb: 2,
+              '& .MuiInputLabel-root': { color: '#b3b3b3' },
+              '& .MuiOutlinedInput-root': {
+                color: '#ffffff',
+                '& fieldset': { borderColor: '#404040' },
+                '&:hover fieldset': { borderColor: '#1db954' },
+                '&.Mui-focused fieldset': { borderColor: '#1db954' },
+              },
+            }}
           />
         )}
 
@@ -203,7 +259,7 @@ export function ChangeStateDialog({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={handleClose} disabled={loading}>
+        <Button onClick={handleClose} disabled={loading} sx={{ color: '#b3b3b3' }}>
           Cancelar
         </Button>
         <Button
