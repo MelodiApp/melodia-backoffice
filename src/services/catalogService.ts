@@ -28,7 +28,7 @@ interface BackendDiscography {
 }
 
 interface BackendDiscographiesResponse {
-  data: BackendDiscography[];
+  data: BackendDiscography;
   total: number;
 }
 
@@ -116,17 +116,14 @@ export class CatalogService extends BaseApiService {
     console.log('✅ AAAAAAAAAAAAAAAAAAAAAAAAAAACatálogo obtenido:', response);
     // Aplanar todas las canciones y colecciones en un solo array
     const allItems: CatalogItem[] = [];
-    
-    response.data.map((discography) => {
-      // Agregar canciones
-      discography.returned_songs.map((song) => {
+          // Agregar canciones
+      response.data.returned_songs.forEach((song) => {
         allItems.push(this.mapBackendSongToFrontend(song));
       });
       // Agregar colecciones
-      discography.returned_collections.map((collection) => {
+      response.data.returned_collections.forEach((collection) => {
         allItems.push(this.mapBackendCollectionToFrontend(collection));
       });
-    });
 
     return {
       items: allItems,
