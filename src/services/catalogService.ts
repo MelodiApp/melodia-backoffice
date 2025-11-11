@@ -3,50 +3,32 @@ import type { CatalogItem, CatalogStatus } from "../types/catalog";
 
 // Backend response types (from artists microservice)
 interface BackendSong {
-  id: number;
-  title: string;
-  duration: number;
-  status: string;
-  explicit: boolean;
-  releaseDate?: string;
-  createdAt: string;
-  updatedAt: string;
-  artistId: number;
-  collectionId?: number;
-  artist?: {
-    id: number;
-    name: string;
-  };
-  collection?: {
-    id: number;
-    title: string;
-  };
+    id: number,
+    type: string,
+    title: string,
+    artistName: string,
+    collectionName: undefined, 
+    publishedAt: string,
+    status: string;
+
 }
 
 interface BackendCollection {
   id: number;
+  type: string;
   title: string;
-  releaseDate?: string;
+  artistName: string;
+  publishedAt: string;
   status: string;
-  collectionType: string;
-  createdAt: string;
-  updatedAt: string;
-  artistId: number;
-  artist?: {
-    id: number;
-    name: string;
-  };
 }
 
 interface BackendDiscography {
-  artistId: number;
-  artistName: string;
-  songs: BackendSong[];
-  collections: BackendCollection[];
+  returned_songs: BackendSong[];
+  returned_collections: BackendCollection[];
 }
 
 interface BackendDiscographiesResponse {
-  discographies: BackendDiscography[];
+  data: BackendDiscography[];
   total: number;
 }
 
@@ -65,17 +47,10 @@ export class CatalogService extends BaseApiService {
       id: String(song.id),
       type: 'song',
       title: song.title,
-      mainArtist: song.artist?.name || 'Unknown Artist',
-      collection: song.collection?.title,
-      collectionId: song.collectionId ? String(song.collectionId) : undefined,
-      publishDate: song.releaseDate,
+      mainArtist: song.artistName || 'Unknown Artist',
+      collection: song.collectionName|| undefined,
       status: this.mapBackendStatus(song.status),
-      hasVideo: false, // El backend no proporciona esta info aún
-      createdAt: song.createdAt,
-      updatedAt: song.updatedAt,
-      duration: song.duration,
-      explicit: song.explicit,
-      artistId: song.artistId,
+      publishDate: song.publishedAt,
     };
   }
 
@@ -85,16 +60,11 @@ export class CatalogService extends BaseApiService {
   private mapBackendCollectionToFrontend(collection: BackendCollection): CatalogItem {
     return {
       id: String(collection.id),
-      type: 'collection',
+      type: collection.type,
       title: collection.title,
-      mainArtist: collection.artist?.name || 'Unknown Artist',
-      publishDate: collection.releaseDate,
+      mainArtist: collection.artistName || 'Unknown Artist',
+      publishDate: collection.publishedAt,
       status: this.mapBackendStatus(collection.status),
-      hasVideo: false, // El backend no proporciona esta info aún
-      createdAt: collection.createdAt,
-      updatedAt: collection.updatedAt,
-      collectionType: collection.collectionType,
-      artistId: collection.artistId,
     };
   }
 
@@ -147,14 +117,13 @@ export class CatalogService extends BaseApiService {
     // Aplanar todas las canciones y colecciones en un solo array
     const allItems: CatalogItem[] = [];
     
-    response.forEach((discography) => {
+    response.data.map((discography) => {
       // Agregar canciones
-      discography.songs.forEach((song) => {
+      discography.returned_songs.map((song) => {
         allItems.push(this.mapBackendSongToFrontend(song));
       });
-      
       // Agregar colecciones
-      discography.collections.forEach((collection) => {
+      discography.returned_collections.map((collection) => {
         allItems.push(this.mapBackendCollectionToFrontend(collection));
       });
     });

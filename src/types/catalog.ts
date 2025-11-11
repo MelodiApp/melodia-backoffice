@@ -1,19 +1,14 @@
-export type CatalogItemType = 'song' | 'collection';
-
 export type CatalogStatus = 'scheduled' | 'published' | 'blocked';
 
 export interface CatalogItem {
   id: string;
-  type: CatalogItemType;
+  type: string;
   title: string;
   mainArtist: string;
   collection?: string;
   collectionId?: string;
   publishDate?: string;
   status: CatalogStatus;
-  hasVideo: boolean;
-  createdAt: string;
-  updatedAt: string;
   // Campos adicionales para songs
   duration?: number;
   explicit?: boolean;
@@ -24,7 +19,7 @@ export interface CatalogItem {
 
 export interface CatalogFilters {
   search?: string;
-  type?: CatalogItemType | 'all';
+  type?: string;
   status?: CatalogStatus | 'all';
   hasVideo?: boolean | 'all';
   publishDateFrom?: string;

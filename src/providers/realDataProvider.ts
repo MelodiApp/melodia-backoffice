@@ -66,6 +66,7 @@ export const realDataProvider: DataProvider = {
         console.log("filteredData inicial:", filteredData);
         console.log('🔍 Filtro aplicado:', filter);
 
+
         // Filtrar por tipo si es necesario
         if (filter.type && filter.type !== 'all') {
           filteredData = filteredData.filter((item) => item.type === filter.type);
