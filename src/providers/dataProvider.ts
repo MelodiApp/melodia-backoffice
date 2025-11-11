@@ -40,9 +40,9 @@ export const dataProvider: DataProvider = {
         );
       }
 
-      if (filter.isActive !== undefined) {
+      if (filter.status) {
         filteredUsers = filteredUsers.filter(
-          (user) => user.isActive === filter.isActive,
+          (user) => user.status === filter.status,
         );
       }
 

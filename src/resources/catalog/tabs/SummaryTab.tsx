@@ -22,7 +22,6 @@ import {
   MusicNote,
   Album,
   Explicit,
-  Videocam,
   AccessTime,
   Sync,
 } from '@mui/icons-material';
@@ -157,14 +156,7 @@ function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => 
                         color="warning"
                       />
                     )}
-                    {item.hasVideo && (
-                      <Chip
-                        icon={<Videocam />}
-                        label="Con video"
-                        size="small"
-                        color="success"
-                      />
-                    )}
+                    
                   </Box>
                 </Box>
               </Box>
@@ -385,14 +377,7 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
                             color="warning"
                           />
                         )}
-                        {item.hasVideo && (
-                          <Chip
-                            icon={<Videocam />}
-                            label="Contiene videos"
-                            size="small"
-                            color="success"
-                          />
-                        )}
+                        
                       </Box>
                     </Box>
                   </Box>
@@ -429,7 +414,7 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
                         <TableCell align="center">
                           <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'center' }}>
                             {track.explicit && <Explicit fontSize="small" color="warning" />}
-                            {track.hasVideo && <Videocam fontSize="small" color="success" />}
+                            
                           </Box>
                         </TableCell>
                       </TableRow>

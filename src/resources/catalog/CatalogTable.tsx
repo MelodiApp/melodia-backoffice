@@ -21,8 +21,7 @@ import {
   LockOpen,
   MusicNote,
   Album,
-  Videocam,
-  VideocamOff,
+  
 } from '@mui/icons-material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -160,14 +159,13 @@ export function CatalogTable({
                   Estado
                 </TableSortLabel>
               </TableCell>
-              <TableCell align="center" sx={{ color: '#ffffff', fontWeight: 600 }}>Video</TableCell>
               <TableCell align="center" sx={{ color: '#ffffff', fontWeight: 600 }}>Acciones</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {items.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} align="center">
+                <TableCell colSpan={7} align="center">
                   <Box sx={{ py: 4 }}>
                     <Typography sx={{ color: '#b3b3b3' }}>
                       No se encontraron resultados
@@ -211,13 +209,6 @@ export function CatalogTable({
                     </Typography>
                   </TableCell>
                   <TableCell>{getStatusChip(item.status)}</TableCell>
-                  <TableCell align="center">
-                    {item.hasVideo ? (
-                      <Videocam fontSize="small" color="success" />
-                    ) : (
-                      <VideocamOff fontSize="small" sx={{ color: '#666666' }} />
-                    )}
-                  </TableCell>
                   <TableCell align="center">
                     <IconButton
                       size="small"

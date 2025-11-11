@@ -8,6 +8,7 @@ export interface User {
   avatar?: string;
   createdAt: string;
   lastLogin?: string;
+  updatedAt?: string;
 }
 
 export interface Artist {

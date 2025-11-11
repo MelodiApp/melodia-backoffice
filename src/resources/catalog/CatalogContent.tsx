@@ -11,7 +11,6 @@ export default function CatalogContent() {
     search: '',
     type: 'all',
     status: 'all',
-    hasVideo: 'all',
     publishDateFrom: undefined,
     publishDateTo: undefined,
     sortBy: 'title',
@@ -48,10 +47,7 @@ export default function CatalogContent() {
       items = items.filter((item) => item.status === filters.status);
     }
 
-    // Filtro por video
-    if (filters.hasVideo !== undefined && filters.hasVideo !== 'all') {
-      items = items.filter((item) => item.hasVideo === filters.hasVideo);
-    }
+    
 
     // Filtro por rango de fechas
     if (filters.publishDateFrom) {

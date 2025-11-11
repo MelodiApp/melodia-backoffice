@@ -43,7 +43,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color }) => (
 
 export const Dashboard: React.FC = () => {
   const totalUsers = mockUsers.length;
-  const activeUsers = mockUsers.filter((u) => u.isActive).length;
+  const activeUsers = mockUsers.filter((u) => u.status === 'active').length;
   const adminUsers = mockUsers.filter((u) => u.role === "admin").length;
   const listenerUsers = mockUsers.filter((u) => u.role === "listener").length;
 

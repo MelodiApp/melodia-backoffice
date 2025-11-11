@@ -30,7 +30,6 @@ export function CatalogFiltersBar({
       search: '',
       type: 'all',
       status: 'all',
-      hasVideo: 'all',
       publishDateFrom: undefined,
       publishDateTo: undefined,
     });
@@ -40,7 +39,6 @@ export function CatalogFiltersBar({
     filters.search ||
     (filters.type && filters.type !== 'all') ||
     (filters.status && filters.status !== 'all') ||
-    (filters.hasVideo !== undefined && filters.hasVideo !== 'all') ||
     filters.publishDateFrom ||
     filters.publishDateTo;
 
@@ -167,50 +165,7 @@ export function CatalogFiltersBar({
           </FormControl>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={2.4}>
-          <FormControl fullWidth>
-            <InputLabel sx={{ color: '#b3b3b3' }}>Tiene video</InputLabel>
-            <Select
-              value={String(filters.hasVideo)}
-              label="Tiene video"
-              onChange={(e) =>
-                onFiltersChange({
-                  hasVideo: e.target.value === 'all' ? 'all' : e.target.value === 'true',
-                })
-              }
-              MenuProps={{
-                PaperProps: {
-                  sx: {
-                    backgroundColor: '#282828',
-                    '& .MuiMenuItem-root': {
-                      color: '#ffffff',
-                      '&:hover': {
-                        backgroundColor: '#404040',
-                      },
-                      '&.Mui-selected': {
-                        backgroundColor: '#1db954',
-                        '&:hover': {
-                          backgroundColor: '#1ed760',
-                        },
-                      },
-                    },
-                  },
-                },
-              }}
-              sx={{
-                color: '#ffffff',
-                '& .MuiOutlinedInput-notchedOutline': { borderColor: '#404040' },
-                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#1db954' },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#1db954' },
-                '& .MuiSvgIcon-root': { color: '#b3b3b3' },
-              }}
-            >
-              <MenuItem value="all">Todos</MenuItem>
-              <MenuItem value="true">Sí</MenuItem>
-              <MenuItem value="false">No</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
+        
 
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
