@@ -14,6 +14,12 @@ export interface CatalogItem {
   hasVideo: boolean;
   createdAt: string;
   updatedAt: string;
+  // Campos adicionales para songs
+  duration?: number;
+  explicit?: boolean;
+  artistId?: number;
+  // Campos adicionales para collections
+  collectionType?: string;
 }
 
 export interface CatalogFilters {

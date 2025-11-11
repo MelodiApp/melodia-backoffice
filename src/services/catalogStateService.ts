@@ -1,4 +1,5 @@
 import type { StateChangeEvent, CatalogState } from '../types/catalogStates';
+import { catalogService } from './catalogService';
 
 /**
  * Mock de eventos de auditoría para el sistema de estados
@@ -116,18 +117,20 @@ export interface ChangeStateResult {
 }
 
 /**
- * Cambia el estado de un ítem (simulación)
+ * Cambia el estado de un ítem (usando el backend real)
  */
 export async function changeItemState(
   params: ChangeStateParams
 ): Promise<ChangeStateResult> {
-  // Simulación de delay de red
-  await new Promise((resolve) => setTimeout(resolve, 500));
-
-  // En producción, aquí iría la llamada al backend
-  // const response = await fetch('/api/catalog/change-state', { ... })
-
   try {
+    // Llamar al backend para cambiar el estado
+    await catalogService.updateItemStatus(
+      params.itemId,
+      params.itemType,
+      params.newState
+    );
+
+    // Agregar evento de auditoría local
     const event = addStateChangeEvent({
       itemId: params.itemId,
       itemType: params.itemType,
@@ -143,9 +146,10 @@ export async function changeItemState(
       event,
     };
   } catch (error) {
+    console.error('Error al cambiar el estado:', error);
     return {
       success: false,
-      error: 'Error al cambiar el estado',
+      error: 'Error al cambiar el estado en el servidor',
     };
   }
 }

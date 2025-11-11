@@ -1,12 +1,14 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Tabs, Tab, Paper, Breadcrumbs, Link } from '@mui/material';
+import { Box, Typography, Tabs, Tab, Paper, Breadcrumbs, Link, CircularProgress, Alert } from '@mui/material';
 import { useState } from 'react';
+import { useGetOne } from 'react-admin';
 import { getCatalogDetail } from '../../providers/catalogDetailMockData';
 import { SummaryTab } from './tabs/SummaryTab';
 import { AvailabilityTab } from './tabs/AvailabilityTab';
 import { AppearancesTab } from './tabs/AppearancesTab';
 import { AuditTab } from './tabs/AuditTab';
 import { NavigateNext } from '@mui/icons-material';
+import type { CatalogItem } from '../../types/catalog';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -36,19 +38,47 @@ export default function CatalogShow() {
   const [currentTab, setCurrentTab] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const catalogItem = id ? getCatalogDetail(id) : null;
+  // Obtener datos del backend usando React Admin
+  const { data: catalogItem, isLoading, error, refetch } = useGetOne<CatalogItem>(
+    'catalog',
+    { id: id || '' },
+    { enabled: !!id }
+  );
+
+  // Usar datos mock como fallback si hay error
+  const fallbackItem = id ? getCatalogDetail(id) : null;
+  const item = catalogItem || fallbackItem;
 
   const handleRefresh = () => {
     setRefreshKey((prev) => prev + 1);
-    // En producción, aquí recargarías los datos del backend
+    // Refrescar datos del backend
+    if (refetch) {
+      refetch();
+    }
   };
 
-  if (!catalogItem) {
+  // Mostrar loading
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // Mostrar error o item no encontrado
+  if (!item) {
     return (
       <Box sx={{ p: 3 }}>
-        <Typography variant="h5" color="error">
-          Elemento no encontrado
-        </Typography>
+        {error ? (
+          <Alert severity="error">
+            Error al cargar el elemento. Por favor, intenta nuevamente.
+          </Alert>
+        ) : (
+          <Typography variant="h5" color="error">
+            Elemento no encontrado
+          </Typography>
+        )}
       </Box>
     );
   }
@@ -57,7 +87,7 @@ export default function CatalogShow() {
     setCurrentTab(newValue);
   };
 
-  const isSong = catalogItem.type === 'song';
+  const isSong = item.type === 'song';
 
   return (
     <Box sx={{ p: 3, backgroundColor: '#121212', minHeight: '100vh' }}>
@@ -71,7 +101,7 @@ export default function CatalogShow() {
           Catálogo
         </Link>
         <Typography sx={{ color: '#ffffff' }}>
-          {catalogItem.title}
+          {item.title}
         </Typography>
       </Breadcrumbs>
 
@@ -81,7 +111,7 @@ export default function CatalogShow() {
           {isSong ? 'Canción' : 'Colección'}
         </Typography>
         <Typography variant="h4" component="h1" gutterBottom sx={{ color: '#ffffff' }}>
-          {catalogItem.title}
+          {item.title}
         </Typography>
       </Box>
 
@@ -112,20 +142,20 @@ export default function CatalogShow() {
 
       {/* Tab Panels */}
       <TabPanel value={currentTab} index={0}>
-        <SummaryTab item={catalogItem} onRefresh={handleRefresh} />
+        <SummaryTab item={item as any} onRefresh={handleRefresh} />
       </TabPanel>
 
       <TabPanel value={currentTab} index={1}>
-        <AvailabilityTab itemId={catalogItem.id} />
+        <AvailabilityTab itemId={item.id} />
       </TabPanel>
 
       <TabPanel value={currentTab} index={2}>
-        <AppearancesTab item={catalogItem} />
+        <AppearancesTab item={item as any} />
       </TabPanel>
 
       {isSong && (
         <TabPanel value={currentTab} index={3}>
-          <AuditTab itemId={catalogItem.id} key={refreshKey} />
+          <AuditTab itemId={item.id} key={refreshKey} />
         </TabPanel>
       )}
     </Box>

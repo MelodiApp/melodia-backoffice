@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
+import { useGetList } from 'react-admin';
 import { mockCatalogItems } from '../../providers/catalogMockData';
-import type { CatalogFilters } from '../../types/catalog';
+import type { CatalogFilters, CatalogItem } from '../../types/catalog';
 import { CatalogTable } from './CatalogTable';
 import { CatalogFiltersBar } from './CatalogFiltersBar';
-import { Card } from '@mui/material';
+import { Card, CircularProgress, Box, Alert } from '@mui/material';
 
 export default function CatalogContent() {
   // Inicializar filtros
@@ -17,53 +18,46 @@ export default function CatalogContent() {
     sortOrder: 'asc',
   });
 
+  // Obtener datos del backend usando React Admin
+  const { data: catalogData, isLoading, error } = useGetList<CatalogItem>(
+    'catalog',
+    {
+      pagination: { page: 1, perPage: 1000 }, // Obtener todos los items
+      filter: {
+        search: filters.search,
+        status: filters.status !== 'all' ? filters.status : undefined,
+        type: filters.type !== 'all' ? filters.type : undefined,
+      },
+    }
+  );
+
   // Actualizar filtros
   const updateFilters = (newFilters: Partial<CatalogFilters>) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
   };
 
-  // Filtrar y ordenar datos
+  // Usar datos reales o mock como fallback
+  const items = catalogData || mockCatalogItems;
+
+  // Filtrar y ordenar datos localmente
   const filteredItems = useMemo(() => {
-    let items = [...mockCatalogItems];
+    let itemsList = [...items];
 
-    // Búsqueda
-    if (filters.search) {
-      const search = filters.search.toLowerCase();
-      items = items.filter(
-        (item) =>
-          item.title.toLowerCase().includes(search) ||
-          item.mainArtist.toLowerCase().includes(search) ||
-          item.collection?.toLowerCase().includes(search)
-      );
-    }
-
-    // Filtro por tipo
-    if (filters.type && filters.type !== 'all') {
-      items = items.filter((item) => item.type === filters.type);
-    }
-
-    // Filtro por estado
-    if (filters.status && filters.status !== 'all') {
-      items = items.filter((item) => item.status === filters.status);
-    }
-
-    
-
-    // Filtro por rango de fechas
+    // Filtro por rango de fechas (filtrado local adicional)
     if (filters.publishDateFrom) {
-      items = items.filter(
+      itemsList = itemsList.filter(
         (item) => item.publishDate && item.publishDate >= filters.publishDateFrom!
       );
     }
     if (filters.publishDateTo) {
-      items = items.filter(
+      itemsList = itemsList.filter(
         (item) => item.publishDate && item.publishDate <= filters.publishDateTo!
       );
     }
 
     // Ordenar
     if (filters.sortBy) {
-      items.sort((a, b) => {
+      itemsList.sort((a, b) => {
         let aValue: any;
         let bValue: any;
 
@@ -90,8 +84,26 @@ export default function CatalogContent() {
       });
     }
 
-    return items;
-  }, [filters]);
+    return itemsList;
+  }, [items, filters]);
+
+  // Mostrar loading
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // Mostrar error
+  if (error) {
+    return (
+      <Alert severity="error" sx={{ m: 2 }}>
+        Error al cargar el catálogo. Usando datos de ejemplo.
+      </Alert>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
