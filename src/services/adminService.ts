@@ -38,7 +38,7 @@ export interface LoginResponse {
 }
 
 export interface RefreshTokenRequest {
-  refresh_token: string;
+  refreshToken: string;
 }
 
 export interface UsersListResponse {
@@ -108,7 +108,7 @@ export class AdminService extends BaseApiService {
   async refreshToken(refreshToken: string): Promise<LoginResponse> {
     return await this.post<LoginResponse, RefreshTokenRequest>(
       `${this.BASE_PATH}/refresh-token`,
-      { refresh_token: refreshToken }
+      { refreshToken }
     );
   }
 
