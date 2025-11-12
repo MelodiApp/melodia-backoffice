@@ -2,33 +2,48 @@ import { BaseApiService } from "./apiClient";
 import type { CatalogItem, CatalogStatus } from "../types/catalog";
 
 // Backend response types (from artists microservice)
-interface BackendSong {
-    id: number,
-    type: string,
-    title: string,
-    artistName: string,
-    collectionName: undefined, 
-    publishedAt: string,
-    status: string;
+// interface BackendSong {
+//   id: number,
+//   type: string,
+//   title: string,
+//   artistName: string,
+//   collectionName: undefined, 
+//   publishedAt: string,
+//   status: string;
+// }
 
-}
+// interface BackendCollection {
+//   id: number;
+//   type: string;
+//   title: string;
+//   artistName: string;
+//   publishedAt: string;
+//   status: string;
+// }
 
-interface BackendCollection {
-  id: number;
-  type: string;
-  title: string;
-  artistName: string;
-  publishedAt: string;
+// interface BackendDiscography {
+//   returned_songs: BackendSong[];
+//   returned_collections: BackendCollection[];
+// }
+
+// interface BackendDiscographiesResponse {
+//   data: BackendDiscography;
+//   total: number;
+// }
+
+
+interface BackendDiscographyItem {
+  id: number,
+  type: 'song' | 'collection',
+  title: string,
+  artistName: string,
+  collectionName: string | undefined,
+  publishedAt: string,
   status: string;
 }
-
-interface BackendDiscography {
-  returned_songs: BackendSong[];
-  returned_collections: BackendCollection[];
-}
-
-interface BackendDiscographiesResponse {
-  data: BackendDiscography;
+interface SearchBackendDiscographiesResponse {
+  data: BackendDiscographyItem[];
+  hasMore: boolean;
   total: number;
 }
 
@@ -42,22 +57,22 @@ export class CatalogService extends BaseApiService {
   /**
    * Mapea un song del backend al formato del frontend
    */
-  private mapBackendSongToFrontend(song: BackendSong): CatalogItem {
+  private mapBackendSongToFrontend(song: BackendDiscographyItem): CatalogItem {
     return {
       id: String(song.id),
       type: 'song',
       title: song.title,
       mainArtist: song.artistName || 'Unknown Artist',
-      collection: song.collectionName|| undefined,
-      status: this.mapBackendStatus(song.status),
+      collection: song.collectionName || undefined,
       publishDate: song.publishedAt,
+      status: this.mapBackendStatus(song.status), // a chequear
     };
   }
 
   /**
    * Mapea una collection del backend al formato del frontend
    */
-  private mapBackendCollectionToFrontend(collection: BackendCollection): CatalogItem {
+  private mapBackendCollectionToFrontend(collection: BackendDiscographyItem): CatalogItem {
     return {
       id: String(collection.id),
       type: collection.type,
@@ -75,9 +90,7 @@ export class CatalogService extends BaseApiService {
     const statusMap: Record<string, CatalogStatus> = {
       'published': 'published',
       'blocked': 'blocked',
-      'scheduled': 'scheduled',
-      'programmed': 'scheduled', // Mapear 'PROGRAMMED' del backend a 'scheduled'
-      'draft': 'blocked', // Mapear draft a blocked temporalmente
+      'programmed': 'scheduled',
     };
     return statusMap[status.toLowerCase()] || 'blocked';
   }
@@ -98,38 +111,53 @@ export class CatalogService extends BaseApiService {
    * GET /api/admin/artists/discographies
    * Obtener todas las discografías de artistas
    */
-  async getAllDiscographies(params?: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    status?: CatalogStatus;
-  }): Promise<{ items: CatalogItem[]; total: number }> {
-    console.log('🔍 CatalogService: getAllDiscographies called with params:', params);
+  async getAllDiscographies(params: {
+    offset: number;
+    limit: number;
+    q?: string;
+    type?: 'song' | 'collection';
+    status?: 'PUBLISHED' | 'BLOCKED' | 'PROGRAMMED';
+    fromDate?: string;
+    toDate?: string;
+    sortBy?: 'title' | 'publishedAt' | 'artistName';
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<{ items: CatalogItem[], hasMore: boolean, total: number }> {
     const queryParams = new URLSearchParams();
+
+    // Parámetros de paginación
+    queryParams.append("offset", params.offset.toString());
+    queryParams.append("limit", params.limit.toString());
     
-    if (params?.page) queryParams.append("page", params.page.toString());
-    if (params?.limit) queryParams.append("limit", params.limit.toString());
-    if (params?.search) queryParams.append("search", params.search);
-    if (params?.status) queryParams.append("status", params.status);
+    // Parámetros de búsqueda y filtrado
+    if (params.q) queryParams.append("q", params.q);
+    if (params.type) queryParams.append("type", params.type);
+    if (params.status) queryParams.append("status", params.status);
+    if (params.fromDate) queryParams.append("fromDate", params.fromDate);
+    if (params.toDate) queryParams.append("toDate", params.toDate);
+    
+    // Parámetros de ordenamiento
+    if (params.sortBy) queryParams.append("sortBy", params.sortBy);
+    if (params.sortOrder) queryParams.append("sortOrder", params.sortOrder);
 
-    const url = `${this.BASE_PATH}/discographies${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
-    const response = await this.get<BackendDiscographiesResponse>(url);
+    const url = `${this.BASE_PATH}/discographies?${queryParams.toString()}`;
+    console.log('🔍 CatalogService: Fetching discographies with URL:', url);
+    
+    const response = await this.get<SearchBackendDiscographiesResponse>(url);
+    console.log('✅ CatalogService: Discographies response:', response);
 
-    console.log('✅ AAAAAAAAAAAAAAAAAAAAAAAAAAACatálogo obtenido:', response);
-    // Aplanar todas las canciones y colecciones en un solo array
-    const allItems: CatalogItem[] = [];
-          // Agregar canciones
-      response.data.returned_songs.forEach((song) => {
-        allItems.push(this.mapBackendSongToFrontend(song));
-      });
-      // Agregar colecciones
-      response.data.returned_collections.forEach((collection) => {
-        allItems.push(this.mapBackendCollectionToFrontend(collection));
-      });
+    // Mapear items del backend al formato del frontend
+    const allItems: CatalogItem[] = response.data.map((item) => {
+      if (item.type === 'song') {
+        return this.mapBackendSongToFrontend(item);
+      } else {
+        return this.mapBackendCollectionToFrontend(item);
+      }
+    });
 
     console.log('✅ CatalogService: Returning items:', allItems.length, 'total:', response.total);
     return {
       items: allItems,
+      hasMore: response.hasMore,
       total: response.total,
     };
   }
@@ -139,7 +167,7 @@ export class CatalogService extends BaseApiService {
    * Obtener una canción por ID
    */
   async getSongById(songId: string): Promise<CatalogItem> {
-    const song = await this.get<BackendSong>(`${this.BASE_PATH}/songs/${songId}`);
+    const song = await this.get<BackendDiscographyItem>(`${this.BASE_PATH}/songs/${songId}`);
     return this.mapBackendSongToFrontend(song);
   }
 
@@ -155,7 +183,7 @@ export class CatalogService extends BaseApiService {
     if (data.explicit !== undefined) backendData.explicit = data.explicit;
     if (data.publishDate !== undefined) backendData.releaseDate = data.publishDate;
     
-    const updatedSong = await this.put<BackendSong, any>(
+    const updatedSong = await this.put<BackendDiscographyItem, any>(
       `${this.BASE_PATH}/songs/${songId}`,
       backendData
     );
@@ -172,7 +200,7 @@ export class CatalogService extends BaseApiService {
     if (status === 'scheduled' && scheduledDate) {
       body.releaseDate = scheduledDate;
     }
-    const updatedSong = await this.put<BackendSong, typeof body>(
+    const updatedSong = await this.put<BackendDiscographyItem, typeof body>(
       `${this.BASE_PATH}/songs/${songId}/status`,
       body
     );
@@ -184,7 +212,7 @@ export class CatalogService extends BaseApiService {
    * Obtener una colección por ID
    */
   async getCollectionById(collectionId: string): Promise<CatalogItem> {
-    const collection = await this.get<BackendCollection>(
+    const collection = await this.get<BackendDiscographyItem>(
       `${this.BASE_PATH}/collections/${collectionId}`
     );
     return this.mapBackendCollectionToFrontend(collection);
@@ -201,7 +229,7 @@ export class CatalogService extends BaseApiService {
     if (data.publishDate !== undefined) backendData.releaseDate = data.publishDate;
     if (data.collectionType !== undefined) backendData.collectionType = data.collectionType;
     
-    const updatedCollection = await this.put<BackendCollection, any>(
+    const updatedCollection = await this.put<BackendDiscographyItem, any>(
       `${this.BASE_PATH}/collections/${collectionId}`,
       backendData
     );
@@ -225,7 +253,7 @@ export class CatalogService extends BaseApiService {
       action,
       body,
     });
-    const updatedCollection = await this.put<BackendCollection, typeof body>(
+    const updatedCollection = await this.put<BackendDiscographyItem, typeof body>(
       `${this.BASE_PATH}/collections/${collectionId}/status`,
       body
     );

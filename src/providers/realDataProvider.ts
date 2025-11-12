@@ -20,8 +20,9 @@ import { catalogService } from "../services/catalogService";
  */
 export const realDataProvider: DataProvider = {
   // GET /api/admin/users - Obtener lista de recursos
+  // También GET /api/admin/artists/discographies para catálogo
   getList: async (resource, params) => {
-    const { page = 1, perPage = 10 } = params.pagination || {};
+    const { page = 0, perPage = 20 } = params.pagination || {};
     const filter = params.filter || {};
 
     if (resource === "users") {
@@ -55,31 +56,40 @@ export const realDataProvider: DataProvider = {
     if (resource === "catalog" || resource === "songs" || resource === "collections") {
       try {
         console.log('🔍 RealDataProvider: Fetching catalog with params:', params);
-        const response = await catalogService.getAllDiscographies({
-          page,
+        
+        // Mapear el estado del frontend al formato del backend
+        const mapStatusToBackend = (status: string | undefined): 'PUBLISHED' | 'BLOCKED' | 'PROGRAMMED' | undefined => {
+          if (!status || status === 'all') return undefined;
+          const statusMap: Record<string, 'PUBLISHED' | 'BLOCKED' | 'PROGRAMMED'> = {
+            'published': 'PUBLISHED',
+            'blocked': 'BLOCKED',
+            'scheduled': 'PROGRAMMED',
+            'programmed': 'PROGRAMMED',
+          };
+          return statusMap[status.toLowerCase()];
+        };
+
+        // Preparar parámetros para el backend
+        const catalogParams = {
+          offset: (page - 1) * perPage, // React Admin usa páginas base 1, el backend usa offset
           limit: perPage,
-          search: filter.search || filter.q,
-          status: filter.status !== 'all' ? filter.status : undefined,
-        });
+          q: filter.search || filter.q,
+          type: (filter.type && filter.type !== 'all') ? filter.type as 'song' | 'collection' : undefined,
+          status: mapStatusToBackend(filter.status),
+          fromDate: filter.fromDate,
+          toDate: filter.toDate,
+          sortBy: params.sort?.field as 'title' | 'publishedAt' | 'artistName' | undefined,
+          sortOrder: params.sort?.order?.toLowerCase() as 'asc' | 'desc' | undefined,
+        };
+
+        console.log('📤 RealDataProvider: Sending params to backend:', catalogParams);
+        const response = await catalogService.getAllDiscographies(catalogParams);
         console.log('✅ RealDataProvider: Catalog response:', response);
 
-        let filteredData = response.items;
-        console.log("filteredData inicial:", filteredData);
-        console.log('🔍 Filtro aplicado:', filter);
-
-
-        // Filtrar por tipo si es necesario
-        if (filter.type && filter.type !== 'all') {
-          filteredData = filteredData.filter((item) => item.type === filter.type);
-        }
-
-        // Filtrar localmente por otros criterios si es necesario
-        if (filter.status && filter.status !== 'all') {
-          filteredData = filteredData.filter((item) => item.status === filter.status);
-        }
-
+        // El backend ya se encarga de toda la lógica de filtrado, búsqueda y paginación
+        // No necesitamos filtrar localmente
         return {
-          data: filteredData as any[],
+          data: response.items as any[],
           total: response.total,
         };
       } catch (error) {

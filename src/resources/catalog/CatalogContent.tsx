@@ -1,126 +1,119 @@
-import { useState, useMemo, useEffect } from 'react';
-import { useGetList, useRefresh } from 'react-admin';
+import { useState, useEffect } from 'react';
+import { useGetList } from 'react-admin';
+import { useSearchParams } from 'react-router-dom';
 import type { CatalogFilters } from '../../types/catalog';
 import type { CatalogItem } from '../../types/catalog';
 import { CatalogTable } from './CatalogTable';
 import { CatalogFiltersBar } from './CatalogFiltersBar';
-import { Card, CircularProgress, Box, Typography } from '@mui/material';
+import { Card, CircularProgress, Box, Typography, Pagination } from '@mui/material';
 
 export default function CatalogContent() {
-  const refresh = useRefresh();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [perPage] = useState(20);
   
-  // Refrescar cada vez que el componente se monta (cuando vuelves a la lista)
-  useEffect(() => {
-    console.log('📋 CatalogContent mounted, refreshing data...');
-  }, []);
-  
-  // Inicializar filtros
-  const [filters, setFilters] = useState<CatalogFilters>({
-    search: '',
-    type: 'all',
-    status: 'all',
-    publishDateFrom: undefined,
-    publishDateTo: undefined,
-    sortBy: 'title',
-    sortOrder: 'asc',
-  });
+  // Inicializar desde URL o valores por defecto
+  const getInitialPage = () => {
+    const pageParam = searchParams.get('page');
+    return pageParam ? parseInt(pageParam, 10) : 1;
+  };
+
+  const getInitialFilters = (): CatalogFilters => {
+    return {
+      search: searchParams.get('search') || '',
+      type: searchParams.get('type') || 'all',
+      status: (searchParams.get('status') as CatalogFilters['status']) || 'all',
+      publishDateFrom: searchParams.get('fromDate') || undefined,
+      publishDateTo: searchParams.get('toDate') || undefined,
+      sortBy: (searchParams.get('sortBy') as CatalogFilters['sortBy']) || 'title',
+      sortOrder: (searchParams.get('sortOrder') as 'asc' | 'desc') || 'desc',
+    };
+  };
+
+  const [page, setPage] = useState(getInitialPage);
+  const [filters, setFilters] = useState<CatalogFilters>(getInitialFilters);
 
   // Obtener datos del realDataProvider
-  const { data, isLoading, error, refetch } = useGetList<CatalogItem>(
+  // useGetList se vuelve a ejecutar automáticamente cuando cambian los parámetros
+  const { data, total, isLoading, error, refetch } = useGetList<CatalogItem>(
     'catalog',
     {
-      pagination: { page: 1, perPage: 1000 },
-      sort: { field: filters.sortBy || 'title', order: filters.sortOrder?.toUpperCase() as 'ASC' | 'DESC' || 'ASC' },
+      pagination: { page, perPage },
+      sort: { 
+        field: filters.sortBy || 'title', 
+        order: filters.sortOrder?.toUpperCase() as 'ASC' | 'DESC' || 'DESC' 
+      },
       filter: {
-        search: filters.search,
+        q: filters.search,
         type: filters.type,
         status: filters.status,
+        fromDate: filters.publishDateFrom,
+        toDate: filters.publishDateTo,
       },
     }
   );
 
-  // Actualizar filtros
+  // Calcular número total de páginas
+  const totalPages = total ? Math.ceil(total / perPage) : 0;
+
+  // Sincronizar estado con URL
+  useEffect(() => {
+    const params = new URLSearchParams();
+    
+    // Agregar página
+    if (page > 1) {
+      params.set('page', page.toString());
+    }
+    
+    // Agregar filtros solo si no son valores por defecto
+    if (filters.search) params.set('search', filters.search);
+    if (filters.type && filters.type !== 'all') params.set('type', filters.type);
+    if (filters.status && filters.status !== 'all') params.set('status', filters.status);
+    if (filters.publishDateFrom) params.set('fromDate', filters.publishDateFrom);
+    if (filters.publishDateTo) params.set('toDate', filters.publishDateTo);
+    if (filters.sortBy && filters.sortBy !== 'title') params.set('sortBy', filters.sortBy);
+    if (filters.sortOrder && filters.sortOrder !== 'desc') params.set('sortOrder', filters.sortOrder);
+
+    // Actualizar URL sin recargar la página
+    setSearchParams(params, { replace: true });
+  }, [page, filters, setSearchParams]);
+
+  // Actualizar filtros y resetear a la primera página
   const updateFilters = (newFilters: Partial<CatalogFilters>) => {
+    console.log('🔄 Updating filters:', newFilters);
     setFilters((prev) => ({ ...prev, ...newFilters }));
+    setPage(1); // Volver a la primera página cuando cambian los filtros
   };
 
-  // Filtrar y ordenar datos localmente (filtros adicionales)
-  const filteredItems = useMemo(() => {
-    if (!data) return [];
-    let items = [...data];
+  // Manejar cambio de página
+  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+    console.log('📄 Changing to page:', value);
+    setPage(value);
+  };
 
-    // Búsqueda
-    if (filters.search) {
-      const search = filters.search.toLowerCase();
-      items = items.filter(
-        (item) =>
-          item.title.toLowerCase().includes(search) ||
-          item.mainArtist.toLowerCase().includes(search) ||
-          item.collection?.toLowerCase().includes(search)
-      );
-    }
+  // Manejar cambio de ordenamiento
+  const handleSort = (sortBy: 'title' | 'publishDate' | 'status') => {
+    const sortOrder =
+      filters.sortBy === sortBy && filters.sortOrder === 'asc' ? 'desc' : 'asc';
+    console.log('🔀 Sorting by:', sortBy, sortOrder);
+    setFilters((prev) => ({ ...prev, sortBy, sortOrder }));
+    setPage(1); // Volver a la primera página cuando cambia el ordenamiento
+  };
 
-    // Filtro por tipo
-    if (filters.type && filters.type !== 'all') {
-      items = items.filter((item) => item.type === filters.type);
-    }
-
-    // Filtro por estado
-    if (filters.status && filters.status !== 'all') {
-      items = items.filter((item) => item.status === filters.status);
-    }
-
-    
-
-    // Filtro por rango de fechas
-    if (filters.publishDateFrom) {
-      items = items.filter(
-        (item) => item.publishDate && item.publishDate >= filters.publishDateFrom!
-      );
-    }
-    if (filters.publishDateTo) {
-      items = items.filter(
-        (item) => item.publishDate && item.publishDate <= filters.publishDateTo!
-      );
-    }
-
-    // Ordenar
-    if (filters.sortBy) {
-      items.sort((a, b) => {
-        let aValue: any;
-        let bValue: any;
-
-        switch (filters.sortBy) {
-          case 'title':
-            aValue = a.title.toLowerCase();
-            bValue = b.title.toLowerCase();
-            break;
-          case 'publishDate':
-            aValue = a.publishDate || '';
-            bValue = b.publishDate || '';
-            break;
-          case 'status':
-            aValue = a.status;
-            bValue = b.status;
-            break;
-          default:
-            return 0;
-        }
-
-        if (aValue < bValue) return filters.sortOrder === 'asc' ? -1 : 1;
-        if (aValue > bValue) return filters.sortOrder === 'asc' ? 1 : -1;
-        return 0;
-      });
-    }
-
-    return items;
-  }, [data, filters]);
+  // Log cuando cambian los datos
+  useEffect(() => {
+    console.log('📊 Data updated:', {
+      itemsCount: data?.length || 0,
+      total,
+      page,
+      totalPages,
+    });
+  }, [data, total, page, totalPages]);
 
   // Mostrar loading
   if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-        <CircularProgress />
+        <CircularProgress sx={{ color: '#1db954' }} />
       </Box>
     );
   }
@@ -139,18 +132,14 @@ export default function CatalogContent() {
       <CatalogFiltersBar
         filters={filters}
         onFiltersChange={updateFilters}
-        resultCount={filteredItems.length}
+        resultCount={total || 0}
       />
 
       <Card sx={{ backgroundColor: '#181818' }}>
         <CatalogTable
-          items={filteredItems}
+          items={data || []}
           searchTerm={filters.search || ''}
-          onSort={(sortBy: 'title' | 'publishDate' | 'status') => {
-            const sortOrder =
-              filters.sortBy === sortBy && filters.sortOrder === 'asc' ? 'desc' : 'asc';
-            updateFilters({ sortBy, sortOrder });
-          }}
+          onSort={handleSort}
           currentSort={filters.sortBy}
           sortOrder={filters.sortOrder}
           onRefresh={() => {
@@ -158,6 +147,47 @@ export default function CatalogContent() {
             refetch();
           }}
         />
+        
+        {/* Paginación */}
+        {totalPages > 1 && (
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              p: 3,
+              borderTop: '1px solid #404040',
+            }}
+          >
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={handlePageChange}
+              color="primary"
+              size="large"
+              showFirstButton
+              showLastButton
+              sx={{
+                '& .MuiPaginationItem-root': {
+                  color: '#ffffff',
+                  '&:hover': {
+                    backgroundColor: '#404040',
+                  },
+                },
+                '& .Mui-selected': {
+                  backgroundColor: '#1db954 !important',
+                  color: '#ffffff',
+                  '&:hover': {
+                    backgroundColor: '#1ed760 !important',
+                  },
+                },
+              }}
+            />
+            <Typography sx={{ ml: 3, color: '#b3b3b3' }}>
+              Mostrando {((page - 1) * perPage) + 1}-{Math.min(page * perPage, total || 0)} de {total || 0} resultados
+            </Typography>
+          </Box>
+        )}
       </Card>
     </div>
   );
