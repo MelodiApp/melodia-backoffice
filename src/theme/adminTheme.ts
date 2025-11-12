@@ -114,16 +114,6 @@ export const spotifyTheme = deepmerge(defaultDarkTheme, {
       styleOverrides: {
         root: {
           position: 'relative',
-          '&::after': {
-            content: '""',
-            position: 'fixed',
-            left: '240px',
-            top: 0,
-            bottom: 0,
-            width: '1px',
-            backgroundColor: '#282828',
-            zIndex: 1000,
-          },
           "& .RaLayout-content": {
             backgroundColor: "#121212",
           },
@@ -135,6 +125,17 @@ export const spotifyTheme = deepmerge(defaultDarkTheme, {
       styleOverrides: {
         root: {
           backgroundColor: "#121212",
+          position: 'relative',
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            right: 0,
+            top: 0,
+            bottom: 0,
+            width: '1px',
+            backgroundColor: '#282828',
+            zIndex: 1,
+          },
           "& .MuiPaper-root": {
             backgroundColor: "#121212",
           },
