@@ -76,6 +76,7 @@ export class CatalogService extends BaseApiService {
       'published': 'published',
       'blocked': 'blocked',
       'scheduled': 'scheduled',
+      'programmed': 'scheduled', // Mapear 'PROGRAMMED' del backend a 'scheduled'
       'draft': 'blocked', // Mapear draft a blocked temporalmente
     };
     return statusMap[status.toLowerCase()] || 'blocked';

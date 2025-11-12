@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { useGetList } from 'react-admin';
+import { useState, useMemo, useEffect } from 'react';
+import { useGetList, useRefresh } from 'react-admin';
 import type { CatalogFilters } from '../../types/catalog';
 import type { CatalogItem } from '../../types/catalog';
 import { CatalogTable } from './CatalogTable';
@@ -7,6 +7,13 @@ import { CatalogFiltersBar } from './CatalogFiltersBar';
 import { Card, CircularProgress, Box, Typography } from '@mui/material';
 
 export default function CatalogContent() {
+  const refresh = useRefresh();
+  
+  // Refrescar cada vez que el componente se monta (cuando vuelves a la lista)
+  useEffect(() => {
+    console.log('📋 CatalogContent mounted, refreshing data...');
+  }, []);
+  
   // Inicializar filtros
   const [filters, setFilters] = useState<CatalogFilters>({
     search: '',
@@ -19,7 +26,7 @@ export default function CatalogContent() {
   });
 
   // Obtener datos del realDataProvider
-  const { data, isLoading, error } = useGetList<CatalogItem>(
+  const { data, isLoading, error, refetch } = useGetList<CatalogItem>(
     'catalog',
     {
       pagination: { page: 1, perPage: 1000 },
@@ -146,6 +153,10 @@ export default function CatalogContent() {
           }}
           currentSort={filters.sortBy}
           sortOrder={filters.sortOrder}
+          onRefresh={() => {
+            console.log('🔄 Refreshing catalog data...');
+            refetch();
+          }}
         />
       </Card>
     </div>

@@ -33,6 +33,7 @@ interface CatalogTableProps {
   onSort: (field: 'title' | 'publishDate' | 'status') => void;
   currentSort?: string;
   sortOrder?: 'asc' | 'desc';
+  onRefresh?: () => void;
 }
 
 export function CatalogTable({
@@ -41,6 +42,7 @@ export function CatalogTable({
   onSort,
   currentSort,
   sortOrder,
+  onRefresh,
 }: CatalogTableProps) {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
