@@ -22,6 +22,7 @@ const customSpanishMessages = {
       remove: "Quitar",
       close: "Cerrar",
       clear_filters: "Limpiar filtros",
+      export: "Descargar",
     },
     filter: {
       ...(spanishMessages as any).ra.filter,
