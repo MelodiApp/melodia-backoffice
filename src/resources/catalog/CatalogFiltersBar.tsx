@@ -191,19 +191,11 @@ export function CatalogFiltersBar({
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
-            label="Desde (dd-mm-yyyy)"
-            placeholder="dd-mm-yyyy"
+            label="Desde"
+            type="date"
             value={tempDateFrom}
-            onChange={(e) => {
-              const value = e.target.value;
-              // Permitir solo números y guiones
-              if (/^[\d-]*$/.test(value)) {
-                onTempDateFromChange(value);
-              }
-            }}
-            inputProps={{
-              maxLength: 10,
-            }}
+            onChange={(e) => onTempDateFromChange(e.target.value)}
+            InputLabelProps={{ shrink: true }}
             sx={{
               '& .MuiInputLabel-root': { color: '#b3b3b3' },
               '& .MuiOutlinedInput-root': {
@@ -219,19 +211,11 @@ export function CatalogFiltersBar({
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
-            label="Hasta (dd-mm-yyyy)"
-            placeholder="dd-mm-yyyy"
+            label="Hasta"
+            type="date"
             value={tempDateTo}
-            onChange={(e) => {
-              const value = e.target.value;
-              // Permitir solo números y guiones
-              if (/^[\d-]*$/.test(value)) {
-                onTempDateToChange(value);
-              }
-            }}
-            inputProps={{
-              maxLength: 10,
-            }}
+            onChange={(e) => onTempDateToChange(e.target.value)}
+            InputLabelProps={{ shrink: true }}
             sx={{
               '& .MuiInputLabel-root': { color: '#b3b3b3' },
               '& .MuiOutlinedInput-root': {

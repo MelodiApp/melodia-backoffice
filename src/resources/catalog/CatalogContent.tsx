@@ -39,6 +39,9 @@ export default function CatalogContent() {
   const [tempDateFrom, setTempDateFrom] = useState(filters.publishDateFrom || '');
   const [tempDateTo, setTempDateTo] = useState(filters.publishDateTo || '');
 
+  // Key para forzar re-render cuando cambia la página o filtros
+  const [queryKey, setQueryKey] = useState(0);
+
   // Obtener datos del realDataProvider
   // useGetList se vuelve a ejecutar automáticamente cuando cambian los parámetros
   const { data, total, isLoading, error, refetch } = useGetList<CatalogItem>(
@@ -55,7 +58,15 @@ export default function CatalogContent() {
         status: filters.status,
         fromDate: filters.publishDateFrom,
         toDate: filters.publishDateTo,
+        _queryKey: queryKey, // Forzar nueva query
       },
+    },
+    {
+      // Configuración de React Query para evitar caché
+      retry: false,
+      refetchOnMount: true,
+      refetchOnWindowFocus: false,
+      staleTime: 0,
     }
   );
 
@@ -144,7 +155,14 @@ export default function CatalogContent() {
   const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     console.log('📄 Changing to page:', value);
     setPage(value);
+    setQueryKey(prev => prev + 1); // Incrementar para forzar nueva query
   };
+
+  // Incrementar queryKey cuando cambian los filtros
+  useEffect(() => {
+    console.log('🔄 Filters changed, incrementing queryKey');
+    setQueryKey(prev => prev + 1);
+  }, [filters.search, filters.type, filters.status, filters.publishDateFrom, filters.publishDateTo, filters.sortBy, filters.sortOrder]);
 
   // Manejar cambio de ordenamiento
   const handleSort = (sortBy: 'title' | 'publishDate' | 'status') => {
@@ -208,6 +226,7 @@ export default function CatalogContent() {
           sortOrder={filters.sortOrder}
           onRefresh={() => {
             console.log('🔄 Refreshing catalog data...');
+            setQueryKey(prev => prev + 1);
             refetch();
           }}
         />
