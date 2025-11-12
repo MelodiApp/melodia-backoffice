@@ -24,13 +24,20 @@ export default function CatalogContent() {
       status: (searchParams.get('status') as CatalogFilters['status']) || 'all',
       publishDateFrom: searchParams.get('fromDate') || undefined,
       publishDateTo: searchParams.get('toDate') || undefined,
-      sortBy: (searchParams.get('sortBy') as CatalogFilters['sortBy']) || 'title',
+      sortBy: (searchParams.get('sortBy') as CatalogFilters['sortBy']) || 'publishDate',
       sortOrder: (searchParams.get('sortOrder') as 'asc' | 'desc') || 'desc',
     };
   };
 
   const [page, setPage] = useState(getInitialPage);
   const [filters, setFilters] = useState<CatalogFilters>(getInitialFilters);
+  
+  // Estado para búsqueda con debounce
+  const [searchInput, setSearchInput] = useState(filters.search || '');
+  
+  // Estado temporal para las fechas (antes de confirmar)
+  const [tempDateFrom, setTempDateFrom] = useState(filters.publishDateFrom || '');
+  const [tempDateTo, setTempDateTo] = useState(filters.publishDateTo || '');
 
   // Obtener datos del realDataProvider
   // useGetList se vuelve a ejecutar automáticamente cuando cambian los parámetros
@@ -55,6 +62,19 @@ export default function CatalogContent() {
   // Calcular número total de páginas
   const totalPages = total ? Math.ceil(total / perPage) : 0;
 
+  // Debounce para la búsqueda (espera 800ms después de dejar de escribir)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchInput !== filters.search) {
+        console.log('🔍 Applying debounced search:', searchInput);
+        setFilters((prev) => ({ ...prev, search: searchInput }));
+        setPage(1);
+      }
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [searchInput, filters.search]);
+
   // Sincronizar estado con URL
   useEffect(() => {
     const params = new URLSearchParams();
@@ -70,7 +90,7 @@ export default function CatalogContent() {
     if (filters.status && filters.status !== 'all') params.set('status', filters.status);
     if (filters.publishDateFrom) params.set('fromDate', filters.publishDateFrom);
     if (filters.publishDateTo) params.set('toDate', filters.publishDateTo);
-    if (filters.sortBy && filters.sortBy !== 'title') params.set('sortBy', filters.sortBy);
+    if (filters.sortBy && filters.sortBy !== 'publishDate') params.set('sortBy', filters.sortBy);
     if (filters.sortOrder && filters.sortOrder !== 'desc') params.set('sortOrder', filters.sortOrder);
 
     // Actualizar URL sin recargar la página
@@ -80,8 +100,44 @@ export default function CatalogContent() {
   // Actualizar filtros y resetear a la primera página
   const updateFilters = (newFilters: Partial<CatalogFilters>) => {
     console.log('🔄 Updating filters:', newFilters);
-    setFilters((prev) => ({ ...prev, ...newFilters }));
+    
+    // Si se actualiza la búsqueda, actualizar el input (el debounce aplicará el filtro)
+    if ('search' in newFilters && newFilters.search !== undefined) {
+      setSearchInput(newFilters.search);
+      // No actualizar filters.search aquí, el useEffect con debounce lo hará
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { search: _search, ...otherFilters } = newFilters;
+      if (Object.keys(otherFilters).length > 0) {
+        setFilters((prev) => ({ ...prev, ...otherFilters }));
+      }
+    } else {
+      setFilters((prev) => ({ ...prev, ...newFilters }));
+    }
+    
     setPage(1); // Volver a la primera página cuando cambian los filtros
+  };
+
+  // Aplicar filtros de fecha (con confirmación)
+  const applyDateFilters = () => {
+    console.log('📅 Applying date filters:', { from: tempDateFrom, to: tempDateTo });
+    setFilters((prev) => ({
+      ...prev,
+      publishDateFrom: tempDateFrom || undefined,
+      publishDateTo: tempDateTo || undefined,
+    }));
+    setPage(1);
+  };
+
+  // Limpiar filtros de fecha
+  const clearDateFilters = () => {
+    setTempDateFrom('');
+    setTempDateTo('');
+    setFilters((prev) => ({
+      ...prev,
+      publishDateFrom: undefined,
+      publishDateTo: undefined,
+    }));
+    setPage(1);
   };
 
   // Manejar cambio de página
@@ -131,7 +187,15 @@ export default function CatalogContent() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
       <CatalogFiltersBar
         filters={filters}
+        searchInput={searchInput}
+        tempDateFrom={tempDateFrom}
+        tempDateTo={tempDateTo}
+        onSearchChange={setSearchInput}
         onFiltersChange={updateFilters}
+        onTempDateFromChange={setTempDateFrom}
+        onTempDateToChange={setTempDateTo}
+        onApplyDateFilters={applyDateFilters}
+        onClearDateFilters={clearDateFilters}
         resultCount={total || 0}
       />
 

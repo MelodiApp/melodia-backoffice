@@ -16,16 +16,33 @@ import type { CatalogFilters } from '../../types/catalog';
 
 interface CatalogFiltersBarProps {
   filters: CatalogFilters;
+  searchInput: string;
+  tempDateFrom: string;
+  tempDateTo: string;
+  onSearchChange: (value: string) => void;
   onFiltersChange: (filters: Partial<CatalogFilters>) => void;
+  onTempDateFromChange: (value: string) => void;
+  onTempDateToChange: (value: string) => void;
+  onApplyDateFilters: () => void;
+  onClearDateFilters: () => void;
   resultCount: number;
 }
 
 export function CatalogFiltersBar({
   filters,
+  searchInput,
+  tempDateFrom,
+  tempDateTo,
+  onSearchChange,
   onFiltersChange,
+  onTempDateFromChange,
+  onTempDateToChange,
+  onApplyDateFilters,
+  onClearDateFilters,
   resultCount,
 }: CatalogFiltersBarProps) {
   const handleReset = () => {
+    onSearchChange('');
     onFiltersChange({
       search: '',
       type: 'all',
@@ -33,14 +50,19 @@ export function CatalogFiltersBar({
       publishDateFrom: undefined,
       publishDateTo: undefined,
     });
+    onClearDateFilters();
   };
 
   const hasActiveFilters =
-    filters.search ||
+    searchInput ||
     (filters.type && filters.type !== 'all') ||
     (filters.status && filters.status !== 'all') ||
     filters.publishDateFrom ||
     filters.publishDateTo;
+
+  const hasPendingDateChanges =
+    tempDateFrom !== (filters.publishDateFrom || '') ||
+    tempDateTo !== (filters.publishDateTo || '');
 
   return (
     <Paper sx={{ p: 3, backgroundColor: '#181818' }}>
@@ -49,8 +71,8 @@ export function CatalogFiltersBar({
           fullWidth
           label="Buscar"
           placeholder="Buscar por título, artista o colección..."
-          value={filters.search || ''}
-          onChange={(e) => onFiltersChange({ search: e.target.value })}
+          value={searchInput}
+          onChange={(e) => onSearchChange(e.target.value)}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -58,6 +80,7 @@ export function CatalogFiltersBar({
               </InputAdornment>
             ),
           }}
+          helperText="La búsqueda se aplica automáticamente después de dejar de escribir"
           sx={{
             '& .MuiInputLabel-root': { color: '#b3b3b3' },
             '& .MuiOutlinedInput-root': {
@@ -165,16 +188,22 @@ export function CatalogFiltersBar({
           </FormControl>
         </Grid>
 
-        
-
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
-            label="Desde"
-            type="date"
-            value={filters.publishDateFrom || ''}
-            onChange={(e) => onFiltersChange({ publishDateFrom: e.target.value })}
-            InputLabelProps={{ shrink: true }}
+            label="Desde (dd-mm-yyyy)"
+            placeholder="dd-mm-yyyy"
+            value={tempDateFrom}
+            onChange={(e) => {
+              const value = e.target.value;
+              // Permitir solo números y guiones
+              if (/^[\d-]*$/.test(value)) {
+                onTempDateFromChange(value);
+              }
+            }}
+            inputProps={{
+              maxLength: 10,
+            }}
             sx={{
               '& .MuiInputLabel-root': { color: '#b3b3b3' },
               '& .MuiOutlinedInput-root': {
@@ -190,11 +219,19 @@ export function CatalogFiltersBar({
         <Grid item xs={12} sm={6} md={2.4}>
           <TextField
             fullWidth
-            label="Hasta"
-            type="date"
-            value={filters.publishDateTo || ''}
-            onChange={(e) => onFiltersChange({ publishDateTo: e.target.value })}
-            InputLabelProps={{ shrink: true }}
+            label="Hasta (dd-mm-yyyy)"
+            placeholder="dd-mm-yyyy"
+            value={tempDateTo}
+            onChange={(e) => {
+              const value = e.target.value;
+              // Permitir solo números y guiones
+              if (/^[\d-]*$/.test(value)) {
+                onTempDateToChange(value);
+              }
+            }}
+            inputProps={{
+              maxLength: 10,
+            }}
             sx={{
               '& .MuiInputLabel-root': { color: '#b3b3b3' },
               '& .MuiOutlinedInput-root': {
@@ -206,6 +243,40 @@ export function CatalogFiltersBar({
             }}
           />
         </Grid>
+
+        {/* Botones para aplicar filtros de fecha */}
+        {hasPendingDateChanges && (
+          <Grid item xs={12} sm={6} md={2.4}>
+            <Box sx={{ display: 'flex', gap: 1, height: '56px', alignItems: 'center' }}>
+              <Button
+                variant="contained"
+                onClick={onApplyDateFilters}
+                sx={{
+                  backgroundColor: '#1db954',
+                  '&:hover': { backgroundColor: '#1ed760' },
+                  flex: 1,
+                }}
+              >
+                Aplicar fechas
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={onClearDateFilters}
+                sx={{
+                  borderColor: '#404040',
+                  color: '#b3b3b3',
+                  '&:hover': {
+                    borderColor: '#1db954',
+                    backgroundColor: 'transparent',
+                  },
+                  flex: 1,
+                }}
+              >
+                Limpiar
+              </Button>
+            </Box>
+          </Grid>
+        )}
       </Grid>
 
       <Typography variant="body2" sx={{ mt: 2, color: '#b3b3b3' }}>

@@ -69,6 +69,19 @@ export const realDataProvider: DataProvider = {
           return statusMap[status.toLowerCase()];
         };
 
+        // Mapear sortBy del frontend al backend
+        const mapSortByToBackend = (sortBy: string | undefined): 'title' | 'publishedAt' | 'artistName' | undefined => {
+          if (!sortBy) return undefined;
+          const sortByMap: Record<string, 'title' | 'publishedAt' | 'artistName'> = {
+            'title': 'title',
+            'publishDate': 'publishedAt',
+            'publishedAt': 'publishedAt',
+            'artistName': 'artistName',
+            'mainArtist': 'artistName',
+          };
+          return sortByMap[sortBy] || undefined;
+        };
+
         // Preparar parámetros para el backend
         const catalogParams = {
           offset: (page - 1) * perPage, // React Admin usa páginas base 1, el backend usa offset
@@ -78,7 +91,7 @@ export const realDataProvider: DataProvider = {
           status: mapStatusToBackend(filter.status),
           fromDate: filter.fromDate,
           toDate: filter.toDate,
-          sortBy: params.sort?.field as 'title' | 'publishedAt' | 'artistName' | undefined,
+          sortBy: mapSortByToBackend(params.sort?.field),
           sortOrder: params.sort?.order?.toLowerCase() as 'asc' | 'desc' | undefined,
         };
 
