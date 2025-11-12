@@ -35,7 +35,7 @@ export const Dashboard = () => {
             }}
           />
           <CardContent>
-            <p style={{ color: "#ffffff" }}>Administra usuarios del sistema</p>
+            <p style={{ color: "#ffffff" }}>Explora y gestiona los usuarios</p>
             <p
               style={{ marginTop: "10px", color: "#b3b3b3", fontSize: "14px" }}
             >
