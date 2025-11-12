@@ -1,10 +1,10 @@
 import { useState, useMemo } from 'react';
 import { useGetList } from 'react-admin';
-import { mockCatalogItems } from '../../providers/catalogMockData';
-import type { CatalogFilters, CatalogItem } from '../../types/catalog';
+import type { CatalogFilters } from '../../types/catalog';
+import type { CatalogItem } from '../../types/catalog';
 import { CatalogTable } from './CatalogTable';
 import { CatalogFiltersBar } from './CatalogFiltersBar';
-import { Card, CircularProgress, Box, Alert } from '@mui/material';
+import { Card, CircularProgress, Box, Typography } from '@mui/material';
 
 export default function CatalogContent() {
   // Inicializar filtros
@@ -18,15 +18,16 @@ export default function CatalogContent() {
     sortOrder: 'asc',
   });
 
-  // Obtener datos del backend usando React Admin
-  const { data: catalogData, isLoading, error } = useGetList<CatalogItem>(
+  // Obtener datos del realDataProvider
+  const { data, isLoading, error } = useGetList<CatalogItem>(
     'catalog',
     {
-      pagination: { page: 1, perPage: 1000 }, // Obtener todos los items
+      pagination: { page: 1, perPage: 1000 },
+      sort: { field: filters.sortBy || 'title', order: filters.sortOrder?.toUpperCase() as 'ASC' | 'DESC' || 'ASC' },
       filter: {
         search: filters.search,
-        status: filters.status !== 'all' ? filters.status : undefined,
-        type: filters.type !== 'all' ? filters.type : undefined,
+        type: filters.type,
+        status: filters.status,
       },
     }
   );
@@ -36,28 +37,49 @@ export default function CatalogContent() {
     setFilters((prev) => ({ ...prev, ...newFilters }));
   };
 
-  // Usar datos reales o mock como fallback
-  const items = catalogData || mockCatalogItems;
-
-  // Filtrar y ordenar datos localmente
+  // Filtrar y ordenar datos localmente (filtros adicionales)
   const filteredItems = useMemo(() => {
-    let itemsList = [...items];
+    if (!data) return [];
+    let items = [...data];
 
-    // Filtro por rango de fechas (filtrado local adicional)
+    // Búsqueda
+    if (filters.search) {
+      const search = filters.search.toLowerCase();
+      items = items.filter(
+        (item) =>
+          item.title.toLowerCase().includes(search) ||
+          item.mainArtist.toLowerCase().includes(search) ||
+          item.collection?.toLowerCase().includes(search)
+      );
+    }
+
+    // Filtro por tipo
+    if (filters.type && filters.type !== 'all') {
+      items = items.filter((item) => item.type === filters.type);
+    }
+
+    // Filtro por estado
+    if (filters.status && filters.status !== 'all') {
+      items = items.filter((item) => item.status === filters.status);
+    }
+
+    
+
+    // Filtro por rango de fechas
     if (filters.publishDateFrom) {
-      itemsList = itemsList.filter(
+      items = items.filter(
         (item) => item.publishDate && item.publishDate >= filters.publishDateFrom!
       );
     }
     if (filters.publishDateTo) {
-      itemsList = itemsList.filter(
+      items = items.filter(
         (item) => item.publishDate && item.publishDate <= filters.publishDateTo!
       );
     }
 
     // Ordenar
     if (filters.sortBy) {
-      itemsList.sort((a, b) => {
+      items.sort((a, b) => {
         let aValue: any;
         let bValue: any;
 
@@ -84,13 +106,13 @@ export default function CatalogContent() {
       });
     }
 
-    return itemsList;
-  }, [items, filters]);
+    return items;
+  }, [data, filters]);
 
   // Mostrar loading
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
         <CircularProgress />
       </Box>
     );
@@ -99,9 +121,9 @@ export default function CatalogContent() {
   // Mostrar error
   if (error) {
     return (
-      <Alert severity="error" sx={{ m: 2 }}>
-        Error al cargar el catálogo. Usando datos de ejemplo.
-      </Alert>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+        <Typography color="error">Error al cargar el catálogo: {String(error)}</Typography>
+      </Box>
     );
   }
 

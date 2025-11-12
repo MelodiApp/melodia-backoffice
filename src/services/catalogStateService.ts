@@ -127,7 +127,8 @@ export async function changeItemState(
     await catalogService.updateItemStatus(
       params.itemId,
       params.itemType,
-      params.newState
+      params.newState,
+      params.scheduledDate
     );
 
     // Agregar evento de auditoría local

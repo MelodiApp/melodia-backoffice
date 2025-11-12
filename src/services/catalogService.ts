@@ -82,15 +82,15 @@ export class CatalogService extends BaseApiService {
   }
 
   /**
-   * Mapea el estado del frontend al formato del backend
+   * Mapea el estado del frontend a la action del backend
    */
-  private mapFrontendStatus(status: CatalogStatus): string {
-    const statusMap: Record<CatalogStatus, string> = {
-      'published': 'published',
-      'blocked': 'blocked',
-      'scheduled': 'scheduled',
+  private mapFrontendStatusToAction(status: CatalogStatus): string {
+    const actionMap: Record<CatalogStatus, string> = {
+      'published': 'PUBLISHED',
+      'blocked': 'BLOCKED',
+      'scheduled': 'PROGRAMMED',
     };
-    return statusMap[status] || 'blocked';
+    return actionMap[status] || 'BLOCKED';
   }
 
   /**
@@ -101,8 +101,9 @@ export class CatalogService extends BaseApiService {
     page?: number;
     limit?: number;
     search?: string;
-    status?: string;
+    status?: CatalogStatus;
   }): Promise<{ items: CatalogItem[]; total: number }> {
+    console.log('🔍 CatalogService: getAllDiscographies called with params:', params);
     const queryParams = new URLSearchParams();
     
     if (params?.page) queryParams.append("page", params.page.toString());
@@ -125,6 +126,7 @@ export class CatalogService extends BaseApiService {
         allItems.push(this.mapBackendCollectionToFrontend(collection));
       });
 
+    console.log('✅ CatalogService: Returning items:', allItems.length, 'total:', response.total);
     return {
       items: allItems,
       total: response.total,
@@ -163,11 +165,15 @@ export class CatalogService extends BaseApiService {
    * PUT /api/admin/artists/songs/:song_id/status
    * Actualizar el estado de una canción
    */
-  async updateSongStatus(songId: string, status: CatalogStatus): Promise<CatalogItem> {
-    const backendStatus = this.mapFrontendStatus(status);
-    const updatedSong = await this.put<BackendSong, { status: string }>(
+  async updateSongStatus(songId: string, status: CatalogStatus, scheduledDate?: string): Promise<CatalogItem> {
+    const action = this.mapFrontendStatusToAction(status);
+    const body: { action: string; releaseDate?: string } = { action };
+    if (status === 'scheduled' && scheduledDate) {
+      body.releaseDate = scheduledDate;
+    }
+    const updatedSong = await this.put<BackendSong, typeof body>(
       `${this.BASE_PATH}/songs/${songId}/status`,
-      { status: backendStatus }
+      body
     );
     return this.mapBackendSongToFrontend(updatedSong);
   }
@@ -205,23 +211,35 @@ export class CatalogService extends BaseApiService {
    * PUT /api/admin/artists/collections/:collection_id/status
    * Actualizar el estado de una colección
    */
-  async updateCollectionStatus(collectionId: string, status: CatalogStatus): Promise<CatalogItem> {
-    const backendStatus = this.mapFrontendStatus(status);
-    const updatedCollection = await this.put<BackendCollection, { status: string }>(
+  async updateCollectionStatus(collectionId: string, status: CatalogStatus, scheduledDate?: string): Promise<CatalogItem> {
+    const action = this.mapFrontendStatusToAction(status);
+    const body: { action: string; releaseDate?: string } = { action };
+    if (status === 'scheduled' && scheduledDate) {
+      body.releaseDate = scheduledDate;
+    }
+    console.log('🚀 CatalogService.updateCollectionStatus:', {
+      collectionId,
+      status,
+      scheduledDate,
+      action,
+      body,
+    });
+    const updatedCollection = await this.put<BackendCollection, typeof body>(
       `${this.BASE_PATH}/collections/${collectionId}/status`,
-      { status: backendStatus }
+      body
     );
+    console.log('✅ CatalogService.updateCollectionStatus response:', updatedCollection);
     return this.mapBackendCollectionToFrontend(updatedCollection);
   }
 
   /**
    * Actualizar el estado de un item (song o collection)
    */
-  async updateItemStatus(itemId: string, itemType: 'song' | 'collection', status: CatalogStatus): Promise<CatalogItem> {
+  async updateItemStatus(itemId: string, itemType: 'song' | 'collection', status: CatalogStatus, scheduledDate?: string): Promise<CatalogItem> {
     if (itemType === 'song') {
       return this.updateSongStatus(itemId, status);
     } else {
-      return this.updateCollectionStatus(itemId, status);
+      return this.updateCollectionStatus(itemId, status, scheduledDate);
     }
   }
 }

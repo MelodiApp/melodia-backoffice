@@ -54,13 +54,14 @@ export const realDataProvider: DataProvider = {
 
     if (resource === "catalog" || resource === "songs" || resource === "collections") {
       try {
+        console.log('🔍 RealDataProvider: Fetching catalog with params:', params);
         const response = await catalogService.getAllDiscographies({
           page,
           limit: perPage,
           search: filter.search || filter.q,
           status: filter.status !== 'all' ? filter.status : undefined,
         });
-        console.log('✅ Catálogo obtenido:', response);
+        console.log('✅ RealDataProvider: Catalog response:', response);
 
         let filteredData = response.items;
         console.log("filteredData inicial:", filteredData);
