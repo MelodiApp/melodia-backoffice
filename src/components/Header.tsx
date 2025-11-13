@@ -1,15 +1,9 @@
-import React from 'react'
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  IconButton,
-  Box,
-} from '@mui/material'
-import { Menu as MenuIcon, AccountCircle } from '@mui/icons-material'
+import React from "react";
+import { AppBar, Toolbar, Typography, IconButton, Box } from "@mui/material";
+import { Menu as MenuIcon, AccountCircle } from "@mui/icons-material";
 
 interface HeaderProps {
-  onMenuClick?: () => void
+  onMenuClick?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
@@ -25,11 +19,11 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         >
           <MenuIcon />
         </IconButton>
-        
+
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           Melodia Backoffice
         </Typography>
-        
+
         <Box>
           <IconButton
             size="large"
@@ -41,5 +35,5 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         </Box>
       </Toolbar>
     </AppBar>
-  )
-}
+  );
+};

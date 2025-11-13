@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import {
   Drawer,
   List,
@@ -8,33 +8,33 @@ import {
   ListItemText,
   Divider,
   Toolbar,
-} from '@mui/material'
+} from "@mui/material";
 import {
   Dashboard,
   People,
   Settings,
   Analytics,
   MusicNote,
-} from '@mui/icons-material'
+} from "@mui/icons-material";
 
 interface SidebarProps {
-  open: boolean
-  onClose?: () => void
-  width?: number
+  open: boolean;
+  onClose?: () => void;
+  width?: number;
 }
 
 const menuItems = [
-  { text: 'Dashboard', icon: <Dashboard />, path: '/' },
-  { text: 'Users', icon: <People />, path: '/users' },
-  { text: 'Music', icon: <MusicNote />, path: '/music' },
-  { text: 'Analytics', icon: <Analytics />, path: '/analytics' },
-  { text: 'Settings', icon: <Settings />, path: '/settings' },
-]
+  { text: "Dashboard", icon: <Dashboard />, path: "/" },
+  { text: "Users", icon: <People />, path: "/users" },
+  { text: "Music", icon: <MusicNote />, path: "/music" },
+  { text: "Analytics", icon: <Analytics />, path: "/analytics" },
+  { text: "Settings", icon: <Settings />, path: "/settings" },
+];
 
-export const Sidebar: React.FC<SidebarProps> = ({ 
-  open, 
-  onClose, 
-  width = 240 
+export const Sidebar: React.FC<SidebarProps> = ({
+  open,
+  onClose,
+  width = 240,
 }) => {
   return (
     <Drawer
@@ -45,9 +45,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
       sx={{
         width: width,
         flexShrink: 0,
-        '& .MuiDrawer-paper': {
+        "& .MuiDrawer-paper": {
           width: width,
-          boxSizing: 'border-box',
+          boxSizing: "border-box",
         },
       }}
     >
@@ -57,14 +57,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {menuItems.map((item) => (
           <ListItem key={item.text} disablePadding>
             <ListItemButton>
-              <ListItemIcon>
-                {item.icon}
-              </ListItemIcon>
+              <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} />
             </ListItemButton>
           </ListItem>
         ))}
       </List>
     </Drawer>
-  )
-}
+  );
+};

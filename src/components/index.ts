@@ -1,6 +1,5 @@
-export { Header } from './Header'
-export { Sidebar } from './Sidebar'
-export { DataDemo } from './DataDemo'
+export { Header } from "./Header";
+export { Sidebar } from "./Sidebar";
 
 // Admin components
-export * from './admin'
+export * from "./admin";
