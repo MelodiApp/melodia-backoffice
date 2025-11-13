@@ -41,6 +41,7 @@ const customSpanishMessages = {
     },
     navigation: {
       ...(spanishMessages as any).ra.navigation,
+      skip_nav: "Saltar al contenido principal",
       page_rows_per_page: "Filas por página:",
       page_range_info: "%{offsetBegin}-%{offsetEnd} de %{total}",
       prev: "Anterior",
