@@ -2,21 +2,23 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react()],
   build: {
     outDir: 'dist',
-    sourcemap: false,
+    sourcemap: mode === 'development',
+    minify: mode === 'production' ? 'esbuild' : false,
+    target: 'es2015', // Más compatible
+    emptyOutDir: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          admin: ['react-admin'],
-          mui: ['@mui/material', '@mui/icons-material']
-        }
+        manualChunks: undefined,
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
       }
     },
-    chunkSizeWarningLimit: 1600
+    chunkSizeWarningLimit: 2000
   },
   preview: {
     port: 3000,
@@ -26,4 +28,4 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 3000,
   }
-});
+}));
