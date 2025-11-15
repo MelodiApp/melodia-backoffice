@@ -3,9 +3,7 @@ import {
   Datagrid,
   TextField,
   EmailField,
-  EditButton,
   ShowButton,
-  DeleteButton,
   FunctionField,
   SelectInput,
   Title,
@@ -13,6 +11,7 @@ import {
 import { Box, Typography } from "@mui/material";
 import { People } from "@mui/icons-material";
 import type { User } from "../../types/user";
+import { RestrictedEditButton, RestrictedDeleteButton } from "../../components/RestrictedButtons";
 
 const userFilters = [
   <SelectInput
@@ -76,8 +75,8 @@ export const UserList = () => (
           )}
         />
         <ShowButton />
-        <EditButton />
-        <DeleteButton mutationMode="pessimistic" />
+        <RestrictedEditButton />
+        <RestrictedDeleteButton />
       </Datagrid>
     </List>
   </Box>

@@ -7,6 +7,8 @@ import {
   ChipField,
   FunctionField,
   useRecordContext,
+  TopToolbar,
+  EditButton,
 } from "react-admin";
 import type { User } from "../../types/user";
 
@@ -16,8 +18,23 @@ const DebugField = () => {
   return null;
 };
 
+const ShowActions = () => {
+  const record = useRecordContext<User>();
+  
+  // Solo mostrar el botón de editar si NO es admin
+  if (record?.role === 'admin') {
+    return <TopToolbar />;
+  }
+  
+  return (
+    <TopToolbar>
+      <EditButton />
+    </TopToolbar>
+  );
+};
+
 export const UserShow = () => (
-  <Show>
+  <Show actions={<ShowActions />}>
     <SimpleShowLayout>
       <DebugField />
       <TextField source="username" label="Nombre de Usuario" />
