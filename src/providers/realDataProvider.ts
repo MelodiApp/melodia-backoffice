@@ -99,10 +99,31 @@ export const realDataProvider: DataProvider = {
         const response = await catalogService.getAllDiscographies(catalogParams);
         console.log('✅ RealDataProvider: Catalog response:', response);
 
+        // Los items ya vienen mapeados por catalogService, pero verificamos por si acaso
+        const statusMapFromBackend: Record<string, 'published' | 'blocked' | 'scheduled'> = {
+          'PUBLISHED': 'published',
+          'BLOCKED': 'blocked',
+          'PROGRAMMED': 'scheduled',
+          'published': 'published',
+          'blocked': 'blocked',
+          'scheduled': 'scheduled',
+        };
+
+        const mappedItems = response.items.map((item: any) => {
+          const mappedStatus = statusMapFromBackend[item.status] || 'published';
+          console.log(`🔍 Mapeando item "${item.title}": status backend="${item.status}" -> frontend="${mappedStatus}"`);
+          return {
+            ...item,
+            status: mappedStatus,
+          };
+        });
+
+        console.log('🔄 Items mapeados con status:', mappedItems);
+
         // El backend ya se encarga de toda la lógica de filtrado, búsqueda y paginación
         // No necesitamos filtrar localmente
         return {
-          data: response.items as any[],
+          data: mappedItems,
           total: response.total,
         };
       } catch (error) {
@@ -181,6 +202,16 @@ export const realDataProvider: DataProvider = {
         const collection = await catalogService.getCollectionById(id);
         console.log('✅ Collection obtenida del backend:', collection);
         
+        // Mapear el status del backend al frontend
+        const statusMap: Record<string, 'published' | 'blocked' | 'scheduled'> = {
+          'PUBLISHED': 'published',
+          'BLOCKED': 'blocked',
+          'PROGRAMMED': 'scheduled',
+        };
+        
+        // El backend devuelve el status
+        const backendCollection = collection as any;
+        
         // Adaptar al formato que espera el frontend
         const adaptedCollection = {
           id: id,
@@ -201,7 +232,7 @@ export const realDataProvider: DataProvider = {
           totalDuration: collection.songs.reduce((sum, song) => sum + song.duration, 0),
           hasExplicit: false,
           hasVideo: false,
-          status: 'published' as const,
+          status: statusMap[backendCollection.status] || 'published',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };

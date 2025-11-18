@@ -59,6 +59,9 @@ interface BackendCollectionDetail {
   owner?: string;
   privacy?: string;
   songs: BackendCollectionSong[];
+  status: 'PUBLISHED' | 'BLOCKED' | 'PROGRAMMED';
+  isBlocked: boolean;
+  releaseDate: string;
 }
 
 interface BackendDiscographyItem {
@@ -101,13 +104,14 @@ export class CatalogService extends BaseApiService {
   /**
    * Mapea una collection del backend al formato del frontend
    */
-  private mapBackendCollectionToFrontend(collection: BackendDiscographyItem): CatalogItem {
+  private mapBackendCollectionToFrontend(collection: any): CatalogItem {
+    // El backend ya calcula el status correctamente, solo mapearlo
     return {
       id: String(collection.id),
       type: collection.type,
       title: collection.title,
-      mainArtist: collection.artistName || 'Unknown Artist',
-      publishDate: collection.publishedAt,
+      mainArtist: collection.artist?.artisticName || collection.artistName || 'Unknown Artist',
+      publishDate: collection.releaseDate || collection.publishedAt,
       status: this.mapBackendStatus(collection.status),
     };
   }
@@ -120,8 +124,9 @@ export class CatalogService extends BaseApiService {
       'published': 'published',
       'blocked': 'blocked',
       'programmed': 'scheduled',
+      'scheduled': 'scheduled', // Por si ya viene en formato frontend
     };
-    return statusMap[status.toLowerCase()] || 'blocked';
+    return statusMap[status.toLowerCase()] || 'published';
   }
 
   /**
@@ -173,17 +178,33 @@ export class CatalogService extends BaseApiService {
     
     const response = await this.get<SearchBackendDiscographiesResponse>(url);
     console.log('✅ CatalogService: Discographies response:', response);
+    console.log('🔍 RAW backend items:', response.data);
 
     // Mapear items del backend al formato del frontend
     const allItems: CatalogItem[] = response.data.map((item) => {
+      console.log(`🔧 Processing item "${item.title}":`, {
+        id: item.id,
+        type: item.type,
+        status_BEFORE_mapping: item.status,
+      });
+      
+      let mappedItem: CatalogItem;
       if (item.type === 'song') {
-        return this.mapBackendSongToFrontend(item);
+        mappedItem = this.mapBackendSongToFrontend(item);
       } else {
-        return this.mapBackendCollectionToFrontend(item);
+        mappedItem = this.mapBackendCollectionToFrontend(item);
       }
+      
+      console.log(`✅ Mapped item "${item.title}":`, {
+        id: mappedItem.id,
+        status_AFTER_mapping: mappedItem.status,
+      });
+      
+      return mappedItem;
     });
 
     console.log('✅ CatalogService: Returning items:', allItems.length, 'total:', response.total);
+    console.log('🔍 FINAL items being returned:', allItems);
     return {
       items: allItems,
       hasMore: response.hasMore,
@@ -236,13 +257,34 @@ export class CatalogService extends BaseApiService {
     const action = this.mapFrontendStatusToAction(status);
     const body: { action: string; releaseDate?: string } = { action };
     if (status === 'scheduled' && scheduledDate) {
-      body.releaseDate = scheduledDate;
+      body.releaseDate = new Date(scheduledDate).toISOString();
     }
-    const updatedSong = await this.put<BackendDiscographyItem, typeof body>(
+    const updatedSong = await this.put<any, typeof body>(
       `${this.BASE_PATH}/songs/${songId}/status`,
       body
     );
-    return this.mapBackendSongToFrontend(updatedSong);
+    
+    // El backend devuelve un objeto Prisma Song, calcular status manualmente
+    const now = new Date();
+    const releaseDate = new Date(updatedSong.releaseDate);
+    let calculatedStatus: 'PUBLISHED' | 'BLOCKED' | 'PROGRAMMED';
+    
+    if (updatedSong.isBlocked) {
+      calculatedStatus = 'BLOCKED';
+    } else if (releaseDate > now) {
+      calculatedStatus = 'PROGRAMMED';
+    } else {
+      calculatedStatus = 'PUBLISHED';
+    }
+    
+    return {
+      id: String(updatedSong.id),
+      type: 'song',
+      title: updatedSong.title,
+      mainArtist: 'Unknown Artist',
+      publishDate: updatedSong.releaseDate,
+      status: this.mapBackendStatus(calculatedStatus.toLowerCase()),
+    };
   }
 
   /**
@@ -268,10 +310,12 @@ export class CatalogService extends BaseApiService {
    * Actualizar el estado de una colección
    */
   async updateCollectionStatus(collectionId: string, status: CatalogStatus, scheduledDate?: string): Promise<CatalogItem> {
+    console.log('🚨 updateCollectionStatus - collectionId recibido:', collectionId, 'type:', typeof collectionId);
+    
     const action = this.mapFrontendStatusToAction(status);
     const body: { action: string; releaseDate?: string } = { action };
     if (status === 'scheduled' && scheduledDate) {
-      body.releaseDate = scheduledDate;
+      body.releaseDate = new Date(scheduledDate).toISOString();
     }
     console.log('🚀 CatalogService.updateCollectionStatus:', {
       collectionId,
@@ -279,13 +323,61 @@ export class CatalogService extends BaseApiService {
       scheduledDate,
       action,
       body,
+      url: `${this.BASE_PATH}/collections/${collectionId}/status`,
     });
-    const updatedCollection = await this.put<BackendDiscographyItem, typeof body>(
+    const updatedCollection = await this.put<any, typeof body>(
       `${this.BASE_PATH}/collections/${collectionId}/status`,
       body
     );
     console.log('✅ CatalogService.updateCollectionStatus response:', updatedCollection);
-    return this.mapBackendCollectionToFrontend(updatedCollection);
+    console.log('📊 Backend response details:', {
+      id: updatedCollection.id,
+      title: updatedCollection.title,
+      isBlocked: updatedCollection.isBlocked,
+      releaseDate: updatedCollection.releaseDate,
+      releaseDate_type: typeof updatedCollection.releaseDate,
+    });
+    
+    // El backend devuelve un objeto Prisma Collection, no un BackendDiscographyItem
+    // Necesitamos calcular el status manualmente
+    const now = new Date();
+    const releaseDate = new Date(updatedCollection.releaseDate);
+    let calculatedStatus: 'PUBLISHED' | 'BLOCKED' | 'PROGRAMMED';
+    
+    console.log('🔍 Calculating status:', {
+      now: now.toISOString(),
+      releaseDate: releaseDate.toISOString(),
+      isBlocked: updatedCollection.isBlocked,
+      comparison: releaseDate > now,
+    });
+    
+    if (updatedCollection.isBlocked) {
+      calculatedStatus = 'BLOCKED';
+    } else if (releaseDate > now) {
+      calculatedStatus = 'PROGRAMMED';
+    } else {
+      calculatedStatus = 'PUBLISHED';
+    }
+    
+    console.log('🎯 Status calculado:', {
+      isBlocked: updatedCollection.isBlocked,
+      releaseDate: releaseDate,
+      now: now,
+      calculatedStatus: calculatedStatus
+    });
+    
+    const mappedStatus = this.mapBackendStatus(calculatedStatus.toLowerCase());
+    console.log('🎯 Status mapeado al frontend:', mappedStatus);
+    
+    // Devolver en el formato que espera el frontend
+    return {
+      id: String(updatedCollection.id),
+      type: 'collection',
+      title: updatedCollection.title,
+      mainArtist: 'Unknown Artist', // No viene en la respuesta del update
+      publishDate: updatedCollection.releaseDate,
+      status: mappedStatus,
+    };
   }
 
   /**

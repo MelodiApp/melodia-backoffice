@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useRefresh, useDataProvider } from 'react-admin';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   Box,
   Typography,
@@ -47,6 +49,8 @@ export function SummaryTab({ item, onRefresh }: SummaryTabProps) {
 }
 
 function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => void }) {
+  const refresh = useRefresh();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [stateDialogOpen, setStateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -57,8 +61,17 @@ function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => 
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleStateChange = () => {
+  const handleStateChange = async () => {
     setStateDialogOpen(false);
+    // Pequeño delay para asegurar que el backend terminó de actualizar
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Invalidar cache de React Admin para todos los recursos del catálogo
+    queryClient.invalidateQueries({ queryKey: ['catalog'] });
+    queryClient.invalidateQueries({ queryKey: ['songs'] });
+    queryClient.invalidateQueries({ queryKey: ['collections'] });
+    refresh();
+    
     if (onRefresh) {
       onRefresh();
     }
@@ -240,6 +253,8 @@ function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => 
 }
 
 function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefresh?: () => void }) {
+  const refresh = useRefresh();
+  const queryClient = useQueryClient();
   const [stateDialogOpen, setStateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
@@ -249,8 +264,16 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleStateChange = () => {
+  const handleStateChange = async () => {
     setStateDialogOpen(false);
+    // Pequeño delay para asegurar que el backend terminó de actualizar
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Invalidar cache de React Admin para todos los recursos del catálogo
+    queryClient.invalidateQueries({ queryKey: ['catalog'] });
+    queryClient.invalidateQueries({ queryKey: ['songs'] });
+    queryClient.invalidateQueries({ queryKey: ['collections'] });
+    refresh();
     if (onRefresh) {
       onRefresh();
     }

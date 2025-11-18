@@ -70,6 +70,13 @@ export function ChangeStateDialog({
       return;
     }
 
+    // Validación: si el estado es 'scheduled', debe haber una fecha
+    if (newState === 'scheduled' && !scheduledDate) {
+      setError('Debe seleccionar una fecha para programar la publicación');
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
 
     try {
