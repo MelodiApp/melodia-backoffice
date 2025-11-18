@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -46,6 +47,7 @@ export function SummaryTab({ item, onRefresh }: SummaryTabProps) {
 }
 
 function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => void }) {
+  const navigate = useNavigate();
   const [stateDialogOpen, setStateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
@@ -197,9 +199,14 @@ function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => 
                     variant="outlined"
                     startIcon={<OpenInNew />}
                     fullWidth
-                    onClick={() =>
-                      (window.location.href = `/#/catalog/${item.collection?.id}/show`)
-                    }
+                    onClick={() => {
+                      console.log('🔥 SummaryTab - item completo:', item);
+                      console.log('🔥 SummaryTab - item.collection:', item.collection);
+                      console.log('🔥 SummaryTab - item.collection.id:', item.collection?.id);
+                      console.log('🔥 SummaryTab - Navegando a:', `/collections/${item.collection?.id}/show`);
+                      // Navegar a la colección usando el resource correcto
+                      navigate(`/collections/${item.collection?.id}/show`);
+                    }}
                   >
                     Abrir detalle de Colección
                   </Button>

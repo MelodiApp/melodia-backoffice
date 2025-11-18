@@ -21,7 +21,10 @@ export interface CatalogItem {
 export interface SongDetail {
   title: string;
   artists: string[];
-  collection?: string;
+  collection?: {
+    id: number;
+    title: string;
+  };
   year?: number;
   position?: number;
   duration: number;

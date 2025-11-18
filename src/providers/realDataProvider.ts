@@ -138,6 +138,9 @@ export const realDataProvider: DataProvider = {
         const id = String(params.id);
         const song = await catalogService.getSongById(id);
         console.log('✅ Song obtenida del backend:', song);
+        console.log('🔍 song.collection:', song.collection);
+        console.log('🔍 song.collection?.id:', song.collection?.id);
+        console.log('🔍 String(song.collection?.id):', String(song.collection?.id));
         
         // Adaptar al formato que espera el frontend
         const adaptedSong = {
@@ -149,8 +152,8 @@ export const realDataProvider: DataProvider = {
             name: artistName
           })),
           collection: song.collection ? {
-            id: '0',
-            title: song.collection,
+            id: String(song.collection.id), // Usar el ID real de la colección
+            title: song.collection.title,
             year: song.year
           } : undefined,
           trackNumber: song.position,
