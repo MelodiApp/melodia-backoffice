@@ -322,6 +322,16 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
                       />
                     </Box>
 
+                    {/* Mostrar artista para albums, eps y singles */}
+                    {item.collectionType !== 'playlist' && item.owner && (
+                      <Box>
+                        <Typography variant="body2" sx={{ color: '#b3b3b3' }}>
+                          Artista
+                        </Typography>
+                        <Typography variant="body1" sx={{ color: '#ffffff' }}>{item.owner}</Typography>
+                      </Box>
+                    )}
+
                     {item.year && (
                       <Box>
                         <Typography variant="body2" sx={{ color: '#b3b3b3' }}>

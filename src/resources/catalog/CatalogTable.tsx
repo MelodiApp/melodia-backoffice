@@ -61,8 +61,15 @@ export function CatalogTable({
   const handleAction = (action: string) => {
     if (!selectedItem) return;
     
+    console.log('🎯 handleAction - action:', action, 'selectedItem:', selectedItem);
+    
     if (action === 'view') {
-      navigate(`/catalog/${selectedItem.id}/show`);
+      // React Admin espera rutas en formato: /{resource}/{id}/show
+      // Usamos el resource correcto basado en el tipo
+      const resource = selectedItem.type === 'song' ? 'songs' : 'collections';
+      const targetUrl = `/${resource}/${selectedItem.id}/show`;
+      console.log('🚀 Navegando a:', targetUrl);
+      navigate(targetUrl);
     } else {
       console.log(`Action: ${action}`, selectedItem);
     }

@@ -131,24 +131,158 @@ export const realDataProvider: DataProvider = {
       }
     }
 
-    if (resource === "catalog" || resource === "songs" || resource === "collections") {
+    // Manejar songs específicamente
+    if (resource === "songs") {
       try {
+        console.log('🎯 realDataProvider.getOne - SONG id:', params.id);
+        const id = String(params.id);
+        const song = await catalogService.getSongById(id);
+        console.log('✅ Song obtenida del backend:', song);
+        
+        // Adaptar al formato que espera el frontend
+        const adaptedSong = {
+          id: id,
+          type: 'song' as const,
+          title: song.title,
+          artists: song.artists.map((artistName: string) => ({
+            id: artistName.toLowerCase().replace(/\s+/g, '-'),
+            name: artistName
+          })),
+          collection: song.collection ? {
+            id: '0',
+            title: song.collection,
+            year: song.year
+          } : undefined,
+          trackNumber: song.position,
+          duration: song.duration,
+          explicit: false,
+          hasVideo: false,
+          status: 'published' as const,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        
+        console.log('✅ Song adaptada para frontend:', adaptedSong);
+        return { data: adaptedSong };
+      } catch (error) {
+        console.error("❌ Error obteniendo song:", error);
+        throw error;
+      }
+    }
+
+    // Manejar collections específicamente
+    if (resource === "collections") {
+      try {
+        console.log('🎯 realDataProvider.getOne - COLLECTION id:', params.id);
+        const id = String(params.id);
+        const collection = await catalogService.getCollectionById(id);
+        console.log('✅ Collection obtenida del backend:', collection);
+        
+        // Adaptar al formato que espera el frontend
+        const adaptedCollection = {
+          id: id,
+          type: 'collection' as const,
+          coverUrl: collection.cover,
+          title: collection.title,
+          collectionType: collection.type.toLowerCase() as 'album' | 'ep' | 'single',
+          year: collection.year,
+          owner: collection.owner, // Nombre del artista propietario
+          tracks: collection.songs.map((song) => ({
+            position: song.position,
+            id: `${id}-${song.position}`,
+            title: song.title,
+            duration: song.duration,
+            explicit: false,
+            hasVideo: false
+          })),
+          totalDuration: collection.songs.reduce((sum, song) => sum + song.duration, 0),
+          hasExplicit: false,
+          hasVideo: false,
+          status: 'published' as const,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        
+        console.log('✅ Collection adaptada para frontend:', adaptedCollection);
+        return { data: adaptedCollection };
+      } catch (error) {
+        console.error("❌ Error obteniendo collection:", error);
+        throw error;
+      }
+    }
+
+    // Mantener el manejo legacy de "catalog" por si acaso
+    if (resource === "catalog") {
+      try {
+        console.log('🎯 realDataProvider.getOne - resource:', resource, 'id:', params.id);
         // Necesitamos saber si es song o collection
         // Intentamos primero obtener como song, si falla intentamos como collection
         const id = String(params.id);
         
         try {
           const song = await catalogService.getSongById(id);
-          console.log('✅ Song obtenida:', song);
-          return { data: song as any };
-        } catch {
+          console.log('✅ Song obtenida del backend:', song);
+          
+          // Adaptar al formato que espera el frontend
+          const adaptedSong = {
+            id: id,
+            type: 'song' as const,
+            title: song.title,
+            artists: song.artists.map((artistName: string) => ({
+              id: artistName.toLowerCase().replace(/\s+/g, '-'),
+              name: artistName
+            })),
+            collection: song.collection ? {
+              id: '0', // No tenemos el ID de la colección en la respuesta
+              title: song.collection,
+              year: song.year
+            } : undefined,
+            trackNumber: song.position,
+            duration: song.duration,
+            explicit: false, // No viene del backend
+            hasVideo: false, // No viene del backend
+            status: 'published' as const, // No viene del backend
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+          
+          console.log('✅ Song adaptada para frontend:', adaptedSong);
+          return { data: adaptedSong };
+        } catch (songError) {
+          console.log('⚠️ Error obteniendo song, intentando collection:', songError);
           // Si falla, intentamos como collection
           const collection = await catalogService.getCollectionById(id);
-          console.log('✅ Collection obtenida:', collection);
-          return { data: collection as any };
+          console.log('✅ Collection obtenida del backend:', collection);
+          
+          // Adaptar al formato que espera el frontend
+          const adaptedCollection = {
+            id: id,
+            type: 'collection' as const,
+            coverUrl: collection.cover,
+            title: collection.title,
+            collectionType: collection.type.toLowerCase() as 'album' | 'ep' | 'single',
+            year: collection.year,
+            tracks: collection.songs.map((song) => ({
+              position: song.position,
+              id: `${id}-${song.position}`,
+              title: song.title,
+              duration: song.duration,
+              explicit: false,
+              hasVideo: false
+            })),
+            totalDuration: collection.songs.reduce((sum, song) => sum + song.duration, 0),
+            hasExplicit: false,
+            hasVideo: false,
+            status: 'published' as const,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+          
+          console.log('✅ Collection adaptada para frontend:', adaptedCollection);
+          return { data: adaptedCollection };
         }
       } catch (error) {
-        console.error("Error obteniendo item del catálogo:", error);
+        console.error("❌ Error obteniendo item del catálogo:", error);
         throw error;
       }
     }

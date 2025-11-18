@@ -8,7 +8,7 @@ import { AvailabilityTab } from './tabs/AvailabilityTab';
 import { AppearancesTab } from './tabs/AppearancesTab';
 import { AuditTab } from './tabs/AuditTab';
 import { NavigateNext } from '@mui/icons-material';
-import type { CatalogItem } from '../../types/catalog';
+import type { CatalogDetail } from '../../types/catalogDetail';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -38,9 +38,18 @@ export default function CatalogShow() {
   const [currentTab, setCurrentTab] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // Obtener el resource actual de la URL
+  // La URL será /songs/{id}/show o /collections/{id}/show
+  const currentPath = window.location.pathname;
+  const resource = currentPath.includes('/songs/') ? 'songs' : 'collections';
+  
+  console.log('🔍 CatalogShow - currentPath:', currentPath);
+  console.log('🔍 CatalogShow - detected resource:', resource);
+  console.log('🔍 CatalogShow - id:', id);
+
   // Obtener datos del backend usando React Admin
-  const { data: catalogItem, isLoading, error, refetch } = useGetOne<CatalogItem>(
-    'catalog',
+  const { data: catalogItem, isLoading, error, refetch } = useGetOne<CatalogDetail>(
+    resource,
     { id: id || '' },
     { enabled: !!id }
   );
@@ -48,6 +57,11 @@ export default function CatalogShow() {
   // Usar datos mock como fallback si hay error
   const fallbackItem = id ? getCatalogDetail(id) : null;
   const item = catalogItem || fallbackItem;
+
+  // Debug: Log para ver qué datos tenemos
+  console.log('🔍 CatalogShow - catalogItem:', catalogItem);
+  console.log('🔍 CatalogShow - fallbackItem:', fallbackItem);
+  console.log('🔍 CatalogShow - item final:', item);
 
   const handleRefresh = () => {
     setRefreshKey((prev) => prev + 1);

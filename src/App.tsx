@@ -57,6 +57,16 @@ function App() {
         icon={LibraryMusic}
         options={{ label: "Catálogo" }}
       />
+
+      {/* Recursos internos para songs y collections (no aparecen en menú) */}
+      <Resource
+        name="songs"
+        show={CatalogShow}
+      />
+      <Resource
+        name="collections"
+        show={CatalogShow}
+      />
     </Admin>
   );
 }

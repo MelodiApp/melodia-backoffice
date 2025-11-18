@@ -1,5 +1,5 @@
 import { BaseApiService } from "./apiClient";
-import type { CatalogItem, CatalogStatus } from "../types/catalog";
+import type { CatalogItem, CatalogStatus, SongDetail, CollectionDetail } from "../types/catalog";
 
 // Backend response types (from artists microservice)
 // interface BackendSong {
@@ -31,6 +31,32 @@ import type { CatalogItem, CatalogStatus } from "../types/catalog";
 //   total: number;
 // }
 
+
+// Backend response types for detailed views
+interface BackendSongDetail {
+  title: string;
+  artists: string[];
+  collection?: string;
+  year?: number;
+  position?: number;
+  duration: number;
+}
+
+interface BackendCollectionSong {
+  title: string;
+  position: number;
+  duration: number;
+}
+
+interface BackendCollectionDetail {
+  cover?: string;
+  title: string;
+  type: 'ALBUM' | 'EP' | 'SINGLE';
+  year?: number;
+  owner?: string;
+  privacy?: string;
+  songs: BackendCollectionSong[];
+}
 
 interface BackendDiscographyItem {
   id: number,
@@ -164,11 +190,20 @@ export class CatalogService extends BaseApiService {
 
   /**
    * GET /api/admin/artists/songs/:song_id
-   * Obtener una canción por ID
+   * Obtener una canción por ID (vista detallada)
    */
-  async getSongById(songId: string): Promise<CatalogItem> {
-    const song = await this.get<BackendDiscographyItem>(`${this.BASE_PATH}/songs/${songId}`);
-    return this.mapBackendSongToFrontend(song);
+  async getSongById(songId: string): Promise<SongDetail> {
+    const song = await this.get<BackendSongDetail>(`${this.BASE_PATH}/songs/${songId}`);
+    return song;
+  }
+
+  /**
+   * GET /api/admin/artists/collections/:collection_id
+   * Obtener una colección por ID (vista detallada)
+   */
+  async getCollectionById(collectionId: string): Promise<CollectionDetail> {
+    const collection = await this.get<BackendCollectionDetail>(`${this.BASE_PATH}/collections/${collectionId}`);
+    return collection;
   }
 
   /**
@@ -205,17 +240,6 @@ export class CatalogService extends BaseApiService {
       body
     );
     return this.mapBackendSongToFrontend(updatedSong);
-  }
-
-  /**
-   * GET /api/admin/artists/collections/:collection_id
-   * Obtener una colección por ID
-   */
-  async getCollectionById(collectionId: string): Promise<CatalogItem> {
-    const collection = await this.get<BackendDiscographyItem>(
-      `${this.BASE_PATH}/collections/${collectionId}`
-    );
-    return this.mapBackendCollectionToFrontend(collection);
   }
 
   /**

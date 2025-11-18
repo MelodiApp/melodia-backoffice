@@ -17,6 +17,32 @@ export interface CatalogItem {
   collectionType?: string;
 }
 
+// Detailed view types
+export interface SongDetail {
+  title: string;
+  artists: string[];
+  collection?: string;
+  year?: number;
+  position?: number;
+  duration: number;
+}
+
+export interface CollectionSong {
+  title: string;
+  position: number;
+  duration: number;
+}
+
+export interface CollectionDetail {
+  cover?: string;
+  title: string;
+  type: 'ALBUM' | 'EP' | 'SINGLE';
+  year?: number;
+  owner?: string;
+  privacy?: string;
+  songs: CollectionSong[];
+}
+
 export interface CatalogFilters {
   search?: string;
   type?: string;
