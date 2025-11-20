@@ -43,6 +43,7 @@ interface BackendSongDetail {
   year?: number;
   position?: number;
   duration: number;
+  status: 'PUBLISHED' | 'BLOCKED' | 'PROGRAMMED';
 }
 
 interface BackendCollectionSong {
@@ -218,7 +219,10 @@ export class CatalogService extends BaseApiService {
    */
   async getSongById(songId: string): Promise<SongDetail> {
     const song = await this.get<BackendSongDetail>(`${this.BASE_PATH}/songs/${songId}`);
-    return song;
+    return {
+      ...song,
+      status: this.mapBackendStatus(song.status),
+    };
   }
 
   /**
@@ -227,7 +231,10 @@ export class CatalogService extends BaseApiService {
    */
   async getCollectionById(collectionId: string): Promise<CollectionDetail> {
     const collection = await this.get<BackendCollectionDetail>(`${this.BASE_PATH}/collections/${collectionId}`);
-    return collection;
+    return {
+      ...collection,
+      status: this.mapBackendStatus(collection.status),
+    };
   }
 
   /**
@@ -254,21 +261,47 @@ export class CatalogService extends BaseApiService {
    * Actualizar el estado de una canción
    */
   async updateSongStatus(songId: string, status: CatalogStatus, scheduledDate?: string): Promise<CatalogItem> {
+    console.log('🚨 updateSongStatus - songId recibido:', songId, 'type:', typeof songId);
+
     const action = this.mapFrontendStatusToAction(status);
     const body: { action: string; releaseDate?: string } = { action };
     if (status === 'scheduled' && scheduledDate) {
       body.releaseDate = new Date(scheduledDate).toISOString();
     }
+    console.log('🚀 CatalogService.updateSongStatus:', {
+      songId,
+      status,
+      scheduledDate,
+      action,
+      body,
+      url: `${this.BASE_PATH}/songs/${songId}/status`,
+    });
     const updatedSong = await this.put<any, typeof body>(
       `${this.BASE_PATH}/songs/${songId}/status`,
       body
     );
-    
-    // El backend devuelve un objeto Prisma Song, calcular status manualmente
+    console.log('✅ CatalogService.updateSongStatus response:', updatedSong);
+    console.log('📊 Backend response details:', {
+      id: updatedSong.id,
+      title: updatedSong.title,
+      isBlocked: updatedSong.isBlocked,
+      releaseDate: updatedSong.releaseDate,
+      releaseDate_type: typeof updatedSong.releaseDate,
+    });
+
+    // El backend devuelve un objeto Prisma Song, no un BackendDiscographyItem
+    // Necesitamos calcular el status manualmente
     const now = new Date();
     const releaseDate = new Date(updatedSong.releaseDate);
     let calculatedStatus: 'PUBLISHED' | 'BLOCKED' | 'PROGRAMMED';
-    
+
+    console.log('🔍 Calculating status:', {
+      now: now.toISOString(),
+      releaseDate: releaseDate.toISOString(),
+      isBlocked: updatedSong.isBlocked,
+      comparison: releaseDate > now,
+    });
+
     if (updatedSong.isBlocked) {
       calculatedStatus = 'BLOCKED';
     } else if (releaseDate > now) {
@@ -276,14 +309,26 @@ export class CatalogService extends BaseApiService {
     } else {
       calculatedStatus = 'PUBLISHED';
     }
-    
+
+    console.log('🎯 Status calculado:', {
+      isBlocked: updatedSong.isBlocked,
+      releaseDate: releaseDate,
+      now: now,
+      calculatedStatus: calculatedStatus
+    });
+
+    const mappedStatus = this.mapBackendStatus(calculatedStatus.toLowerCase());
+    console.log('🎯 Status mapeado al frontend:', mappedStatus);
+
+    // Devolver en el formato que espera el frontend
     return {
       id: String(updatedSong.id),
       type: 'song',
       title: updatedSong.title,
-      mainArtist: 'Unknown Artist',
+      mainArtist: 'Unknown Artist', // No viene en la respuesta del update
+      collection: undefined, // No viene en la respuesta del update
       publishDate: updatedSong.releaseDate,
-      status: this.mapBackendStatus(calculatedStatus.toLowerCase()),
+      status: mappedStatus,
     };
   }
 
@@ -385,7 +430,7 @@ export class CatalogService extends BaseApiService {
    */
   async updateItemStatus(itemId: string, itemType: 'song' | 'collection', status: CatalogStatus, scheduledDate?: string): Promise<CatalogItem> {
     if (itemType === 'song') {
-      return this.updateSongStatus(itemId, status);
+      return this.updateSongStatus(itemId, status, scheduledDate);
     } else {
       return this.updateCollectionStatus(itemId, status, scheduledDate);
     }

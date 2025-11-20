@@ -181,7 +181,17 @@ export const realDataProvider: DataProvider = {
           duration: song.duration,
           explicit: false,
           hasVideo: false,
-          status: 'published' as const,
+          status: song.status ? (() => {
+            const statusMap: Record<string, 'published' | 'blocked' | 'scheduled'> = {
+              'PUBLISHED': 'published',
+              'BLOCKED': 'blocked', 
+              'PROGRAMMED': 'scheduled',
+              'published': 'published',
+              'blocked': 'blocked',
+              'scheduled': 'scheduled'
+            };
+            return statusMap[song.status] || 'published';
+          })() : 'published',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };

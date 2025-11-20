@@ -70,6 +70,9 @@ function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => 
     queryClient.invalidateQueries({ queryKey: ['catalog'] });
     queryClient.invalidateQueries({ queryKey: ['songs'] });
     queryClient.invalidateQueries({ queryKey: ['collections'] });
+    // Invalidar también queries individuales de canciones y colecciones
+    queryClient.invalidateQueries({ queryKey: ['songs', item.id] });
+    queryClient.invalidateQueries({ queryKey: ['collections', item.id] });
     refresh();
     
     if (onRefresh) {
@@ -273,6 +276,9 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
     queryClient.invalidateQueries({ queryKey: ['catalog'] });
     queryClient.invalidateQueries({ queryKey: ['songs'] });
     queryClient.invalidateQueries({ queryKey: ['collections'] });
+    // Invalidar también queries individuales de canciones y colecciones
+    queryClient.invalidateQueries({ queryKey: ['songs', item.id] });
+    queryClient.invalidateQueries({ queryKey: ['collections', item.id] });
     refresh();
     if (onRefresh) {
       onRefresh();

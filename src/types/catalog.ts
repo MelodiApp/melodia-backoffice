@@ -28,6 +28,7 @@ export interface SongDetail {
   year?: number;
   position?: number;
   duration: number;
+  status: CatalogStatus;
 }
 
 export interface CollectionSong {
@@ -44,6 +45,9 @@ export interface CollectionDetail {
   owner?: string;
   privacy?: string;
   songs: CollectionSong[];
+  status: CatalogStatus;
+  isBlocked: boolean;
+  releaseDate: string;
 }
 
 export interface CatalogFilters {
