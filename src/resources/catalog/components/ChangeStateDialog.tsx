@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNotify } from 'react-admin';
 import {
   Dialog,
   DialogTitle,
@@ -46,6 +47,7 @@ export function ChangeStateDialog({
   currentScheduledDate,
   onSuccess,
 }: ChangeStateDialogProps) {
+  const notify = useNotify();
   const [newState, setNewState] = useState<CatalogState>(currentState);
   const [reason, setReason] = useState('');
   const [scheduledDate, setScheduledDate] = useState<string>(
@@ -91,6 +93,7 @@ export function ChangeStateDialog({
       });
 
       if (result.success) {
+        notify(`Estado de "${itemTitle}" cambiado exitosamente a ${STATE_LABELS[newState]}`, { type: 'success' });
         onSuccess();
         handleClose();
       } else {
