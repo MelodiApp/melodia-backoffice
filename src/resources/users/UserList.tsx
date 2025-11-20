@@ -46,7 +46,7 @@ export const UserList = () => (
       Explora y gestiona los usuarios
     </Typography>
     
-    <List filters={userFilters} title={false}>
+    <List filters={userFilters} title={false} exporter={false}>
       <Datagrid bulkActionButtons={false}>
         <TextField source="username" label="Nombre de Usuario" />
         <EmailField source="email" label="Correo Electrónico" />
