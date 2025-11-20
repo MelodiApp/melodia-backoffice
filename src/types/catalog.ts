@@ -35,6 +35,7 @@ export interface CollectionSong {
   title: string;
   position: number;
   duration: number;
+  status: CatalogStatus;
 }
 
 export interface CollectionDetail {

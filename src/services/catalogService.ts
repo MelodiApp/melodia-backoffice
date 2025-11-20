@@ -50,6 +50,7 @@ interface BackendCollectionSong {
   title: string;
   position: number;
   duration: number;
+  status: 'PUBLISHED' | 'BLOCKED' | 'PROGRAMMED';
 }
 
 interface BackendCollectionDetail {
@@ -232,8 +233,21 @@ export class CatalogService extends BaseApiService {
   async getCollectionById(collectionId: string): Promise<CollectionDetail> {
     const collection = await this.get<BackendCollectionDetail>(`${this.BASE_PATH}/collections/${collectionId}`);
     return {
-      ...collection,
+      cover: collection.cover,
+      title: collection.title,
+      type: collection.type,
+      year: collection.year,
+      owner: collection.owner,
+      privacy: collection.privacy,
+      songs: collection.songs.map(song => ({
+        title: song.title,
+        position: song.position,
+        duration: song.duration,
+        status: this.mapBackendStatus(song.status) as CatalogStatus,
+      })),
       status: this.mapBackendStatus(collection.status),
+      isBlocked: collection.isBlocked,
+      releaseDate: collection.releaseDate,
     };
   }
 

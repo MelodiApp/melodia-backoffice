@@ -119,11 +119,40 @@ export const realDataProvider: DataProvider = {
         });
 
         console.log('🔄 Items mapeados con status:', mappedItems);
+        
+        // Log detallado de TODOS los items para debug
+        console.log('📋 TODOS los items recibidos del backend:', 
+          mappedItems.map(i => ({ 
+            id: i.id, 
+            type: i.type, 
+            title: i.title,
+            collection: (i as any).collection,
+            status: i.status,
+            publishDate: i.publishDate 
+          }))
+        );
+
+        // Deduplicar items por ID + type para evitar duplicados en la tabla
+        // Usamos una clave compuesta (id + type) para asegurar que solo se eliminen duplicados exactos
+        const uniqueItems = Array.from(
+          new Map(mappedItems.map(item => [`${item.type}-${item.id}`, item])).values()
+        );
+
+        if (uniqueItems.length < mappedItems.length) {
+          console.warn(`⚠️ Se encontraron ${mappedItems.length - uniqueItems.length} items duplicados que fueron eliminados`);
+          console.log('📋 Items DUPLICADOS eliminados:', 
+            mappedItems.filter(item => 
+              !uniqueItems.some(u => u.id === item.id && u.type === item.type)
+            ).map(i => ({ id: i.id, type: i.type, title: i.title }))
+          );
+        }
+
+        console.log('📊 Total de items únicos retornados:', uniqueItems.length);
 
         // El backend ya se encarga de toda la lógica de filtrado, búsqueda y paginación
         // No necesitamos filtrar localmente
         return {
-          data: mappedItems,
+          data: uniqueItems,
           total: response.total,
         };
       } catch (error) {
@@ -217,9 +246,12 @@ export const realDataProvider: DataProvider = {
           'PUBLISHED': 'published',
           'BLOCKED': 'blocked',
           'PROGRAMMED': 'scheduled',
+          'published': 'published',
+          'blocked': 'blocked',
+          'scheduled': 'scheduled',
         };
         
-        // El backend devuelve el status
+        // El backend devuelve el status ya mapeado por catalogService
         const backendCollection = collection as any;
         
         // Adaptar al formato que espera el frontend
@@ -237,12 +269,13 @@ export const realDataProvider: DataProvider = {
             title: song.title,
             duration: song.duration,
             explicit: false,
-            hasVideo: false
+            hasVideo: false,
+            status: song.status // Ya está mapeado por catalogService.getCollectionById
           })),
           totalDuration: collection.songs.reduce((sum, song) => sum + song.duration, 0),
           hasExplicit: false,
           hasVideo: false,
-          status: statusMap[backendCollection.status] || 'published',
+          status: statusMap[backendCollection.status] || backendCollection.status || 'published',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };

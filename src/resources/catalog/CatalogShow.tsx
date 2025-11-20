@@ -2,7 +2,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, Tabs, Tab, Paper, Breadcrumbs, Link, CircularProgress, Alert } from '@mui/material';
 import { useState } from 'react';
 import { useGetOne } from 'react-admin';
-import { getCatalogDetail } from '../../providers/catalogDetailMockData';
 import { SummaryTab } from './tabs/SummaryTab';
 import { AvailabilityTab } from './tabs/AvailabilityTab';
 import { AppearancesTab } from './tabs/AppearancesTab';
@@ -54,13 +53,12 @@ export default function CatalogShow() {
     { enabled: !!id }
   );
 
-  // Usar datos mock como fallback si hay error
-  const fallbackItem = id ? getCatalogDetail(id) : null;
-  const item = catalogItem || fallbackItem;
+  // No usar datos mock como fallback - si hay error, mostrar error
+  const item = catalogItem;
 
   // Debug: Log para ver qué datos tenemos
   console.log('🔍 CatalogShow - catalogItem:', catalogItem);
-  console.log('🔍 CatalogShow - fallbackItem:', fallbackItem);
+  console.log('🔍 CatalogShow - error:', error);
   console.log('🔍 CatalogShow - item final:', item);
 
   const handleRefresh = () => {

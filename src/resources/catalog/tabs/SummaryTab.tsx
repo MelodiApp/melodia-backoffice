@@ -63,16 +63,14 @@ function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => 
 
   const handleStateChange = async () => {
     setStateDialogOpen(false);
-    // Pequeño delay para asegurar que el backend terminó de actualizar
-    await new Promise(resolve => setTimeout(resolve, 100));
     
-    // Invalidar cache de React Admin para todos los recursos del catálogo
-    queryClient.invalidateQueries({ queryKey: ['catalog'] });
-    queryClient.invalidateQueries({ queryKey: ['songs'] });
-    queryClient.invalidateQueries({ queryKey: ['collections'] });
-    // Invalidar también queries individuales de canciones y colecciones
-    queryClient.invalidateQueries({ queryKey: ['songs', item.id] });
-    queryClient.invalidateQueries({ queryKey: ['collections', item.id] });
+    // Solo invalidar sin refetch múltiple
+    await queryClient.invalidateQueries({ 
+      queryKey: ['catalog'],
+      refetchType: 'none' // No hacer refetch automático
+    });
+    
+    // Usar refresh de React Admin para refrescar la vista actual (hace UN solo refetch controlado)
     refresh();
     
     if (onRefresh) {
@@ -269,17 +267,24 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
 
   const handleStateChange = async () => {
     setStateDialogOpen(false);
-    // Pequeño delay para asegurar que el backend terminó de actualizar
-    await new Promise(resolve => setTimeout(resolve, 100));
     
-    // Invalidar cache de React Admin para todos los recursos del catálogo
-    queryClient.invalidateQueries({ queryKey: ['catalog'] });
-    queryClient.invalidateQueries({ queryKey: ['songs'] });
-    queryClient.invalidateQueries({ queryKey: ['collections'] });
-    // Invalidar también queries individuales de canciones y colecciones
-    queryClient.invalidateQueries({ queryKey: ['songs', item.id] });
-    queryClient.invalidateQueries({ queryKey: ['collections', item.id] });
+    // Solo invalidar sin refetch múltiple
+    await queryClient.invalidateQueries({ 
+      queryKey: ['catalog'],
+      refetchType: 'none' // No hacer refetch automático
+    });
+    await queryClient.invalidateQueries({ 
+      queryKey: ['collections'],
+      refetchType: 'none'
+    });
+    await queryClient.invalidateQueries({ 
+      queryKey: ['songs'],
+      refetchType: 'none'
+    });
+    
+    // Usar refresh de React Admin para refrescar la vista actual (hace UN solo refetch controlado)
     refresh();
+    
     if (onRefresh) {
       onRefresh();
     }
