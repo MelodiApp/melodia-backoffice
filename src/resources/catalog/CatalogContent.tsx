@@ -39,6 +39,9 @@ export default function CatalogContent() {
   const [tempDateFrom, setTempDateFrom] = useState(filters.publishDateFrom || '');
   const [tempDateTo, setTempDateTo] = useState(filters.publishDateTo || '');
 
+  // Estado para errores de validación de fechas
+  const [dateError, setDateError] = useState<string>('');
+
   // Key para forzar re-render cuando cambia la página o filtros
   const [queryKey, setQueryKey] = useState(0);
 
@@ -131,6 +134,14 @@ export default function CatalogContent() {
   // Aplicar filtros de fecha (con confirmación)
   const applyDateFilters = () => {
     console.log('📅 Applying date filters:', { from: tempDateFrom, to: tempDateTo });
+    
+    // Validar que la fecha desde no sea mayor que la fecha hasta
+    if (tempDateFrom && tempDateTo && new Date(tempDateFrom) > new Date(tempDateTo)) {
+      setDateError('La fecha "desde" no puede ser mayor o igual que la fecha "hasta"');
+      return;
+    }
+    
+    setDateError('');
     setFilters((prev) => ({
       ...prev,
       publishDateFrom: tempDateFrom || undefined,
@@ -143,6 +154,7 @@ export default function CatalogContent() {
   const clearDateFilters = () => {
     setTempDateFrom('');
     setTempDateTo('');
+    setDateError('');
     setFilters((prev) => ({
       ...prev,
       publishDateFrom: undefined,
@@ -208,6 +220,7 @@ export default function CatalogContent() {
         searchInput={searchInput}
         tempDateFrom={tempDateFrom}
         tempDateTo={tempDateTo}
+        dateError={dateError}
         onSearchChange={setSearchInput}
         onFiltersChange={updateFilters}
         onTempDateFromChange={setTempDateFrom}

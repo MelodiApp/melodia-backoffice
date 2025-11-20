@@ -326,19 +326,6 @@ export function CatalogTable({
           <Visibility fontSize="small" sx={{ mr: 1, color: '#b3b3b3' }} />
           Ver detalle
         </MenuItem>
-        <MenuItem 
-          onClick={() => handleAction('edit')}
-          disabled={loading}
-          sx={{
-            color: '#ffffff',
-            '&:hover': {
-              backgroundColor: '#404040',
-            }
-          }}
-        >
-          <Edit fontSize="small" sx={{ mr: 1, color: '#b3b3b3' }} />
-          Editar metadatos
-        </MenuItem>
         <MenuItem divider />
         {selectedItem?.status === 'blocked' ? (
           <MenuItem 

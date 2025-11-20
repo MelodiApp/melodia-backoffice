@@ -19,6 +19,7 @@ interface CatalogFiltersBarProps {
   searchInput: string;
   tempDateFrom: string;
   tempDateTo: string;
+  dateError: string;
   onSearchChange: (value: string) => void;
   onFiltersChange: (filters: Partial<CatalogFilters>) => void;
   onTempDateFromChange: (value: string) => void;
@@ -33,6 +34,7 @@ export function CatalogFiltersBar({
   searchInput,
   tempDateFrom,
   tempDateTo,
+  dateError,
   onSearchChange,
   onFiltersChange,
   onTempDateFromChange,
@@ -196,6 +198,8 @@ export function CatalogFiltersBar({
             value={tempDateFrom}
             onChange={(e) => onTempDateFromChange(e.target.value)}
             InputLabelProps={{ shrink: true }}
+            error={!!dateError}
+            helperText={dateError}
             sx={{
               '& .MuiInputLabel-root': { color: '#b3b3b3' },
               '& .MuiOutlinedInput-root': {

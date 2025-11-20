@@ -20,7 +20,6 @@ import {
   Paper,
 } from '@mui/material';
 import {
-  Edit,
   OpenInNew,
   MusicNote,
   Album,
@@ -30,7 +29,6 @@ import {
 } from '@mui/icons-material';
 import type { CatalogDetail, SongDetail, CollectionDetail } from '../../../types/catalogDetail';
 import { ChangeStateDialog } from '../components/ChangeStateDialog';
-import { EditMetadataDialog } from '../components/EditMetadataDialog';
 import { STATE_LABELS, STATE_COLORS } from '../../../types/catalogStates';
 
 interface SummaryTabProps {
@@ -53,7 +51,6 @@ function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [stateDialogOpen, setStateDialogOpen] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -73,13 +70,6 @@ function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => 
     // Usar refresh de React Admin para refrescar la vista actual (hace UN solo refetch controlado)
     refresh();
     
-    if (onRefresh) {
-      onRefresh();
-    }
-  };
-
-  const handleMetadataChange = (newTitle: string) => {
-    console.log('Título actualizado:', newTitle);
     if (onRefresh) {
       onRefresh();
     }
@@ -199,15 +189,6 @@ function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => 
                   Cambiar estado
                 </Button>
 
-                <Button
-                  variant="outlined"
-                  startIcon={<Edit />}
-                  fullWidth
-                  onClick={() => setEditDialogOpen(true)}
-                >
-                  Editar metadatos
-                </Button>
-
                 {item.collection && (
                   <Button
                     variant="outlined"
@@ -240,15 +221,6 @@ function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => 
         currentState={item.status}
         onSuccess={handleStateChange}
       />
-
-      <EditMetadataDialog
-        open={editDialogOpen}
-        onClose={() => setEditDialogOpen(false)}
-        itemId={item.id}
-        itemType="song"
-        currentTitle={item.title}
-        onSuccess={handleMetadataChange}
-      />
     </Box>
   );
 }
@@ -257,7 +229,6 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
   const refresh = useRefresh();
   const queryClient = useQueryClient();
   const [stateDialogOpen, setStateDialogOpen] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -285,13 +256,6 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
     // Usar refresh de React Admin para refrescar la vista actual (hace UN solo refetch controlado)
     refresh();
     
-    if (onRefresh) {
-      onRefresh();
-    }
-  };
-
-  const handleMetadataChange = (newTitle: string) => {
-    console.log('Título actualizado:', newTitle);
     if (onRefresh) {
       onRefresh();
     }
@@ -506,15 +470,6 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
                 >
                   Cambiar estado
                 </Button>
-
-                <Button
-                  variant="outlined"
-                  startIcon={<Edit />}
-                  fullWidth
-                  onClick={() => setEditDialogOpen(true)}
-                >
-                  Editar metadatos
-                </Button>
               </Box>
             </CardContent>
           </Card>
@@ -529,15 +484,6 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
         itemTitle={item.title}
         currentState={item.status}
         onSuccess={handleStateChange}
-      />
-
-      <EditMetadataDialog
-        open={editDialogOpen}
-        onClose={() => setEditDialogOpen(false)}
-        itemId={item.id}
-        itemType="collection"
-        currentTitle={item.title}
-        onSuccess={handleMetadataChange}
       />
     </Box>
   );
