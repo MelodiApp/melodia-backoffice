@@ -12,6 +12,7 @@ import {
   MenuItem,
   Box,
   Typography,
+  CircularProgress,
 } from '@mui/material';
 import {
   MoreVert,
@@ -25,7 +26,9 @@ import {
 } from '@mui/icons-material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { CatalogItem } from '../../types/catalog';
+import { useNotify } from 'react-admin';
+import type { CatalogItem, CatalogStatus } from '../../types/catalog';
+import { catalogService } from '../../services/catalogService';
 
 interface CatalogTableProps {
   items: CatalogItem[];
@@ -45,8 +48,13 @@ export function CatalogTable({
   onRefresh,
 }: CatalogTableProps) {
   const navigate = useNavigate();
+  const notify = useNotify();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedItem, setSelectedItem] = useState<CatalogItem | null>(null);
+  const [loading, setLoading] = useState(false);
+  
+  // Guardar el estado anterior de cada item cuando se bloquea
+  const [previousStates, setPreviousStates] = useState<Record<string, CatalogStatus>>({});
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, item: CatalogItem) => {
     setAnchorEl(event.currentTarget);
@@ -58,7 +66,7 @@ export function CatalogTable({
     setSelectedItem(null);
   };
 
-  const handleAction = (action: string) => {
+  const handleAction = async (action: string) => {
     if (!selectedItem) return;
     
     console.log('🎯 handleAction - action:', action, 'selectedItem:', selectedItem);
@@ -70,6 +78,66 @@ export function CatalogTable({
       const targetUrl = `/${resource}/${selectedItem.id}/show`;
       console.log('🚀 Navegando a:', targetUrl);
       navigate(targetUrl);
+    } else if (action === 'block') {
+      // Guardar el estado actual antes de bloquear
+      const itemKey = `${selectedItem.type}-${selectedItem.id}`;
+      setPreviousStates(prev => ({
+        ...prev,
+        [itemKey]: selectedItem.status,
+      }));
+      
+      setLoading(true);
+      try {
+        await catalogService.updateItemStatus(
+          selectedItem.id,
+          selectedItem.type as 'song' | 'collection',
+          'blocked'
+        );
+        
+        notify('Item bloqueado exitosamente', { type: 'success' });
+        
+        // Refrescar la tabla
+        if (onRefresh) {
+          onRefresh();
+        }
+      } catch (error) {
+        console.error('Error al bloquear item:', error);
+        notify('Error al bloquear el item', { type: 'error' });
+      } finally {
+        setLoading(false);
+      }
+    } else if (action === 'unblock') {
+      // Restaurar el estado anterior o usar 'published' por defecto
+      const itemKey = `${selectedItem.type}-${selectedItem.id}`;
+      const previousStatus = previousStates[itemKey] || 'published';
+      
+      setLoading(true);
+      try {
+        await catalogService.updateItemStatus(
+          selectedItem.id,
+          selectedItem.type as 'song' | 'collection',
+          previousStatus
+        );
+        
+        notify('Item desbloqueado exitosamente', { type: 'success' });
+        
+        // Limpiar el estado anterior guardado
+        setPreviousStates(prev => {
+          const newStates = { ...prev };
+          delete newStates[itemKey];
+          return newStates;
+        });
+        
+        // Refrescar la tabla
+        if (onRefresh) {
+          onRefresh();
+        }
+      } catch (error) {
+        console.error('Error al desbloquear item:', error);
+        notify('Error al desbloquear el item', { type: 'error' });
+      } finally {
+        setLoading(false);
+      }
     } else {
       console.log(`Action: ${action}`, selectedItem);
     }
@@ -247,6 +315,7 @@ export function CatalogTable({
       >
         <MenuItem 
           onClick={() => handleAction('view')}
+          disabled={loading}
           sx={{
             color: '#ffffff',
             '&:hover': {
@@ -259,6 +328,7 @@ export function CatalogTable({
         </MenuItem>
         <MenuItem 
           onClick={() => handleAction('edit')}
+          disabled={loading}
           sx={{
             color: '#ffffff',
             '&:hover': {
@@ -273,6 +343,7 @@ export function CatalogTable({
         {selectedItem?.status === 'blocked' ? (
           <MenuItem 
             onClick={() => handleAction('unblock')} 
+            disabled={loading}
             sx={{ 
               color: '#1db954',
               '&:hover': {
@@ -280,12 +351,17 @@ export function CatalogTable({
               }
             }}
           >
-            <LockOpen fontSize="small" sx={{ mr: 1 }} />
+            {loading ? (
+              <CircularProgress size={16} sx={{ mr: 1 }} />
+            ) : (
+              <LockOpen fontSize="small" sx={{ mr: 1 }} />
+            )}
             Desbloquear
           </MenuItem>
         ) : (
           <MenuItem 
             onClick={() => handleAction('block')} 
+            disabled={loading}
             sx={{ 
               color: '#f44336',
               '&:hover': {
@@ -293,7 +369,11 @@ export function CatalogTable({
               }
             }}
           >
-            <Lock fontSize="small" sx={{ mr: 1 }} />
+            {loading ? (
+              <CircularProgress size={16} sx={{ mr: 1 }} />
+            ) : (
+              <Lock fontSize="small" sx={{ mr: 1 }} />
+            )}
             Bloquear
           </MenuItem>
         )}
