@@ -158,7 +158,7 @@ export default function CatalogShow() {
       </TabPanel>
 
       <TabPanel value={currentTab} index={1}>
-        <AvailabilityTab itemId={item.id} />
+        <AvailabilityTab itemId={item.id} itemType={item.type} />
       </TabPanel>
 
       <TabPanel value={currentTab} index={2}>

@@ -449,6 +449,26 @@ export class CatalogService extends BaseApiService {
       return this.updateCollectionStatus(itemId, status, scheduledDate);
     }
   }
+
+  /**
+   * Obtener el estado detallado de una canción
+   */
+  async getSongStatus(songId: string): Promise<any> {
+    console.log('🔍 [CatalogService] Getting song status for songId:', songId);
+    const response = await this.client.get(`${this.BASE_PATH}/songs/${songId}/status`);
+    console.log('✅ [CatalogService] Song status response:', response);
+    return response.data;
+  }
+
+  /**
+   * Obtener el estado detallado de una colección
+   */
+  async getCollectionStatus(collectionId: string): Promise<any> {
+    console.log('🔍 [CatalogService] Getting collection status for collectionId:', collectionId);
+    const response = await this.client.get(`${this.BASE_PATH}/collections/${collectionId}/status`);
+    console.log('✅ [CatalogService] Collection status response:', response);
+    return response.data;
+  }
 }
 
 // Export singleton instance
