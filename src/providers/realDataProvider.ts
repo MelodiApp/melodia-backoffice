@@ -2,6 +2,8 @@ import type { DataProvider } from "react-admin";
 import { adminService } from "../services/adminService";
 import { catalogService } from "../services/catalogService";
 
+console.log('🔧 realDataProvider loaded');
+
 /**
  * Data Provider real que conecta React Admin con el gateway
  * 
@@ -22,29 +24,34 @@ export const realDataProvider: DataProvider = {
   // GET /api/admin/users - Obtener lista de recursos
   // También GET /api/admin/artists/discographies para catálogo
   getList: async (resource, params) => {
-    const { page = 0, perPage = 20 } = params.pagination || {};
+    // Forzar perPage a 10 para users y catalog
+    if (resource === "users" || resource === "catalog" || resource === "songs" || resource === "collections") {
+      params.pagination = { page: params.pagination?.page || 1, perPage: 10 };
+    }
+    
+    const { page = 1, perPage = 10 } = params.pagination || {};
     const filter = params.filter || {};
 
     if (resource === "users") {
       try {
+        console.log('🔍 [RealDataProvider] Getting users with params:', { page, perPage, filter });
         const response = await adminService.getUsers({
           page,
           limit: perPage,
           search: filter.q,
+          role: filter.role || undefined,
+          status: filter.status || undefined,
+        });
+        console.log('✅ [RealDataProvider] Users response:', { 
+          total: response.total, 
+          usersCount: response.users.length,
+          requestedPage: page,
+          requestedLimit: perPage,
+          hasMore: response.hasMore
         });
 
-        let filteredData = response.users as any[];
-
-        if (filter.role) {
-          filteredData = filteredData.filter((user) => user.role === filter.role);
-        }
-
-        if (filter.status) {
-          filteredData = filteredData.filter((user) => user.status === filter.status);
-        }
-
         return {
-          data: filteredData,
+          data: response.users,
           total: response.total,
         };
       } catch (error) {
@@ -170,13 +177,14 @@ export const realDataProvider: DataProvider = {
     
     if (resource === "users") {
       try {
+        console.log('🔍 Fetching user from adminService...');
         const user = await adminService.getUserById(String(params.id));
         console.log('✅ Usuario obtenido:', user);
         console.log('✅ lastLogin:', user.lastLogin);
         console.log('✅ createdAt:', user.createdAt);
         return { data: user as any };
       } catch (error) {
-        console.error("Error obteniendo usuario:", error);
+        console.error("❌ Error obteniendo usuario:", error);
         throw error;
       }
     }
@@ -402,15 +410,19 @@ export const realDataProvider: DataProvider = {
 
   // PATCH /api/admin/users/:id - Actualizar un recurso
   update: async (resource, params) => {
+    console.warn('🚀 UPDATE FUNCTION CALLED - resource:', resource, 'id:', params.id);
     if (resource === "users") {
+      console.warn('📤 UPDATE - users resource detected');
       try {
-        const updatedUser = await adminService.updateUser(
+        console.warn('📤 UPDATE - calling adminService');
+        const result = await adminService.updateUser(
           String(params.id),
           params.data
         );
-        return { data: updatedUser as any };
+        console.warn('✅ UPDATE - success');
+        return { data: result as any };
       } catch (error) {
-        console.error("Error actualizando usuario:", error);
+        console.error("❌ UPDATE ERROR:", error);
         throw error;
       }
     }

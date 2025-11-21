@@ -7,6 +7,7 @@ import {
   FunctionField,
   SelectInput,
   Title,
+  Pagination,
 } from "react-admin";
 import { Box, Typography } from "@mui/material";
 import { People } from "@mui/icons-material";
@@ -22,7 +23,6 @@ const userFilters = [
       { id: "listener", name: "Oyente" },
       { id: "artist", name: "Artista" },
     ]}
-    alwaysOn
   />,
   <SelectInput
     source="status"
@@ -31,7 +31,6 @@ const userFilters = [
       { id: "active", name: "Activo" },
       { id: "blocked", name: "Bloqueado" },
     ]}
-    alwaysOn
   />,
 ];
 
@@ -46,7 +45,13 @@ export const UserList = () => (
       Explora y gestiona los usuarios
     </Typography>
     
-    <List filters={userFilters} title={false} exporter={false}>
+    <List 
+      filters={userFilters} 
+      title={false} 
+      exporter={false}
+      perPage={10}
+      pagination={<Pagination rowsPerPageOptions={[]} />}
+    >
       <Datagrid bulkActionButtons={false}>
         <TextField source="username" label="Nombre de Usuario" />
         <EmailField source="email" label="Correo Electrónico" />

@@ -59,7 +59,15 @@ const RoleInput = () => {
 const StatusInput = () => {
   const record = useRecordContext();
   
-  if (!record) return null;
+  console.log('🔍 StatusInput - Record:', record);
+  
+  if (!record) {
+    console.log('⚠️ StatusInput - No record available');
+    return null;
+  }
+
+  console.log('🔍 StatusInput - Record role:', record.role);
+  console.log('🔍 StatusInput - Record status:', record.status);
 
   return (
     <SelectInput
@@ -84,19 +92,25 @@ const StatusInput = () => {
 export const UserEdit = () => {
   const notify = useNotify();
   const record = useRecordContext();
-  const [initialStatus, setInitialStatus] = useState(record?.status);
+  const [initialStatus, setInitialStatus] = useState<string>();
 
   useEffect(() => {
     if (record?.status && !initialStatus) {
+      console.log('🔄 Setting initial status:', record.status);
       setInitialStatus(record.status);
     }
   }, [record?.status, initialStatus]);
 
+  console.log('🔍 UserEdit - Record:', record);
+  console.log('🔍 UserEdit - Record ID:', record?.id);
+  console.log('🔍 UserEdit - Initial status:', initialStatus);
+
   return (
     <Edit
+      mutationMode="pessimistic"
       mutationOptions={{
         onSuccess: (data) => {
-          // Verificar si se cambió el estado
+          console.log('✅ UserEdit - Update success:', data);
           if (initialStatus && initialStatus !== data.status) {
             const statusLabel = data.status === 'active' ? 'Activo' : 'Bloqueado';
             notify(`Estado del usuario cambiado exitosamente a ${statusLabel}`, { type: 'success' });
@@ -104,6 +118,10 @@ export const UserEdit = () => {
             notify('Usuario actualizado exitosamente', { type: 'success' });
           }
         },
+        onError: (error) => {
+          console.error('❌ UserEdit - Update error:', error);
+          notify('Error al actualizar usuario', { type: 'error' });
+        }
       }}
     >
       <SimpleForm>

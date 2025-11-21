@@ -44,6 +44,9 @@ export interface RefreshTokenRequest {
 export interface UsersListResponse {
   users: User[];
   total: number;
+  skip?: number;
+  limit?: number;
+  hasMore?: boolean;
 }
 
 /**
@@ -123,16 +126,31 @@ export class AdminService extends BaseApiService {
     role?: string;
     status?: string;
   }): Promise<UsersListResponse> {
+    console.log('🔍 [AdminService] getUsers called with params:', params);
     const queryParams = new URLSearchParams();
     
-    if (params?.page) queryParams.append("page", params.page.toString());
-    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    const limit = params?.limit || 10;
+    console.log('🔢 [AdminService] Using limit:', limit);
+    if (params?.page !== undefined) {
+      const skip = (params.page - 1) * limit;
+      console.log(`🔢 [AdminService] Page ${params.page} with limit ${limit} = skip ${skip}`);
+      queryParams.append("skip", skip.toString());
+    }
+    queryParams.append("limit", limit.toString());
     if (params?.search) queryParams.append("search", params.search);
     if (params?.role) queryParams.append("type", params.role);
     if (params?.status) queryParams.append("status", params.status);
 
     const url = `${this.BASE_PATH}/users${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
-    const response = await this.get<{ users: BackendUser[]; total: number }>(url);
+    console.log('🔍 [AdminService] Final URL:', url);
+    const response = await this.get<{
+      users: BackendUser[];
+      total: number;
+      skip: number;
+      limit: number;
+      hasMore: boolean;
+    }>(url);
+    console.log('✅ [AdminService] Users response:', response);
 
     return {
       users: response.users.map(user => this.mapBackendUserToFrontend(user)),
@@ -154,11 +172,14 @@ export class AdminService extends BaseApiService {
    * Actualizar un usuario
    */
   async updateUser(id: string, data: Partial<User>): Promise<User> {
+    console.log('🚀 ADMIN SERVICE - updateUser START - id:', id, 'data:', data);
     const backendData = this.mapFrontendUserToBackend(data);
+    console.log('📤 ADMIN SERVICE - backend data:', backendData);
     const updatedUser = await this.patch<BackendUser, any>(
       `${this.BASE_PATH}/users/${id}`,
       backendData
     );
+    console.log('✅ ADMIN SERVICE - updateUser SUCCESS');
     return this.mapBackendUserToFrontend(updatedUser);
   }
 
