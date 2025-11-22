@@ -169,9 +169,11 @@ const FriendlyUrlFilters = () => {
       query.delete("displayedFilters");
       // Actualizar params planos a partir del objeto filter
       if (filterValues) {
-        if (Object.keys(filterValues).length === 0) {
-          query.delete("status");
-          query.delete("role");
+      if (Object.keys(filterValues).length === 0) {
+        query.delete("status");
+        query.delete("role");
+        // Also remove legacy/alternate param for the same filter
+        query.delete("type");
         } else {
           if (filterValues.status) query.set("status", filterValues.status as string);
           else query.delete("status");

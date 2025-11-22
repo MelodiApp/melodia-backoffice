@@ -24,10 +24,10 @@ export const realDataProvider: DataProvider = {
   // GET /api/admin/users - Obtener lista de recursos
   // También GET /api/admin/artists/discographies para catálogo
   getList: async (resource, params) => {
-    // Forzar perPage a 10 para users y catalog
-    if (resource === "users" || resource === "catalog" || resource === "songs" || resource === "collections") {
-      params.pagination = { page: params.pagination?.page || 1, perPage: 10 };
-    }
+    // Forzar perPage a 10 para users, songs y collections; respetar el valor de catalog para permitir páginas más grandes
+    if (resource === "users" || resource === "songs" || resource === "collections") {
+        params.pagination = { page: params.pagination?.page || 1, perPage: 10 };
+      }
     
     const { page = 1, perPage = 10 } = params.pagination || {};
     const filter = params.filter || {};
