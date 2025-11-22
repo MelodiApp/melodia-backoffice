@@ -96,7 +96,7 @@ export const UserList = () => (
 // planos en lugar de JSON (filter=...). Mantiene la funcionalidad intacta,
 // solo reemplaza lo que se muestra en la barra de direcciones.
 const FriendlyUrlFilters = () => {
-  const { filter, setFilters, page, perPage, setPage, setPerPage, sort, setSort } = useListContext();
+  const { filterValues, setFilters, page, perPage, setPage, setPerPage, sort, setSort } = useListContext();
   const location = useLocation();
   const navigate = useNavigate();
   const inSyncRef = useRef(false);
@@ -105,8 +105,10 @@ const FriendlyUrlFilters = () => {
   useEffect(() => {
     try {
       const query = new URLSearchParams(location.search);
-  const status = query.get("status");
-  const role = query.get("role");
+       const status = query.get("status");
+       const typeParam = query.get("type") || query.get("user_type") || query.get("role");
+       const role = typeParam;
+       const qParam = query.get("q") || query.get("search");
   const pageParam = query.get('page');
   const perPageParam = query.get('perPage') || query.get('limit');
   const offsetParam = query.get('offset');
@@ -116,7 +118,7 @@ const FriendlyUrlFilters = () => {
       if (!hasFilterObj && (status || role)) {
         // Evitar loops: marcamos que estamos en sincronización externa
         inSyncRef.current = true;
-        setFilters({ ...(status ? { status } : {}), ...(role ? { role } : {}) });
+         setFilters({ ...(status ? { status } : {}), ...(role ? { role } : {}), ...(qParam ? { q: qParam } : {}) });
         if (offsetParam) {
           const limitForOffset = perPageParam ? parseInt(perPageParam, 10) : (perPage || 10);
           const offsetVal = parseInt(offsetParam, 10);
@@ -140,7 +142,7 @@ const FriendlyUrlFilters = () => {
           flat.delete("displayedFilters");
           Object.keys(parsed).forEach((k) => {
             if (parsed[k] !== undefined) {
-              flat.set(k, parsed[k]);
+               flat.set(k, parsed[k]);
             }
           });
           // Aplicamos filtros parseados
@@ -159,22 +161,25 @@ const FriendlyUrlFilters = () => {
 
   // Cuando el filtro cambia, actualizar la URL con params planos
   useEffect(() => {
-    if (inSyncRef.current) return;
+  if (inSyncRef.current) return;
     try {
       const query = new URLSearchParams(location.search);
   // Eliminar claves de filtros JSON
       query.delete("filter");
       query.delete("displayedFilters");
       // Actualizar params planos a partir del objeto filter
-  if (filter) {
-        if (Object.keys(filter).length === 0) {
+      if (filterValues) {
+        if (Object.keys(filterValues).length === 0) {
           query.delete("status");
           query.delete("role");
         } else {
-          if (filter.status) query.set("status", filter.status as string);
+          if (filterValues.status) query.set("status", filterValues.status as string);
           else query.delete("status");
-          if (filter.role) query.set("role", filter.role as string);
-          else query.delete("role");
+          // Show type in URL but keep role internally
+          if (filterValues.role) query.set("type", filterValues.role as string);
+          else { query.delete("role"); query.delete("type"); }
+          if ((filterValues as any).q) query.set("q", (filterValues as any).q as string);
+          else query.delete("q");
         }
       }
       // Añadir paginación y sort con estilo amigable (limit/offset/orderBy/order)
@@ -194,7 +199,7 @@ const FriendlyUrlFilters = () => {
     } catch (err) {
       // ignore
     }
-  }, [filter, page, perPage, sort, location.search, navigate]);
+  }, [filterValues, page, perPage, sort, location.search, navigate]);
 
   return null;
 };
