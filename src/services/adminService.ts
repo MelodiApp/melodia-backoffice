@@ -138,10 +138,11 @@ export class AdminService extends BaseApiService {
     }
     queryParams.append("limit", limit.toString());
     if (params?.search) queryParams.append("search", params.search);
-    if (params?.role) queryParams.append("type", params.role);
+  if (params?.role) queryParams.append("user_type", params.role);
     if (params?.status) queryParams.append("status", params.status);
 
-    const url = `${this.BASE_PATH}/users${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+  const url = `${this.BASE_PATH}/users${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+  console.log('📤 [AdminService] Sending GET /admin/users with URL:', url);
     console.log('🔍 [AdminService] Final URL:', url);
     const response = await this.get<{
       users: BackendUser[];
