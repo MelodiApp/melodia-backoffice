@@ -125,6 +125,8 @@ export class AdminService extends BaseApiService {
     search?: string;
     role?: string;
     status?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
   }): Promise<UsersListResponse> {
     console.log('🔍 [AdminService] getUsers called with params:', params);
     const queryParams = new URLSearchParams();
@@ -132,14 +134,18 @@ export class AdminService extends BaseApiService {
     const limit = params?.limit || 10;
     console.log('🔢 [AdminService] Using limit:', limit);
     if (params?.page !== undefined) {
-      const skip = (params.page - 1) * limit;
-      console.log(`🔢 [AdminService] Page ${params.page} with limit ${limit} = skip ${skip}`);
-      queryParams.append("skip", skip.toString());
+      const offset = (params.page - 1) * limit;
+      console.log(`🔢 [AdminService] Page ${params.page} with limit ${limit} = offset ${offset}`);
+      // Keep skip for legacy microservices compatibility
+      queryParams.append("offset", offset.toString());
+      queryParams.append("skip", offset.toString());
     }
     queryParams.append("limit", limit.toString());
-    if (params?.search) queryParams.append("search", params.search);
+  if (params?.search) queryParams.append("q", params.search);
   if (params?.role) queryParams.append("user_type", params.role);
     if (params?.status) queryParams.append("status", params.status);
+  if (params?.sortBy) queryParams.append("orderBy", params.sortBy);
+  if (params?.sortOrder) queryParams.append("order", params.sortOrder);
 
   const url = `${this.BASE_PATH}/users${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
   console.log('📤 [AdminService] Sending GET /admin/users with URL:', url);

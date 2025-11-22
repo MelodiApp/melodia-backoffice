@@ -9,6 +9,9 @@ import {
   Title,
   Pagination,
 } from "react-admin";
+import { useListContext } from "react-admin";
+import { useEffect, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Box, Typography } from "@mui/material";
 import { People } from "@mui/icons-material";
 import type { User } from "../../types/user";
@@ -51,7 +54,9 @@ export const UserList = () => (
       exporter={false}
       perPage={10}
       pagination={<Pagination rowsPerPageOptions={[]} />}
+      disableSyncWithLocation
     >
+      <FriendlyUrlFilters />
       <Datagrid bulkActionButtons={false}>
         <TextField source="username" label="Nombre de Usuario" />
         <EmailField source="email" label="Correo Electrónico" />
@@ -86,3 +91,110 @@ export const UserList = () => (
     </List>
   </Box>
 );
+
+// Syncroniza los filtros del List con una URL "amistosa" que use params
+// planos en lugar de JSON (filter=...). Mantiene la funcionalidad intacta,
+// solo reemplaza lo que se muestra en la barra de direcciones.
+const FriendlyUrlFilters = () => {
+  const { filter, setFilters, page, perPage, setPage, setPerPage, sort, setSort } = useListContext();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const inSyncRef = useRef(false);
+
+  // Al montar: si en la URL hay filtros planos (status, role), aplicarlos
+  useEffect(() => {
+    try {
+      const query = new URLSearchParams(location.search);
+  const status = query.get("status");
+  const role = query.get("role");
+  const pageParam = query.get('page');
+  const perPageParam = query.get('perPage') || query.get('limit');
+  const offsetParam = query.get('offset');
+  const sortField = query.get('orderBy') || query.get('sort');
+  const sortOrder = query.get('order');
+      const hasFilterObj = query.get("filter") || query.get("displayedFilters");
+      if (!hasFilterObj && (status || role)) {
+        // Evitar loops: marcamos que estamos en sincronización externa
+        inSyncRef.current = true;
+        setFilters({ ...(status ? { status } : {}), ...(role ? { role } : {}) });
+        if (offsetParam) {
+          const limitForOffset = perPageParam ? parseInt(perPageParam, 10) : (perPage || 10);
+          const offsetVal = parseInt(offsetParam, 10);
+          const calcPage = Math.floor(offsetVal / limitForOffset) + 1;
+          if (setPage) setPage(calcPage);
+        } else if (pageParam && setPage) {
+          setPage(parseInt(pageParam, 10));
+        }
+        if (perPageParam && setPerPage) {
+          setPerPage(parseInt(perPageParam, 10));
+        }
+  if (sortField && setSort) setSort({ field: sortField, order: (sortOrder || 'ASC') as any });
+        inSyncRef.current = false;
+      }
+      // Si la URL contiene el filter JSON, lo parseamos y lo transformamos a params planos
+      if (query.get("filter")) {
+        try {
+          const parsed = JSON.parse(query.get("filter") || "{}");
+          const flat = new URLSearchParams(location.search);
+          flat.delete("filter");
+          flat.delete("displayedFilters");
+          Object.keys(parsed).forEach((k) => {
+            if (parsed[k] !== undefined) {
+              flat.set(k, parsed[k]);
+            }
+          });
+          // Aplicamos filtros parseados
+          setFilters(parsed);
+          // Reemplazamos la URL sin recargar, dejando el estado actual
+          navigate({ search: flat.toString() ? `?${flat.toString()}` : "" }, { replace: true });
+        } catch (err) {
+          // ignore JSON parse failures
+        }
+      }
+    } catch (err) {
+      // no-op
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Cuando el filtro cambia, actualizar la URL con params planos
+  useEffect(() => {
+    if (inSyncRef.current) return;
+    try {
+      const query = new URLSearchParams(location.search);
+  // Eliminar claves de filtros JSON
+      query.delete("filter");
+      query.delete("displayedFilters");
+      // Actualizar params planos a partir del objeto filter
+  if (filter) {
+        if (Object.keys(filter).length === 0) {
+          query.delete("status");
+          query.delete("role");
+        } else {
+          if (filter.status) query.set("status", filter.status as string);
+          else query.delete("status");
+          if (filter.role) query.set("role", filter.role as string);
+          else query.delete("role");
+        }
+      }
+      // Añadir paginación y sort con estilo amigable (limit/offset/orderBy/order)
+      if (typeof page === 'number' && typeof perPage === 'number') {
+        const offset = (page - 1) * perPage;
+        query.set('offset', String(offset));
+        query.set('limit', String(perPage));
+      }
+      if (sort && sort.field) {
+        query.set('orderBy', sort.field);
+        query.set('order', (sort.order || 'ASC').toLowerCase());
+      }
+
+      inSyncRef.current = true;
+  navigate({ search: query.toString() ? `?${query.toString()}` : "" }, { replace: true });
+      setTimeout(() => { inSyncRef.current = false; }, 10);
+    } catch (err) {
+      // ignore
+    }
+  }, [filter, page, perPage, sort, location.search, navigate]);
+
+  return null;
+};

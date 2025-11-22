@@ -41,6 +41,8 @@ export const realDataProvider: DataProvider = {
           search: filter.q,
           role: filter.role || undefined,
           status: filter.status || undefined,
+          sortBy: params.sort?.field,
+          sortOrder: (params.sort?.order?.toLowerCase() as 'asc' | 'desc') || undefined,
         });
         console.log('✅ [RealDataProvider] Users response:', { 
           total: response.total, 
