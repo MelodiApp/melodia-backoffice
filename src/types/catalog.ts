@@ -9,12 +9,16 @@ export interface CatalogItem {
   collectionId?: string;
   publishDate?: string;
   status: CatalogStatus;
-  // Campos adicionales para songs
+  prevStatus?: CatalogStatus;
+  prevPublishDate?: string;
+  hasVideo?: boolean;
   duration?: number;
   explicit?: boolean;
   artistId?: number;
   // Campos adicionales para collections
   collectionType?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // Detailed view types
@@ -49,6 +53,8 @@ export interface CollectionDetail {
   status: CatalogStatus;
   isBlocked: boolean;
   releaseDate: string;
+  prevStatus?: CatalogStatus;
+  prevReleaseDate?: string;
 }
 
 export interface CatalogFilters {

@@ -18,6 +18,8 @@ export interface SongDetail {
   explicit: boolean;
   hasVideo: boolean;
   status: 'scheduled' | 'published' | 'blocked';
+  prevStatus?: 'scheduled' | 'published' | 'blocked';
+  prevPublishDate?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -45,6 +47,8 @@ export interface CollectionDetail {
   hasExplicit: boolean;
   hasVideo: boolean;
   status: 'scheduled' | 'published' | 'blocked';
+  prevStatus?: 'scheduled' | 'published' | 'blocked';
+  prevReleaseDate?: string;
   createdAt: string;
   updatedAt: string;
 }

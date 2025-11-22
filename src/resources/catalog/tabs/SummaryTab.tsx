@@ -219,6 +219,8 @@ function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => 
         itemType="song"
         itemTitle={item.title}
         currentState={item.status}
+        prevState={item.prevStatus}
+        prevScheduledDate={item.prevPublishDate}
         onSuccess={handleStateChange}
       />
     </Box>
@@ -483,6 +485,8 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
         itemType="collection"
         itemTitle={item.title}
         currentState={item.status}
+        prevState={item.prevStatus}
+        prevScheduledDate={item.prevReleaseDate}
         onSuccess={handleStateChange}
       />
     </Box>

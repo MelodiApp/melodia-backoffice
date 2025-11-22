@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNotify } from 'react-admin';
 import {
   Dialog,
@@ -34,6 +34,8 @@ interface ChangeStateDialogProps {
   itemTitle: string;
   currentState: CatalogState;
   currentScheduledDate?: string;
+  prevState?: CatalogState;
+  prevScheduledDate?: string;
   onSuccess: () => void;
 }
 
@@ -45,18 +47,43 @@ export function ChangeStateDialog({
   itemTitle,
   currentState,
   currentScheduledDate,
+  prevState,
+  prevScheduledDate,
   onSuccess,
 }: ChangeStateDialogProps) {
   const notify = useNotify();
   const [newState, setNewState] = useState<CatalogState>(currentState);
   const [reason, setReason] = useState('');
   const [scheduledDate, setScheduledDate] = useState<string>(
-    currentScheduledDate || ''
+    currentScheduledDate || prevScheduledDate || ''
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const availableStates: CatalogState[] = ['scheduled', 'published', 'blocked'];
+  // Compute allowed states based on current state and business rules.
+  let allowedStates = availableStates.filter((s) => isTransitionAllowed(currentState, s) || s === currentState);
+  // Business rule: If currently published, only allow blocking (can't schedule directly from published)
+  if (currentState === 'published') {
+    allowedStates = ['blocked'];
+  }
+  if (currentState === 'blocked') {
+    if (prevState) {
+      // Only allow reverting to previous state
+      allowedStates = [prevState];
+    } else {
+      // Fallback: allow only published
+      allowedStates = ['published'];
+    }
+  }
+
+  // Ensure newState is valid when allowedStates change (e.g. published -> only blocked option)
+  useEffect(() => {
+    if (!allowedStates.includes(newState)) {
+      setNewState(allowedStates[0] || currentState);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowedStates.join(','), currentState]);
 
   const handleSubmit = async () => {
     setError(null);
@@ -72,13 +99,18 @@ export function ChangeStateDialog({
       return;
     }
 
+    // If unblocking to previous scheduled state and we have a prevScheduledDate, set it
+    if (currentState === 'blocked' && newState === 'scheduled' && !scheduledDate && prevScheduledDate) {
+      setScheduledDate(prevScheduledDate);
+    }
+
     // Validación: si el estado es 'scheduled', debe haber una fecha
     if (newState === 'scheduled' && !scheduledDate) {
       setError('Debe seleccionar una fecha para programar la publicación');
       setLoading(false);
       return;
     }
-
+    setLoading(true);
     setLoading(true);
 
     try {
@@ -191,7 +223,7 @@ export function ChangeStateDialog({
               '& .MuiSvgIcon-root': { color: '#b3b3b3' },
             }}
           >
-            {availableStates.map((state) => (
+            {allowedStates.map((state) => (
               <MenuItem key={state} value={state}>
                 {STATE_LABELS[state]}
               </MenuItem>

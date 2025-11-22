@@ -74,6 +74,8 @@ interface BackendDiscographyItem {
   collectionName: string | undefined,
   publishedAt: string,
   status: string;
+  prevStatus?: string;
+  prevReleaseDate?: string;
 }
 interface SearchBackendDiscographiesResponse {
   data: BackendDiscographyItem[];
@@ -100,6 +102,8 @@ export class CatalogService extends BaseApiService {
       collection: song.collectionName || undefined,
       publishDate: song.publishedAt,
       status: this.mapBackendStatus(song.status), // a chequear
+      prevStatus: song.prevStatus ? this.mapBackendStatus(song.prevStatus) : undefined,
+      prevPublishDate: song.prevReleaseDate || undefined,
     };
   }
 
@@ -115,6 +119,8 @@ export class CatalogService extends BaseApiService {
       mainArtist: collection.artist?.artisticName || collection.artistName || 'Unknown Artist',
       publishDate: collection.releaseDate || collection.publishedAt,
       status: this.mapBackendStatus(collection.status),
+      prevStatus: collection.prevStatus ? this.mapBackendStatus(collection.prevStatus) : undefined,
+      prevPublishDate: collection.prevReleaseDate || undefined,
     };
   }
 
