@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, Tabs, Tab, Paper, Breadcrumbs, Link, CircularProgress, Alert } from '@mui/material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGetOne } from 'react-admin';
 import { SummaryTab } from './tabs/SummaryTab';
 import { AvailabilityTab } from './tabs/AvailabilityTab';
@@ -37,14 +37,16 @@ export default function CatalogShow() {
   const [currentTab, setCurrentTab] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Obtener el resource actual de la URL
+  // Obtener el resource actual de la URL y el subpath (show/availability/appearances)
   // La URL será /songs/{id}/show o /collections/{id}/show
   const currentPath = window.location.pathname;
+  // keep old behavior: we do not generate subpaths for tabs, use /show only
   const resource = currentPath.includes('/songs/') ? 'songs' : 'collections';
   
   console.log('🔍 CatalogShow - currentPath:', currentPath);
   console.log('🔍 CatalogShow - detected resource:', resource);
   console.log('🔍 CatalogShow - id:', id);
+  // no basePath/subpath logs; keep previous behavior
 
   // Obtener datos del backend usando React Admin
   const { data: catalogItem, isLoading, error, refetch } = useGetOne<CatalogDetail>(
@@ -95,6 +97,14 @@ export default function CatalogShow() {
     );
   }
 
+  const getTabIndexFromPath = (path: string): number => {
+    if (path.endsWith('/availability')) return 1;
+    if (path.endsWith('/appearances')) return 2;
+    if (path.endsWith('/audit')) return 3; // only applies to songs
+    return 0; // default show
+  };
+
+  // Initialize tab from path
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);
   };

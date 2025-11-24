@@ -69,6 +69,7 @@ function App() {
         name="collections"
         show={CatalogShow}
       />
+      {/* No custom routes: keep catalog show on /songs/:id/show and /collections/:id/show only */}
     </Admin>
   );
 }

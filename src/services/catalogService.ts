@@ -47,6 +47,7 @@ interface BackendSongDetail {
 }
 
 interface BackendCollectionSong {
+  id?: number;
   title: string;
   position: number;
   duration: number;
@@ -76,6 +77,14 @@ interface BackendDiscographyItem {
   status: string;
   prevStatus?: string;
   prevReleaseDate?: string;
+}
+
+interface LibraryPlaylistDetail {
+  id: number;
+  name?: string;
+  title?: string;
+  user_id?: string | number;
+  songs?: { id?: number; song_id?: number; order?: number; position?: number }[];
 }
 interface SearchBackendDiscographiesResponse {
   data: BackendDiscographyItem[];
@@ -474,6 +483,59 @@ export class CatalogService extends BaseApiService {
     const response = await this.client.get(`${this.BASE_PATH}/collections/${collectionId}/status`);
     console.log('✅ [CatalogService] Collection status response:', response);
     return response.data;
+  }
+
+  /**
+   * POST /libraries/playlists/appears-on
+   * body: { songIds: number[] }
+   * Returns an array of playlist objects that contain any of the provided songIds
+   */
+  async getPlaylistsAppearsOn(songIds: number[]): Promise<{ id: number; name?: string; title?: string }[]> {
+    try {
+      console.log('🔍 CatalogService.getPlaylistsAppearsOn - songIds:', songIds);
+  const response = await this.client.post('/libraries/playlists/appears-on', { songIds });
+      console.log('✅ CatalogService.getPlaylistsAppearsOn - response:', response.data);
+  return response.data as { id: number; name?: string; title?: string }[];
+    } catch (error) {
+      console.error('❌ Error fetching playlists appears-on:', error);
+      throw error;
+    }
+  }
+
+  // New endpoints: songs/:id/appearances and collections/:id/appearances
+  async getSongAppearances(songId: string): Promise<{ collections: any[]; playlists: any[] }> {
+    const response = await this.get<any>(`${this.BASE_PATH}/songs/${songId}/appearances`);
+    return response;
+  }
+
+  async getCollectionAppearances(collectionId: string): Promise<{ playlists: any[] }> {
+    const response = await this.get<any>(`${this.BASE_PATH}/collections/${collectionId}/appearances`);
+    return response;
+  }
+
+  /**
+   * GET /libraries/playlists/:id
+   * Returns detailed playlist metadata including songs (for computing included counts or owner).
+   */
+    async getLibraryPlaylistById(playlistId: string): Promise<LibraryPlaylistDetail> {
+    try {
+      console.log('🔍 CatalogService.getLibraryPlaylistById - id:', playlistId);
+        const response = await this.client.get(`/libraries/playlists/id/${playlistId}`);
+      console.log('✅ CatalogService.getLibraryPlaylistById - response:', response.data);
+  // Normalize camelCase to snake_case if needed (userId -> user_id, songId -> song_id)
+  const raw = response.data as any;
+  const normalized = {
+    ...raw,
+    user_id: raw.user_id ?? raw.userId ?? raw.userId,
+    songs: Array.isArray(raw.songs)
+      ? raw.songs.map((s: any) => ({ ...s, song_id: s.song_id ?? s.songId ?? s.id }))
+      : [],
+  } as LibraryPlaylistDetail;
+  return normalized;
+    } catch (error) {
+      console.error('❌ Error fetching playlist by id:', error);
+      throw error;
+    }
   }
 }
 

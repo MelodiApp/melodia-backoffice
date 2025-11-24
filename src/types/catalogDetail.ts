@@ -80,8 +80,10 @@ export interface CollectionAppearance {
 
 export interface PlaylistAppearance {
   id: string;
+  type?: 'playlist';
   title: string;
-  owner: string;
+  owner?: string;
+  position?: number;
   includedCount: number;
   totalTracksInCollection: number;
 }
