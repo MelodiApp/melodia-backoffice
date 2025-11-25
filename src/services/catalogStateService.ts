@@ -75,7 +75,40 @@ export const mockStateChangeEvents: Record<string, StateChangeEvent[]> = {
  * Obtiene los eventos de auditoría de un ítem
  */
 export function getStateChangeEvents(itemId: string): StateChangeEvent[] {
+  // fallback to in-memory mock for synchronous parts of the UI
   return mockStateChangeEvents[itemId] || [];
+}
+
+export async function fetchStateChangeEvents(itemId: string): Promise<StateChangeEvent[]> {
+  try {
+    // Try to pull from the backend via the CatalogService
+    const audits = await catalogService.getSongAudits(itemId);
+    // Map backend audit response to frontend StateChangeEvent interface
+    return audits.map((a: any) => {
+      const normalize = (s: string | undefined) => {
+        if (!s) return undefined;
+        const lower = String(s).toLowerCase();
+        if (lower === 'programmed' || lower === 'scheduled') return 'scheduled';
+        if (lower === 'published') return 'published';
+        if (lower === 'blocked') return 'blocked';
+        return lower; // fallback: return normalized lower-case string
+      };
+      return {
+        id: a.id,
+        itemId: a.songId,
+        itemType: 'song',
+        timestamp: a.createdAt,
+        user: a.userId,
+        previousState: normalize(a.previousState) as any,
+        newState: normalize(a.newState) as any,
+        reason: a.reason,
+      };
+    });
+  } catch (error) {
+    console.warn('Failed to fetch remote audits for itemId', itemId, error);
+    // Fallback to cached/mock events
+    return mockStateChangeEvents[itemId] || [];
+  }
 }
 
 /**
@@ -128,7 +161,8 @@ export async function changeItemState(
       params.itemId,
       params.itemType,
       params.newState,
-      params.scheduledDate
+      params.scheduledDate,
+      params.reason,
     );
 
     // Agregar evento de auditoría local

@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useRefresh, useDataProvider } from 'react-admin';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   Box,
   Typography,
@@ -17,7 +20,6 @@ import {
   Paper,
 } from '@mui/material';
 import {
-  Edit,
   OpenInNew,
   MusicNote,
   Album,
@@ -27,7 +29,6 @@ import {
 } from '@mui/icons-material';
 import type { CatalogDetail, SongDetail, CollectionDetail } from '../../../types/catalogDetail';
 import { ChangeStateDialog } from '../components/ChangeStateDialog';
-import { EditMetadataDialog } from '../components/EditMetadataDialog';
 import { STATE_LABELS, STATE_COLORS } from '../../../types/catalogStates';
 
 interface SummaryTabProps {
@@ -46,8 +47,10 @@ export function SummaryTab({ item, onRefresh }: SummaryTabProps) {
 }
 
 function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => void }) {
+  const refresh = useRefresh();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [stateDialogOpen, setStateDialogOpen] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -55,15 +58,18 @@ function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => 
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleStateChange = () => {
+  const handleStateChange = async () => {
     setStateDialogOpen(false);
-    if (onRefresh) {
-      onRefresh();
-    }
-  };
-
-  const handleMetadataChange = (newTitle: string) => {
-    console.log('Título actualizado:', newTitle);
+    
+    // Solo invalidar sin refetch múltiple
+    await queryClient.invalidateQueries({ 
+      queryKey: ['catalog'],
+      refetchType: 'none' // No hacer refetch automático
+    });
+    
+    // Usar refresh de React Admin para refrescar la vista actual (hace UN solo refetch controlado)
+    refresh();
+    
     if (onRefresh) {
       onRefresh();
     }
@@ -183,23 +189,19 @@ function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => 
                   Cambiar estado
                 </Button>
 
-                <Button
-                  variant="outlined"
-                  startIcon={<Edit />}
-                  fullWidth
-                  onClick={() => setEditDialogOpen(true)}
-                >
-                  Editar metadatos
-                </Button>
-
                 {item.collection && (
                   <Button
                     variant="outlined"
                     startIcon={<OpenInNew />}
                     fullWidth
-                    onClick={() =>
-                      (window.location.href = `/#/catalog/${item.collection?.id}/show`)
-                    }
+                    onClick={() => {
+                      console.log('🔥 SummaryTab - item completo:', item);
+                      console.log('🔥 SummaryTab - item.collection:', item.collection);
+                      console.log('🔥 SummaryTab - item.collection.id:', item.collection?.id);
+                      console.log('🔥 SummaryTab - Navegando a:', `/collections/${item.collection?.id}/show`);
+                      // Navegar a la colección usando el resource correcto
+                      navigate(`/collections/${item.collection?.id}/show`);
+                    }}
                   >
                     Abrir detalle de Colección
                   </Button>
@@ -217,24 +219,18 @@ function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => 
         itemType="song"
         itemTitle={item.title}
         currentState={item.status}
+        prevState={item.prevStatus}
+        prevScheduledDate={item.prevPublishDate}
         onSuccess={handleStateChange}
-      />
-
-      <EditMetadataDialog
-        open={editDialogOpen}
-        onClose={() => setEditDialogOpen(false)}
-        itemId={item.id}
-        itemType="song"
-        currentTitle={item.title}
-        onSuccess={handleMetadataChange}
       />
     </Box>
   );
 }
 
 function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefresh?: () => void }) {
+  const refresh = useRefresh();
+  const queryClient = useQueryClient();
   const [stateDialogOpen, setStateDialogOpen] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -242,15 +238,26 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
     return `${minutes}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleStateChange = () => {
+  const handleStateChange = async () => {
     setStateDialogOpen(false);
-    if (onRefresh) {
-      onRefresh();
-    }
-  };
-
-  const handleMetadataChange = (newTitle: string) => {
-    console.log('Título actualizado:', newTitle);
+    
+    // Solo invalidar sin refetch múltiple
+    await queryClient.invalidateQueries({ 
+      queryKey: ['catalog'],
+      refetchType: 'none' // No hacer refetch automático
+    });
+    await queryClient.invalidateQueries({ 
+      queryKey: ['collections'],
+      refetchType: 'none'
+    });
+    await queryClient.invalidateQueries({ 
+      queryKey: ['songs'],
+      refetchType: 'none'
+    });
+    
+    // Usar refresh de React Admin para refrescar la vista actual (hace UN solo refetch controlado)
+    refresh();
+    
     if (onRefresh) {
       onRefresh();
     }
@@ -321,6 +328,16 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
                         color="primary"
                       />
                     </Box>
+
+                    {/* Mostrar artista para albums, eps y singles */}
+                    {item.collectionType !== 'playlist' && item.owner && (
+                      <Box>
+                        <Typography variant="body2" sx={{ color: '#b3b3b3' }}>
+                          Artista
+                        </Typography>
+                        <Typography variant="body1" sx={{ color: '#ffffff' }}>{item.owner}</Typography>
+                      </Box>
+                    )}
 
                     {item.year && (
                       <Box>
@@ -455,15 +472,6 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
                 >
                   Cambiar estado
                 </Button>
-
-                <Button
-                  variant="outlined"
-                  startIcon={<Edit />}
-                  fullWidth
-                  onClick={() => setEditDialogOpen(true)}
-                >
-                  Editar metadatos
-                </Button>
               </Box>
             </CardContent>
           </Card>
@@ -477,16 +485,9 @@ function CollectionSummary({ item, onRefresh }: { item: CollectionDetail; onRefr
         itemType="collection"
         itemTitle={item.title}
         currentState={item.status}
+        prevState={item.prevStatus}
+        prevScheduledDate={item.prevReleaseDate}
         onSuccess={handleStateChange}
-      />
-
-      <EditMetadataDialog
-        open={editDialogOpen}
-        onClose={() => setEditDialogOpen(false)}
-        itemId={item.id}
-        itemType="collection"
-        currentTitle={item.title}
-        onSuccess={handleMetadataChange}
       />
     </Box>
   );

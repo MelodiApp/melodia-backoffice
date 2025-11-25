@@ -2,7 +2,8 @@ import { Admin, Resource } from "react-admin";
 import { People, LibraryMusic } from "@mui/icons-material";
 
 // Providers
-import { authProvider, realDataProvider } from "./providers";
+import { authProvider } from "./providers";
+import { realDataProvider } from "./providers/realDataProvider";
 import { i18nProvider } from "./providers/i18nProvider";
 
 // Tema
@@ -29,6 +30,7 @@ import { CatalogList, CatalogShow } from "./resources/catalog";
  * - artist: Usuario artista
  */
 function App() {
+  console.log('🚀 App loading - using realDataProvider:', realDataProvider);
   return (
     <Admin
       authProvider={authProvider}
@@ -57,6 +59,17 @@ function App() {
         icon={LibraryMusic}
         options={{ label: "Catálogo" }}
       />
+
+      {/* Recursos internos para songs y collections (no aparecen en menú) */}
+      <Resource
+        name="songs"
+        show={CatalogShow}
+      />
+      <Resource
+        name="collections"
+        show={CatalogShow}
+      />
+      {/* No custom routes: keep catalog show on /songs/:id/show and /collections/:id/show only */}
     </Admin>
   );
 }

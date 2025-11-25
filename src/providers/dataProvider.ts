@@ -1,6 +1,8 @@
 import type { DataProvider } from "react-admin";
 import { mockUsers } from "./mockData";
 
+console.log('🟡 Mock dataProvider loaded');
+
 /**
  * Data Provider con datos mockeados para desarrollo
  *
@@ -118,6 +120,7 @@ export const dataProvider: DataProvider = {
 
   // Actualizar un recurso
   update: async (resource, params) => {
+    console.log('🟡 MOCK UPDATE called for resource:', resource, 'id:', params.id);
     if (resource === "users") {
       const index = users.findIndex((u) => u.id === params.id);
       if (index === -1) {
