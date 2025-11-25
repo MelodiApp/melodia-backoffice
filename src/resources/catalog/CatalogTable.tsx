@@ -78,7 +78,7 @@ export function CatalogTable({
       const targetUrl = `/${resource}/${selectedItem.id}/show`;
       console.log('🚀 Navegando a:', targetUrl);
       navigate(targetUrl);
-    } else if (action === 'block') {
+  } else if (action === 'block') {
       // Guardar el estado actual antes de bloquear
       const itemKey = `${selectedItem.type}-${selectedItem.id}`;
       setPreviousStates(prev => ({
@@ -86,12 +86,21 @@ export function CatalogTable({
         [itemKey]: selectedItem.status,
       }));
       
+      const reason = window.prompt('Ingresa la razón para bloquear este item (requerido):');
+      if (!reason || reason.trim().length === 0) {
+        notify('Se requiere una razón para bloquear el item', { type: 'warning' });
+        handleMenuClose();
+        return;
+      }
+
       setLoading(true);
       try {
         await catalogService.updateItemStatus(
           selectedItem.id,
           selectedItem.type as 'song' | 'collection',
-          'blocked'
+          'blocked',
+          undefined,
+          reason,
         );
         
         notify('Item bloqueado exitosamente', { type: 'success' });
@@ -106,17 +115,26 @@ export function CatalogTable({
       } finally {
         setLoading(false);
       }
-    } else if (action === 'unblock') {
+  } else if (action === 'unblock') {
       // Restaurar el estado anterior o usar 'published' por defecto
       const itemKey = `${selectedItem.type}-${selectedItem.id}`;
       const previousStatus = previousStates[itemKey] || 'published';
       
+      const reason = window.prompt('Ingresa la razón para desbloquear este item (requerido):');
+      if (!reason || reason.trim().length === 0) {
+        notify('Se requiere una razón para desbloquear el item', { type: 'warning' });
+        handleMenuClose();
+        return;
+      }
+
       setLoading(true);
       try {
         await catalogService.updateItemStatus(
           selectedItem.id,
           selectedItem.type as 'song' | 'collection',
-          previousStatus
+          previousStatus,
+          undefined,
+          reason,
         );
         
         notify('Item desbloqueado exitosamente', { type: 'success' });

@@ -110,6 +110,12 @@ export function ChangeStateDialog({
       setLoading(false);
       return;
     }
+    // Always require a reason for any manual state change
+    if (!reason || reason.trim().length === 0) {
+      setError('Debe ingresar una razón para el cambio de estado');
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setLoading(true);
 
@@ -147,7 +153,8 @@ export function ChangeStateDialog({
   };
 
   const transitionConfig = getTransitionConfig(currentState, newState);
-  const requiresReason = transitionConfig?.requiresReason;
+  // Force reason required for all manual edits
+  const requiresReason = true;
   const requiresScheduleDate = transitionConfig?.requiresScheduleDate || newState === 'scheduled';
   const isValidTransition = isTransitionAllowed(currentState, newState);
   const hasChanges = newState !== currentState;

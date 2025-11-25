@@ -12,7 +12,9 @@ import {
   Chip,
 } from '@mui/material';
 import { Schedule, CheckCircle, Block } from '@mui/icons-material';
-import { getStateChangeEvents } from '../../../services/catalogStateService';
+import { getStateChangeEvents, fetchStateChangeEvents } from '../../../services/catalogStateService';
+import { useEffect, useState } from 'react';
+import type { StateChangeEvent } from '../../../types/catalogStates';
 import { STATE_LABELS } from '../../../types/catalogStates';
 
 interface AuditTabProps {
@@ -20,7 +22,19 @@ interface AuditTabProps {
 }
 
 export function AuditTab({ itemId }: AuditTabProps) {
-  const auditEvents = getStateChangeEvents(itemId);
+  const [auditEvents, setAuditEvents] = useState<StateChangeEvent[]>(() => getStateChangeEvents(itemId));
+
+  useEffect(() => {
+    let mounted = true;
+    fetchStateChangeEvents(itemId)
+      .then((events) => {
+        if (mounted) setAuditEvents(events);
+      })
+      .catch((err) => {
+        console.warn('Failed to fetch audits for item', itemId, err);
+      });
+    return () => { mounted = false; };
+  }, [itemId]);
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -34,7 +48,8 @@ export function AuditTab({ itemId }: AuditTabProps) {
   };
 
   const getEventIcon = (newState: string) => {
-    switch (newState) {
+    const lower = (newState || '').toLowerCase();
+    switch (lower) {
       case 'scheduled':
         return <Schedule />;
       case 'published':
@@ -47,7 +62,8 @@ export function AuditTab({ itemId }: AuditTabProps) {
   };
 
   const getEventColor = (newState: string): 'info' | 'success' | 'error' => {
-    switch (newState) {
+    const lower = (newState || '').toLowerCase();
+    switch (lower) {
       case 'scheduled':
         return 'info';
       case 'published':
@@ -57,6 +73,16 @@ export function AuditTab({ itemId }: AuditTabProps) {
       default:
         return 'info';
     }
+  };
+
+  const getStateLabel = (s?: string) => {
+    if (!s) return 'Unknown';
+    const key = (String(s) || '').toLowerCase();
+    // Normalize: backend may provide "programmed"; map to scheduled
+    const normalized = key === 'programmed' ? 'scheduled' : key;
+    const label = STATE_LABELS[normalized as keyof typeof STATE_LABELS] || normalized;
+    // Return Spanish label with Title Case (uppercase first letter)
+    return String(label);
   };
 
   return (
@@ -113,7 +139,7 @@ export function AuditTab({ itemId }: AuditTabProps) {
                       primary={
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                           <Typography variant="body1" fontWeight="medium" sx={{ color: '#ffffff' }}>
-                            {STATE_LABELS[event.previousState]} → {STATE_LABELS[event.newState]}
+                            {getStateLabel(event.previousState)} → {getStateLabel(event.newState)}
                           </Typography>
                           <Chip
                             label={formatDateTime(event.timestamp)}

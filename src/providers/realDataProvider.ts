@@ -436,10 +436,16 @@ export const realDataProvider: DataProvider = {
         
         // Si se está actualizando solo el estado
         if (params.data.status && Object.keys(params.data).length === 1) {
+          const reason = params.data.reason as string | undefined;
+          if (!reason) {
+            throw new Error('Se requiere una razón para cambiar el estado');
+          }
           const updatedItem = await catalogService.updateItemStatus(
             id,
             itemType,
-            params.data.status
+            params.data.status,
+            undefined,
+            reason,
           );
           return { data: updatedItem as any };
         }

@@ -289,14 +289,15 @@ export class CatalogService extends BaseApiService {
    * PUT /api/admin/artists/songs/:song_id/status
    * Actualizar el estado de una canción
    */
-  async updateSongStatus(songId: string, status: CatalogStatus, scheduledDate?: string): Promise<CatalogItem> {
+  async updateSongStatus(songId: string, status: CatalogStatus, scheduledDate?: string, reason?: string): Promise<CatalogItem> {
     console.log('🚨 updateSongStatus - songId recibido:', songId, 'type:', typeof songId);
 
     const action = this.mapFrontendStatusToAction(status);
-    const body: { action: string; releaseDate?: string } = { action };
+  const body: { action: string; releaseDate?: string; reason?: string } = { action };
     if (status === 'scheduled' && scheduledDate) {
       body.releaseDate = new Date(scheduledDate).toISOString();
     }
+    if (reason) body.reason = reason;
     console.log('🚀 CatalogService.updateSongStatus:', {
       songId,
       status,
@@ -383,14 +384,15 @@ export class CatalogService extends BaseApiService {
    * PUT /api/admin/artists/collections/:collection_id/status
    * Actualizar el estado de una colección
    */
-  async updateCollectionStatus(collectionId: string, status: CatalogStatus, scheduledDate?: string): Promise<CatalogItem> {
+  async updateCollectionStatus(collectionId: string, status: CatalogStatus, scheduledDate?: string, reason?: string): Promise<CatalogItem> {
     console.log('🚨 updateCollectionStatus - collectionId recibido:', collectionId, 'type:', typeof collectionId);
     
     const action = this.mapFrontendStatusToAction(status);
-    const body: { action: string; releaseDate?: string } = { action };
+  const body: { action: string; releaseDate?: string; reason?: string } = { action };
     if (status === 'scheduled' && scheduledDate) {
       body.releaseDate = new Date(scheduledDate).toISOString();
     }
+    if (reason) body.reason = reason;
     console.log('🚀 CatalogService.updateCollectionStatus:', {
       collectionId,
       status,
@@ -455,13 +457,25 @@ export class CatalogService extends BaseApiService {
   }
 
   /**
+   * GET /api/admin/metrics/audit/song/:songId
+   * Obtener auditoría de cambios de estado para una canción
+   */
+  async getSongAudits(songId: string): Promise<any[]> {
+    // Use the admin proxy route on the gateway
+    const url = `/admin/metrics/audit/song/${songId}`;
+    console.log('📊 CatalogService.getSongAudits - requesting URL:', url);
+    const audits = await this.get<any[]>(url);
+    return audits;
+  }
+
+  /**
    * Actualizar el estado de un item (song o collection)
    */
-  async updateItemStatus(itemId: string, itemType: 'song' | 'collection', status: CatalogStatus, scheduledDate?: string): Promise<CatalogItem> {
+  async updateItemStatus(itemId: string, itemType: 'song' | 'collection', status: CatalogStatus, scheduledDate?: string, reason?: string): Promise<CatalogItem> {
     if (itemType === 'song') {
-      return this.updateSongStatus(itemId, status, scheduledDate);
+      return this.updateSongStatus(itemId, status, scheduledDate, reason);
     } else {
-      return this.updateCollectionStatus(itemId, status, scheduledDate);
+      return this.updateCollectionStatus(itemId, status, scheduledDate, reason);
     }
   }
 
