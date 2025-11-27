@@ -8,6 +8,7 @@ import { AppearancesTab } from './tabs/AppearancesTab';
 import { AuditTab } from './tabs/AuditTab';
 import { NavigateNext } from '@mui/icons-material';
 import type { CatalogDetail } from '../../types/catalogDetail';
+import MetricsTab from './tabs/MetricsTab';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -100,7 +101,8 @@ export default function CatalogShow() {
   const getTabIndexFromPath = (path: string): number => {
     if (path.endsWith('/availability')) return 1;
     if (path.endsWith('/appearances')) return 2;
-    if (path.endsWith('/audit')) return 3; // only applies to songs
+    if (path.endsWith('/metrics')) return 3;
+    if (path.endsWith('/audit')) return 4; // only applies to songs
     return 0; // default show
   };
 
@@ -108,6 +110,13 @@ export default function CatalogShow() {
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);
   };
+
+  // Set initial tab based on URL path (support /metrics and /audit)
+  useEffect(() => {
+    const idx = getTabIndexFromPath(currentPath);
+    setCurrentTab(idx);
+    // only run once on mount: eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const isSong = item.type === 'song';
 
@@ -158,7 +167,8 @@ export default function CatalogShow() {
           <Tab label="Resumen" id="catalog-tab-0" />
           <Tab label="Disponibilidad" id="catalog-tab-1" />
           <Tab label="Apariciones" id="catalog-tab-2" />
-          {isSong && <Tab label="Auditoría" id="catalog-tab-3" />}
+          <Tab label="Métricas" id="catalog-tab-3" />
+          {isSong && <Tab label="Auditoría" id="catalog-tab-4" />}
         </Tabs>
       </Paper>
 
@@ -175,11 +185,16 @@ export default function CatalogShow() {
         <AppearancesTab item={item as any} />
       </TabPanel>
 
+      <TabPanel value={currentTab} index={3}>
+        <MetricsTab item={item as any}/>
+      </TabPanel>
+      
       {isSong && (
-        <TabPanel value={currentTab} index={3}>
+        <TabPanel value={currentTab} index={4}>
           <AuditTab itemId={item.id} key={refreshKey} />
         </TabPanel>
       )}
+
     </Box>
   );
 }

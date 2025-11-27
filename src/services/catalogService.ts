@@ -143,7 +143,7 @@ export class CatalogService extends BaseApiService {
       'programmed': 'scheduled',
       'scheduled': 'scheduled', // Por si ya viene en formato frontend
     };
-    return statusMap[status.toLowerCase()] || 'published';
+    return statusMap[status?.toLowerCase()] || 'published';
   }
 
   /**

@@ -1,1 +1,2 @@
-// Hooks index - currently empty, using React Admin hooks directly
+// Hooks index - exports custom hooks for metrics
+export * from './useMetrics';

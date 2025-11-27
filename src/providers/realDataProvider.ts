@@ -207,7 +207,7 @@ export const realDataProvider: DataProvider = {
           id: id,
           type: 'song' as const,
           title: song.title,
-          artists: song.artists.map((artistName: string) => ({
+          artists: song.artists?.map((artistName: string) => ({
             id: artistName.toLowerCase().replace(/\s+/g, '-'),
             name: artistName
           })),

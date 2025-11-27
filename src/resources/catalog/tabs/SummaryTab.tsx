@@ -101,7 +101,7 @@ function SongSummary({ item, onRefresh }: { item: SongDetail; onRefresh?: () => 
                     Artista(s)
                   </Typography>
                   <Typography variant="body1" sx={{ color: '#ffffff' }}>
-                    {item.artists.map((a) => a.name).join(', ')}
+                    {item.artists?.map((a) => a.name).join(', ')}
                   </Typography>
                 </Box>
 
