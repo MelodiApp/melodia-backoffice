@@ -1,4 +1,5 @@
 import React from "react";
+import { NavLink } from 'react-router-dom';
 import {
   Drawer,
   List,
@@ -12,7 +13,6 @@ import {
 import {
   Dashboard,
   People,
-  Settings,
   Analytics,
   MusicNote,
 } from "@mui/icons-material";
@@ -25,10 +25,10 @@ interface SidebarProps {
 
 const menuItems = [
   { text: "Dashboard", icon: <Dashboard />, path: "/" },
-  { text: "Users", icon: <People />, path: "/users" },
-  { text: "Music", icon: <MusicNote />, path: "/music" },
-  { text: "Analytics", icon: <Analytics />, path: "/analytics" },
-  { text: "Settings", icon: <Settings />, path: "/settings" },
+  { text: "Usuarios", icon: <People />, path: "/users" },
+  { text: "Catálogo", icon: <MusicNote />, path: "/music" },
+  // Map Analytics to Users metrics for now
+  { text: "Métricas (Usuarios)", icon: <Analytics />, path: "/metrics/users" },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -56,7 +56,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <List>
         {menuItems.map((item) => (
           <ListItem key={item.text} disablePadding>
-            <ListItemButton>
+            <ListItemButton
+              component={NavLink}
+              to={item.path}
+              onClick={() => {
+                if (onClose) onClose();
+              }}
+              sx={{ '&.active': { background: 'rgba(0,0,0,0.08)' } }}
+            >
               <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} />
             </ListItemButton>
