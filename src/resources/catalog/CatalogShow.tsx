@@ -72,6 +72,23 @@ export default function CatalogShow() {
     }
   };
 
+  const getTabIndexFromPath = (path: string): number => {
+    if (path.endsWith('/availability')) return 1;
+    if (path.endsWith('/appearances')) return 2;
+    if (path.endsWith('/metrics')) return 3;
+    if (path.endsWith('/audit')) return 4; // only applies to songs
+    return 0; // default show
+  };
+
+  // Initialize tab based on URL path (support /metrics and /audit)
+  useEffect(() => {
+    const idx = getTabIndexFromPath(currentPath);
+    setCurrentTab(idx);
+    // only run once on mount: eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const isSong = item?.type === 'song';
+
   // Mostrar loading
   if (isLoading) {
     return (
@@ -98,27 +115,9 @@ export default function CatalogShow() {
     );
   }
 
-  const getTabIndexFromPath = (path: string): number => {
-    if (path.endsWith('/availability')) return 1;
-    if (path.endsWith('/appearances')) return 2;
-    if (path.endsWith('/metrics')) return 3;
-    if (path.endsWith('/audit')) return 4; // only applies to songs
-    return 0; // default show
-  };
-
-  // Initialize tab from path
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);
   };
-
-  // Set initial tab based on URL path (support /metrics and /audit)
-  useEffect(() => {
-    const idx = getTabIndexFromPath(currentPath);
-    setCurrentTab(idx);
-    // only run once on mount: eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const isSong = item.type === 'song';
 
   return (
     <Box sx={{ p: 3, backgroundColor: '#121212', minHeight: '100vh' }}>

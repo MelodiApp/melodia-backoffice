@@ -25,10 +25,11 @@ import {
   
 } from '@mui/icons-material';
 import { useState } from 'react';
+import ReasonDialog from './components/ReasonDialog';
 import { useNavigate } from 'react-router-dom';
 import { useNotify } from 'react-admin';
 import type { CatalogItem, CatalogStatus } from '../../types/catalog';
-import { catalogService } from '../../services/catalogService';
+// import { catalogService } from '../../services/catalogService'; // no longer used: change state via ChangeStateDialog
 
 interface CatalogTableProps {
   items: CatalogItem[];
@@ -52,6 +53,9 @@ export function CatalogTable({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedItem, setSelectedItem] = useState<CatalogItem | null>(null);
   const [loading, setLoading] = useState(false);
+  const [reasonDialogOpen, setReasonDialogOpen] = useState(false);
+  const [dialogPurpose, setDialogPurpose] = useState<'block' | 'unblock' | null>(null);
+  const [dialogItem, setDialogItem] = useState<CatalogItem | null>(null);
   
   // Guardar el estado anterior de cada item cuando se bloquea
   const [previousStates, setPreviousStates] = useState<Record<string, CatalogStatus>>({});
@@ -68,9 +72,10 @@ export function CatalogTable({
 
   const handleAction = async (action: string) => {
     if (!selectedItem) return;
-    
+    const itemKey = `${selectedItem.type}-${selectedItem.id}`;
+
     console.log('🎯 handleAction - action:', action, 'selectedItem:', selectedItem);
-    
+
     if (action === 'view') {
       // React Admin espera rutas en formato: /{resource}/{id}/show
       // Usamos el resource correcto basado en el tipo
@@ -78,88 +83,24 @@ export function CatalogTable({
       const targetUrl = `/${resource}/${selectedItem.id}/show`;
       console.log('🚀 Navegando a:', targetUrl);
       navigate(targetUrl);
-  } else if (action === 'block') {
+    } else if (action === 'block') {
       // Guardar el estado actual antes de bloquear
-      const itemKey = `${selectedItem.type}-${selectedItem.id}`;
       setPreviousStates(prev => ({
         ...prev,
         [itemKey]: selectedItem.status,
       }));
-      
-      const reason = window.prompt('Ingresa la razón para bloquear este item (requerido):');
-      if (!reason || reason.trim().length === 0) {
-        notify('Se requiere una razón para bloquear el item', { type: 'warning' });
-        handleMenuClose();
-        return;
-      }
-
-      setLoading(true);
-      try {
-        await catalogService.updateItemStatus(
-          selectedItem.id,
-          selectedItem.type as 'song' | 'collection',
-          'blocked',
-          undefined,
-          reason,
-        );
-        
-        notify('Item bloqueado exitosamente', { type: 'success' });
-        
-        // Refrescar la tabla
-        if (onRefresh) {
-          onRefresh();
-        }
-      } catch (error) {
-        console.error('Error al bloquear item:', error);
-        notify('Error al bloquear el item', { type: 'error' });
-      } finally {
-        setLoading(false);
-      }
-  } else if (action === 'unblock') {
-      // Restaurar el estado anterior o usar 'published' por defecto
-      const itemKey = `${selectedItem.type}-${selectedItem.id}`;
-      const previousStatus = previousStates[itemKey] || 'published';
-      
-      const reason = window.prompt('Ingresa la razón para desbloquear este item (requerido):');
-      if (!reason || reason.trim().length === 0) {
-        notify('Se requiere una razón para desbloquear el item', { type: 'warning' });
-        handleMenuClose();
-        return;
-      }
-
-      setLoading(true);
-      try {
-        await catalogService.updateItemStatus(
-          selectedItem.id,
-          selectedItem.type as 'song' | 'collection',
-          previousStatus,
-          undefined,
-          reason,
-        );
-        
-        notify('Item desbloqueado exitosamente', { type: 'success' });
-        
-        // Limpiar el estado anterior guardado
-        setPreviousStates(prev => {
-          const newStates = { ...prev };
-          delete newStates[itemKey];
-          return newStates;
-        });
-        
-        // Refrescar la tabla
-        if (onRefresh) {
-          onRefresh();
-        }
-      } catch (error) {
-        console.error('Error al desbloquear item:', error);
-        notify('Error al desbloquear el item', { type: 'error' });
-      } finally {
-        setLoading(false);
-      }
+      setDialogItem(selectedItem);
+      setDialogPurpose('block');
+      setReasonDialogOpen(true);
+    } else if (action === 'unblock') {
+      // Guardar referencia a item para dialog and open
+      setDialogItem(selectedItem);
+      setDialogPurpose('unblock');
+      setReasonDialogOpen(true);
     } else {
       console.log(`Action: ${action}`, selectedItem);
     }
-    
+
     handleMenuClose();
   };
 
@@ -383,6 +324,32 @@ export function CatalogTable({
           </MenuItem>
         )}
       </Menu>
+      {dialogItem && (
+        <ReasonDialog
+          open={reasonDialogOpen}
+          onClose={() => { setReasonDialogOpen(false); setDialogPurpose(null); setDialogItem(null); }}
+          itemId={dialogItem.id}
+          itemType={dialogItem.type as 'song' | 'collection'}
+          itemTitle={dialogItem.title}
+          currentState={dialogPurpose === 'block' ? dialogItem.status : 'blocked'}
+          newState={dialogPurpose === 'block' ? 'blocked' : (previousStates[`${dialogItem.type}-${dialogItem.id}`] || dialogItem.prevStatus || 'published')}
+          onSuccess={() => {
+            // If we just unblocked, we can remove stored previous state
+            if (dialogPurpose === 'unblock') {
+              const key = `${dialogItem.type}-${dialogItem.id}`;
+              setPreviousStates(prev => {
+                const newPrev = { ...prev };
+                delete newPrev[key];
+                return newPrev;
+              });
+            }
+            setReasonDialogOpen(false);
+            setDialogPurpose(null);
+            setDialogItem(null);
+            if (onRefresh) onRefresh();
+          }}
+        />
+      )}
     </>
   );
 }
