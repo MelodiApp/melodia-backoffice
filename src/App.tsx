@@ -1,5 +1,5 @@
 import { Admin, Resource } from "react-admin";
-import { People, LibraryMusic } from "@mui/icons-material";
+import { People, LibraryMusic, Group } from "@mui/icons-material";
 
 // Providers
 import { authProvider } from "./providers";
@@ -15,6 +15,7 @@ import { Dashboard } from "./components/Dashboard";
 // Recursos - Usuarios y Catálogo
 import { UserList, UserEdit, UserShow } from "./resources/users";
 import { CatalogList, CatalogShow } from "./resources/catalog";
+import { ArtistsList, ArtistShow } from "./resources/artists";
 
 /**
  * Aplicación principal de React Admin
@@ -60,6 +61,15 @@ function App() {
         options={{ label: "Catálogo" }}
       />
 
+      {/* Recurso de Artistas - List & Detail */}
+      <Resource
+        name="artists"
+        list={ArtistsList}
+        show={ArtistShow}
+        icon={Group}
+        options={{ label: "Artistas" }}
+      />
+
       {/* Recursos internos para songs y collections (no aparecen en menú) */}
       <Resource
         name="songs"
@@ -70,6 +80,7 @@ function App() {
         show={CatalogShow}
       />
       {/* No custom routes: keep catalog show on /songs/:id/show and /collections/:id/show only */}
+
     </Admin>
   );
 }

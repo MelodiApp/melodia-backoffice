@@ -1,6 +1,7 @@
 import type { DataProvider } from "react-admin";
 import { adminService } from "../services/adminService";
 import { catalogService } from "../services/catalogService";
+import { artistsService } from "../services/artistsService";
 
 console.log('🔧 realDataProvider loaded');
 
@@ -58,6 +59,26 @@ export const realDataProvider: DataProvider = {
         };
       } catch (error) {
         console.error("Error obteniendo usuarios:", error);
+        throw error;
+      }
+    }
+
+    // Artists resource (public list of platform artists)
+    if (resource === "artists") {
+      try {
+        const { page = 1, perPage = 20 } = params.pagination || {};
+        const artists = await artistsService.getPlatformArtists();
+
+        // Simple pagination on the frontend
+        const start = (page - 1) * perPage;
+        const paged = artists.slice(start, start + perPage);
+
+        return {
+          data: paged.map((a) => ({ id: a.id, name: a.name, profile_picture: a.profile_picture, followersCount: a.followersCount })),
+          total: artists.length,
+        };
+      } catch (error) {
+        console.error("Error obteniendo artistas:", error);
         throw error;
       }
     }
@@ -370,6 +391,24 @@ export const realDataProvider: DataProvider = {
         }
       } catch (error) {
         console.error("❌ Error obteniendo item del catálogo:", error);
+        throw error;
+      }
+    }
+
+    if (resource === "artists") {
+      try {
+        const artist = await artistsService.getArtistProfile(String(params.id));
+        // adapt to simple object for the React Admin show view
+        const adapted = {
+          id: String(artist.id),
+          bannerUrl: artist.bannerUrl,
+          name: artist.name ?? artist.artisticName,
+          bio: artist.bio,
+          followers_count: artist.followers_count,
+        };
+        return { data: adapted };
+      } catch (error) {
+        console.error("Error obteniendo artista:", error);
         throw error;
       }
     }
