@@ -157,3 +157,162 @@ export function useCollectionLikesCount(collectionId?: string | null, params?: P
 
   return { data, loading, error, refetch: fetch } as const;
 }
+
+export function useArtistPlaysCount(artistId?: string | null, params?: Params) {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetch = useCallback(async () => {
+    if (!artistId) return;
+    try {
+      setLoading(true);
+      setError(null);
+      const query = buildQuery(params);
+      const path = `/admin/metrics/artists/${encodeURIComponent(artistId)}/plays/count${query ? `?${query}` : ''}`;
+      if (import.meta.env.DEV) console.debug(`[useArtistPlaysCount] GET ${path}`);
+      const result = await apiGet<any>(path);
+      if (import.meta.env.DEV) console.debug('[useArtistPlaysCount] result', result);
+      setData(result);
+    } catch (err: any) {
+      setError(err?.message || String(err));
+      setData(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [artistId, params?.fromDate, params?.toDate, params?.timeSlice, params?.limit, params?.offset]);
+
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
+
+  return { data, loading, error, refetch: fetch } as const;
+}
+
+export function useArtistSavedCollectionsCount(artistId?: string | null, params?: Params) {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetch = useCallback(async () => {
+    if (!artistId) return;
+    try {
+      setLoading(true);
+      setError(null);
+      const query = buildQuery(params);
+      const path = `/admin/libraries/saved-collections/artist/${encodeURIComponent(artistId)}/count${query ? `?${query}` : ''}`;
+      if (import.meta.env.DEV) console.debug(`[useArtistSavedCollectionsCount] GET ${path}`);
+      const result = await apiGet<any>(path);
+      if (import.meta.env.DEV) console.debug('[useArtistSavedCollectionsCount] result', result);
+      setData(result);
+    } catch (err: any) {
+      setError(err?.message || String(err));
+      setData(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [artistId, params?.fromDate, params?.toDate, params?.timeSlice, params?.limit, params?.offset]);
+
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
+
+  return { data, loading, error, refetch: fetch } as const;
+}
+
+export function useArtistTopPlaylists(artistId?: string | null, params?: { limit?: number } ) {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetch = useCallback(async () => {
+    if (!artistId) return;
+    try {
+      setLoading(true);
+      setError(null);
+      const q = new URLSearchParams();
+      if (params?.limit) q.set('limit', String(params.limit));
+      const path = `/admin/libraries/playlists/artist/${encodeURIComponent(artistId)}/appears-on${q.toString() ? `?${q.toString()}` : ''}`;
+      if (import.meta.env.DEV) console.debug(`[useArtistTopPlaylists] GET ${path}`);
+      const result = await apiGet<any>(path);
+      if (import.meta.env.DEV) console.debug('[useArtistTopPlaylists] result', result);
+      setData(result);
+    } catch (err: any) {
+      setError(err?.message || String(err));
+      setData(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [artistId, params?.limit]);
+
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
+
+  return { data, loading, error, refetch: fetch } as const;
+}
+
+export function useArtistTopSongs(artistId?: string | null, params?: { limit?: number } ) {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetch = useCallback(async () => {
+    if (!artistId) return;
+    try {
+      setLoading(true);
+      setError(null);
+      const q = new URLSearchParams();
+      if (params?.limit) q.set('limit', String(params.limit));
+      const path = `/admin/artists/profiles/${encodeURIComponent(artistId)}/top-songs${q.toString() ? `?${q.toString()}` : ''}`;
+      if (import.meta.env.DEV) console.debug(`[useArtistTopSongs] GET ${path}`);
+      const result = await apiGet<any>(path);
+      if (import.meta.env.DEV) console.debug('[useArtistTopSongs] result', result);
+      setData(result);
+    } catch (err: any) {
+      setError(err?.message || String(err));
+      setData(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [artistId, params?.limit]);
+
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
+
+  return { data, loading, error, refetch: fetch } as const;
+}
+
+export function useArtistMonthlyListeners(artistId?: string | null, params?: { year?: number; month?: number }) {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetch = useCallback(async () => {
+    if (!artistId) return;
+    try {
+      setLoading(true);
+      setError(null);
+      const q = new URLSearchParams();
+      if (params?.year !== undefined) q.set('year', String(params.year));
+      if (params?.month !== undefined) q.set('month', String(params.month));
+      const path = `/admin/metrics/artists/${encodeURIComponent(artistId)}/monthly-listeners${q.toString() ? `?${q.toString()}` : ''}`;
+      if (import.meta.env.DEV) console.debug(`[useArtistMonthlyListeners] GET ${path}`);
+      const result = await apiGet<any>(path);
+      if (import.meta.env.DEV) console.debug('[useArtistMonthlyListeners] result', result);
+      setData(result);
+    } catch (err: any) {
+      setError(err?.message || String(err));
+      setData(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [artistId, params?.year, params?.month]);
+
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
+
+  return { data, loading, error, refetch: fetch } as const;
+}
