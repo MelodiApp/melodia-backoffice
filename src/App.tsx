@@ -11,6 +11,11 @@ import { spotifyTheme } from "./theme/adminTheme";
 
 // Dashboard
 import { Dashboard } from "./components/Dashboard";
+import CustomMenu, { CustomLayout } from "./components/CustomMenu";
+import UsersMetrics from "./resources/metrics/UsersMetrics";
+import UsersMetricsList from "./resources/metrics/UsersMetricsList";
+import { CustomRoutes } from 'react-admin';
+import { Route } from 'react-router-dom';
 
 // Recursos - Usuarios y Catálogo
 import { UserList, UserEdit, UserShow } from "./resources/users";
@@ -39,6 +44,7 @@ function App() {
       i18nProvider={i18nProvider}
       theme={spotifyTheme}
       dashboard={Dashboard}
+  layout={CustomLayout}
       title="Melodia Backoffice"
       disableTelemetry
     >
@@ -51,6 +57,10 @@ function App() {
         icon={People}
         options={{ label: "Usuarios" }}
       />
+      <CustomRoutes>
+  <Route path="/metrics/users" element={<UsersMetrics />} />
+  <Route path="/metrics/users/list" element={<UsersMetricsList />} />
+      </CustomRoutes>
 
       {/* Recurso de Catálogo - Gestión de contenido */}
       <Resource
