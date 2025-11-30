@@ -13,6 +13,7 @@ import { spotifyTheme } from "./theme/adminTheme";
 import { Dashboard } from "./components/Dashboard";
 import CustomMenu, { CustomLayout } from "./components/CustomMenu";
 import UsersMetrics from "./resources/metrics/UsersMetrics";
+import UsersMetricsList from "./resources/metrics/UsersMetricsList";
 import { CustomRoutes } from 'react-admin';
 import { Route } from 'react-router-dom';
 
@@ -56,7 +57,8 @@ function App() {
         options={{ label: "Usuarios" }}
       />
       <CustomRoutes>
-        <Route path="/metrics/users" element={<UsersMetrics />} />
+  <Route path="/metrics/users" element={<UsersMetrics />} />
+  <Route path="/metrics/users/list" element={<UsersMetricsList />} />
       </CustomRoutes>
 
       {/* Recurso de Catálogo - Gestión de contenido */}
