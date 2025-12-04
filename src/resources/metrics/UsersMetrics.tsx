@@ -38,7 +38,6 @@ export const UsersMetrics: React.FC = () => {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [overview, setOverview] = useState<any>(null);
-  const [timeline, setTimeline] = useState<any[]>([]);
 
   const navigate = useNavigate();
 
@@ -53,15 +52,6 @@ export const UsersMetrics: React.FC = () => {
     }
   };
 
-  const fetchTimeline = async () => {
-    if (!from || !to) return;
-    try {
-      const data: any = await metricsService.getUsersDetail(from, to);
-      setTimeline(data.timeline || []);
-    } catch (e) {
-      console.error('Error fetching timeline', e);
-    }
-  };
 
   const handleExport = async () => {
     try {
@@ -70,7 +60,39 @@ export const UsersMetrics: React.FC = () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'users_metrics.csv';
+      // Try to get filename from Content-Disposition response header
+      const disposition = resp.headers && (resp.headers['content-disposition'] || resp.headers['Content-Disposition']);
+      if (disposition) {
+        const match = disposition.match(/filename=\"?([^\";]+)\"?/);
+        if (match && match[1]) {
+          a.download = match[1];
+        } else {
+          a.download = 'users_metrics.csv';
+        }
+      } else {
+        // If backend didn't provide a filename, compute a readable fallback from selected dates
+        const fmt = (d?: string) => {
+          if (!d) return undefined;
+          try {
+            const t = new Date(d);
+            if (isNaN(t.getTime())) return d.replace(/[:\s]/g, '-');
+            const pad = (n: number) => n.toString().padStart(2, '0');
+            const date = `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}`;
+            if (t.getHours() === 0 && t.getMinutes() === 0 && t.getSeconds() === 0) return date;
+            return `${date}T${pad(t.getHours())}-${pad(t.getMinutes())}`;
+          } catch {
+            return d.replace(/[:\s]/g, '-');
+          }
+        };
+        const f = fmt(from);
+        const t = fmt(to);
+        let filename = 'users_metrics';
+        if (f && t) filename = `users_metrics_from-${f}_to-${t}`;
+        else if (f) filename = `users_metrics_from-${f}`;
+        else if (t) filename = `users_metrics_to-${t}`;
+        filename = `${filename}.csv`;
+        a.download = filename;
+      }
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -88,7 +110,7 @@ export const UsersMetrics: React.FC = () => {
     if (t) setTo(t);
     // fetch with provided params if present
     fetchOverview(f ?? undefined, t ?? undefined);
-    if (f && t) fetchTimeline();
+    // timeline was removed; only fetch overview
   }, []);
 
   const handleApplyFilters = async () => {
@@ -99,8 +121,14 @@ export const UsersMetrics: React.FC = () => {
     setSearchParams(params);
     // fetch overview with current filters
     await fetchOverview(from || undefined, to || undefined);
-    // fetch timeline only if both are present
-    if (from && to) await fetchTimeline();
+    // timeline was removed
+  };
+
+  const isDateRangeValid = (f?: string, t?: string) => {
+    if (!f || !t) return true;
+    const fd = new Date(f);
+    const td = new Date(t);
+    return fd.getTime() <= td.getTime();
   };
 
   return (
@@ -112,20 +140,46 @@ export const UsersMetrics: React.FC = () => {
         </Typography>
       </Box>
 
-  <Grid container spacing={2} sx={{ mb: 3, alignItems: 'center' }}>
-        <Grid item xs={12} sm={4}>
-          <TextField fullWidth label="Desde" type="datetime-local" value={from} onChange={(e) => setFrom(e.target.value)} InputLabelProps={{ shrink: true }} />
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <TextField fullWidth label="Hasta" type="datetime-local" value={to} onChange={(e) => setTo(e.target.value)} InputLabelProps={{ shrink: true }} />
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <Box sx={{ display: 'flex', gap: 1, justifyContent: { xs: 'flex-start', sm: 'flex-end' }, alignItems: 'center', height: '100%' }}>
-            <Button variant="contained" onClick={() => handleApplyFilters()}>Actualizar</Button>
-            <Button variant="outlined" startIcon={<SaveAlt />} onClick={handleExport}>Exportar CSV</Button>
+  <Box sx={{ maxWidth: '1200px', width: '100%', mx: 'auto' }}>
+    <Grid container spacing={2} sx={{ mb: 3, alignItems: 'center', justifyContent: 'space-between' }}>
+        <Grid item xs={12} sm={4} md={4}>
+          <TextField
+            fullWidth
+            label="Desde"
+            type="datetime-local"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            size="small"
+            sx={{ '& .MuiInputBase-input': { minHeight: 34 }, fontSize: '0.9rem' }}
+            inputProps={{ max: to || undefined }}
+            error={Boolean(from && to && !isDateRangeValid(from, to))}
+              helperText={from && to && !isDateRangeValid(from, to) ? 'La fecha "Desde" no puede ser posterior a la fecha "Hasta"' : ''}
+            />
+          </Grid>
+  <Grid item xs={12} sm={4} md={4}>
+          <TextField
+            fullWidth
+            label="Hasta"
+            type="datetime-local"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            size="small"
+            sx={{ '& .MuiInputBase-input': { minHeight: 34 }, fontSize: '0.9rem' }}
+            inputProps={{ min: from || undefined }}
+            error={Boolean(from && to && !isDateRangeValid(from, to))}
+              helperText={from && to && !isDateRangeValid(from, to) ? 'La fecha "Hasta" no puede ser anterior a la fecha "Desde"' : ''}
+            />
+          </Grid>
+        <Grid item xs={12} sm={4} md={4}>
+          <Box sx={{ display: 'flex', gap: 2.5, justifyContent: { xs: 'flex-start', sm: 'flex-end' }, alignItems: 'center', height: '100%' }}>
+            <Button size="medium" variant="contained" onClick={() => handleApplyFilters()} disabled={!isDateRangeValid(from, to)} sx={{ minWidth: 170, px: 2.5 }}>Actualizar</Button>
+            <Button size="medium" variant="outlined" startIcon={<SaveAlt />} onClick={handleExport} disabled={!isDateRangeValid(from, to)} sx={{ minWidth: 170, px: 2.5 }}>Exportar CSV</Button>
           </Box>
         </Grid>
-      </Grid>
+    </Grid>
+  </Box>
 
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={4}>
@@ -160,20 +214,7 @@ export const UsersMetrics: React.FC = () => {
         </Grid>
       </Grid>
 
-      <Paper sx={{ p: 2 }}>
-        <Typography variant="h6">Timeline (nuevos usuarios por día)</Typography>
-        {timeline.length === 0 && <Typography>No hay datos</Typography>}
-        {timeline.length > 0 && (
-          <Box>
-            {timeline.map((t) => (
-              <Box key={t.date} display="flex" justifyContent="space-between" sx={{ p: 1, borderBottom: '1px solid #eee' }}>
-                <Typography>{t.date}</Typography>
-                <Typography>{t.new}</Typography>
-              </Box>
-            ))}
-          </Box>
-        )}
-      </Paper>
+      {/* Timeline has been intentionally removed per requirements */}
     </Box>
   );
 };
