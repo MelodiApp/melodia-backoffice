@@ -12,6 +12,7 @@ import {
   MenuItem,
   Box,
   Typography,
+  CircularProgress,
 } from '@mui/material';
 import {
   MoreVert,
@@ -24,8 +25,11 @@ import {
   
 } from '@mui/icons-material';
 import { useState } from 'react';
+import ReasonDialog from './components/ReasonDialog';
 import { useNavigate } from 'react-router-dom';
-import type { CatalogItem } from '../../types/catalog';
+import { useNotify } from 'react-admin';
+import type { CatalogItem, CatalogStatus } from '../../types/catalog';
+// import { catalogService } from '../../services/catalogService'; // no longer used: change state via ChangeStateDialog
 
 interface CatalogTableProps {
   items: CatalogItem[];
@@ -45,8 +49,16 @@ export function CatalogTable({
   onRefresh,
 }: CatalogTableProps) {
   const navigate = useNavigate();
+  const notify = useNotify();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedItem, setSelectedItem] = useState<CatalogItem | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [reasonDialogOpen, setReasonDialogOpen] = useState(false);
+  const [dialogPurpose, setDialogPurpose] = useState<'block' | 'unblock' | null>(null);
+  const [dialogItem, setDialogItem] = useState<CatalogItem | null>(null);
+  
+  // Guardar el estado anterior de cada item cuando se bloquea
+  const [previousStates, setPreviousStates] = useState<Record<string, CatalogStatus>>({});
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, item: CatalogItem) => {
     setAnchorEl(event.currentTarget);
@@ -58,15 +70,37 @@ export function CatalogTable({
     setSelectedItem(null);
   };
 
-  const handleAction = (action: string) => {
+  const handleAction = async (action: string) => {
     if (!selectedItem) return;
-    
+    const itemKey = `${selectedItem.type}-${selectedItem.id}`;
+
+    console.log('🎯 handleAction - action:', action, 'selectedItem:', selectedItem);
+
     if (action === 'view') {
-      navigate(`/catalog/${selectedItem.id}/show`);
+      // React Admin espera rutas en formato: /{resource}/{id}/show
+      // Usamos el resource correcto basado en el tipo
+      const resource = selectedItem.type === 'song' ? 'songs' : 'collections';
+      const targetUrl = `/${resource}/${selectedItem.id}/show`;
+      console.log('🚀 Navegando a:', targetUrl);
+      navigate(targetUrl);
+    } else if (action === 'block') {
+      // Guardar el estado actual antes de bloquear
+      setPreviousStates(prev => ({
+        ...prev,
+        [itemKey]: selectedItem.status,
+      }));
+      setDialogItem(selectedItem);
+      setDialogPurpose('block');
+      setReasonDialogOpen(true);
+    } else if (action === 'unblock') {
+      // Guardar referencia a item para dialog and open
+      setDialogItem(selectedItem);
+      setDialogPurpose('unblock');
+      setReasonDialogOpen(true);
     } else {
       console.log(`Action: ${action}`, selectedItem);
     }
-    
+
     handleMenuClose();
   };
 
@@ -240,6 +274,7 @@ export function CatalogTable({
       >
         <MenuItem 
           onClick={() => handleAction('view')}
+          disabled={loading}
           sx={{
             color: '#ffffff',
             '&:hover': {
@@ -250,22 +285,11 @@ export function CatalogTable({
           <Visibility fontSize="small" sx={{ mr: 1, color: '#b3b3b3' }} />
           Ver detalle
         </MenuItem>
-        <MenuItem 
-          onClick={() => handleAction('edit')}
-          sx={{
-            color: '#ffffff',
-            '&:hover': {
-              backgroundColor: '#404040',
-            }
-          }}
-        >
-          <Edit fontSize="small" sx={{ mr: 1, color: '#b3b3b3' }} />
-          Editar metadatos
-        </MenuItem>
         <MenuItem divider />
         {selectedItem?.status === 'blocked' ? (
           <MenuItem 
             onClick={() => handleAction('unblock')} 
+            disabled={loading}
             sx={{ 
               color: '#1db954',
               '&:hover': {
@@ -273,12 +297,17 @@ export function CatalogTable({
               }
             }}
           >
-            <LockOpen fontSize="small" sx={{ mr: 1 }} />
+            {loading ? (
+              <CircularProgress size={16} sx={{ mr: 1 }} />
+            ) : (
+              <LockOpen fontSize="small" sx={{ mr: 1 }} />
+            )}
             Desbloquear
           </MenuItem>
         ) : (
           <MenuItem 
             onClick={() => handleAction('block')} 
+            disabled={loading}
             sx={{ 
               color: '#f44336',
               '&:hover': {
@@ -286,11 +315,41 @@ export function CatalogTable({
               }
             }}
           >
-            <Lock fontSize="small" sx={{ mr: 1 }} />
+            {loading ? (
+              <CircularProgress size={16} sx={{ mr: 1 }} />
+            ) : (
+              <Lock fontSize="small" sx={{ mr: 1 }} />
+            )}
             Bloquear
           </MenuItem>
         )}
       </Menu>
+      {dialogItem && (
+        <ReasonDialog
+          open={reasonDialogOpen}
+          onClose={() => { setReasonDialogOpen(false); setDialogPurpose(null); setDialogItem(null); }}
+          itemId={dialogItem.id}
+          itemType={dialogItem.type as 'song' | 'collection'}
+          itemTitle={dialogItem.title}
+          currentState={dialogPurpose === 'block' ? dialogItem.status : 'blocked'}
+          newState={dialogPurpose === 'block' ? 'blocked' : (previousStates[`${dialogItem.type}-${dialogItem.id}`] || dialogItem.prevStatus || 'published')}
+          onSuccess={() => {
+            // If we just unblocked, we can remove stored previous state
+            if (dialogPurpose === 'unblock') {
+              const key = `${dialogItem.type}-${dialogItem.id}`;
+              setPreviousStates(prev => {
+                const newPrev = { ...prev };
+                delete newPrev[key];
+                return newPrev;
+              });
+            }
+            setReasonDialogOpen(false);
+            setDialogPurpose(null);
+            setDialogItem(null);
+            if (onRefresh) onRefresh();
+          }}
+        />
+      )}
     </>
   );
 }

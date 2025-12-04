@@ -15,7 +15,7 @@ interface StatCardProps {
   color: "primary" | "secondary" | "success" | "warning" | "error";
 }
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color }) => (
+const StatCard: React.FC<StatCardProps & { onClick?: () => void }> = ({ title, value, icon, color, onClick }) => (
   <Paper sx={{ p: 3, textAlign: "center", height: "100%" }}>
     <Box display="flex" flexDirection="column" alignItems="center" gap={1}>
       <Box
@@ -62,6 +62,7 @@ export const Dashboard: React.FC = () => {
             value={totalUsers}
             icon={<People sx={{ fontSize: 32 }} />}
             color="primary"
+            onClick={() => window.location.href = '/metrics/users'}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>

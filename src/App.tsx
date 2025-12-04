@@ -1,8 +1,9 @@
 import { Admin, Resource } from "react-admin";
-import { People, LibraryMusic } from "@mui/icons-material";
+import { People, LibraryMusic, Group } from "@mui/icons-material";
 
 // Providers
-import { authProvider, realDataProvider } from "./providers";
+import { authProvider } from "./providers";
+import { realDataProvider } from "./providers/realDataProvider";
 import { i18nProvider } from "./providers/i18nProvider";
 
 // Tema
@@ -10,10 +11,16 @@ import { spotifyTheme } from "./theme/adminTheme";
 
 // Dashboard
 import { Dashboard } from "./components/Dashboard";
+import CustomMenu, { CustomLayout } from "./components/CustomMenu";
+import UsersMetrics from "./resources/metrics/UsersMetrics";
+import UsersMetricsList from "./resources/metrics/UsersMetricsList";
+import { CustomRoutes } from 'react-admin';
+import { Route } from 'react-router-dom';
 
 // Recursos - Usuarios y Catálogo
 import { UserList, UserEdit, UserShow } from "./resources/users";
 import { CatalogList, CatalogShow } from "./resources/catalog";
+import { ArtistsList, ArtistShow } from "./resources/artists";
 
 /**
  * Aplicación principal de React Admin
@@ -29,6 +36,7 @@ import { CatalogList, CatalogShow } from "./resources/catalog";
  * - artist: Usuario artista
  */
 function App() {
+  console.log('🚀 App loading - using realDataProvider:', realDataProvider);
   return (
     <Admin
       authProvider={authProvider}
@@ -36,6 +44,7 @@ function App() {
       i18nProvider={i18nProvider}
       theme={spotifyTheme}
       dashboard={Dashboard}
+  layout={CustomLayout}
       title="Melodia Backoffice"
       disableTelemetry
     >
@@ -48,6 +57,10 @@ function App() {
         icon={People}
         options={{ label: "Usuarios" }}
       />
+      <CustomRoutes>
+  <Route path="/metrics/users" element={<UsersMetrics />} />
+  <Route path="/metrics/users/list" element={<UsersMetricsList />} />
+      </CustomRoutes>
 
       {/* Recurso de Catálogo - Gestión de contenido */}
       <Resource
@@ -57,6 +70,27 @@ function App() {
         icon={LibraryMusic}
         options={{ label: "Catálogo" }}
       />
+
+      {/* Recurso de Artistas - List & Detail */}
+      <Resource
+        name="artists"
+        list={ArtistsList}
+        show={ArtistShow}
+        icon={Group}
+        options={{ label: "Artistas" }}
+      />
+
+      {/* Recursos internos para songs y collections (no aparecen en menú) */}
+      <Resource
+        name="songs"
+        show={CatalogShow}
+      />
+      <Resource
+        name="collections"
+        show={CatalogShow}
+      />
+      {/* No custom routes: keep catalog show on /songs/:id/show and /collections/:id/show only */}
+
     </Admin>
   );
 }
