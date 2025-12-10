@@ -33,6 +33,8 @@ export interface SongDetail {
   position?: number;
   duration: number;
   status: CatalogStatus;
+  prevStatus?: CatalogStatus;
+  prevPublishDate?: string;
 }
 
 export interface CollectionSong {
