@@ -332,7 +332,7 @@ export function CatalogTable({
           itemType={dialogItem.type as 'song' | 'collection'}
           itemTitle={dialogItem.title}
           currentState={dialogPurpose === 'block' ? dialogItem.status : 'blocked'}
-          newState={dialogPurpose === 'block' ? 'blocked' : (previousStates[`${dialogItem.type}-${dialogItem.id}`] || dialogItem.prevStatus || 'published')}
+          newState={dialogPurpose === 'block' ? 'blocked' : 'published'}
           onSuccess={() => {
             // If we just unblocked, we can remove stored previous state
             if (dialogPurpose === 'unblock') {

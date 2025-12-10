@@ -252,6 +252,18 @@ export const realDataProvider: DataProvider = {
             };
             return statusMap[song.status] || 'published';
           })() : 'published',
+          prevStatus: song.prevStatus ? (() => {
+            const statusMap: Record<string, 'published' | 'blocked' | 'scheduled'> = {
+              'PUBLISHED': 'published',
+              'BLOCKED': 'blocked', 
+              'PROGRAMMED': 'scheduled',
+              'published': 'published',
+              'blocked': 'blocked',
+              'scheduled': 'scheduled'
+            };
+            return statusMap[song.prevStatus] || undefined;
+          })() : undefined,
+          prevPublishDate: song.prevPublishDate,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
@@ -307,6 +319,18 @@ export const realDataProvider: DataProvider = {
           hasExplicit: false,
           hasVideo: false,
           status: statusMap[backendCollection.status] || backendCollection.status || 'published',
+          prevStatus: collection.prevStatus ? (() => {
+            const statusMap: Record<string, 'published' | 'blocked' | 'scheduled'> = {
+              'PUBLISHED': 'published',
+              'BLOCKED': 'blocked', 
+              'PROGRAMMED': 'scheduled',
+              'published': 'published',
+              'blocked': 'blocked',
+              'scheduled': 'scheduled'
+            };
+            return statusMap[collection.prevStatus] || undefined;
+          })() : undefined,
+          prevReleaseDate: collection.prevReleaseDate,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
