@@ -21,6 +21,16 @@ export default function ReasonDialog({ open, onClose, itemId, itemType, itemTitl
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Función para traducir el estado a español
+  const getStateLabel = (state: CatalogStatus): string => {
+    const stateLabels: Record<CatalogStatus, string> = {
+      'published': 'publicado',
+      'blocked': 'bloqueado',
+      'scheduled': 'programado',
+    };
+    return stateLabels[state] || state;
+  };
+
   const handleSubmit = async () => {
     setError(null);
     if (!reason || reason.trim().length === 0) {
@@ -39,7 +49,11 @@ export default function ReasonDialog({ open, onClose, itemId, itemType, itemTitl
       });
 
       if (result.success) {
-        notify(`Estado de "${itemTitle || itemId}" cambiado a ${newState}`, { type: 'success' });
+        // Si estamos desbloqueando, el mensaje es genérico porque el backend decide el estado final
+        const message = newState === 'blocked' 
+          ? `"${itemTitle || itemId}" ha sido bloqueado`
+          : `"${itemTitle || itemId}" ha sido desbloqueado`;
+        notify(message, { type: 'success' });
         if (onSuccess) onSuccess();
         handleClose();
       } else {

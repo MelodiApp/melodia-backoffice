@@ -44,6 +44,8 @@ interface BackendSongDetail {
   position?: number;
   duration: number;
   status: 'PUBLISHED' | 'BLOCKED' | 'PROGRAMMED';
+  prevStatus?: 'PUBLISHED' | 'BLOCKED' | 'PROGRAMMED';
+  prevReleaseDate?: string;
 }
 
 interface BackendCollectionSong {
@@ -65,6 +67,8 @@ interface BackendCollectionDetail {
   status: 'PUBLISHED' | 'BLOCKED' | 'PROGRAMMED';
   isBlocked: boolean;
   releaseDate: string;
+  prevStatus?: 'PUBLISHED' | 'BLOCKED' | 'PROGRAMMED';
+  prevReleaseDate?: string;
 }
 
 interface BackendDiscographyItem {
@@ -238,6 +242,8 @@ export class CatalogService extends BaseApiService {
     return {
       ...song,
       status: this.mapBackendStatus(song.status),
+      prevStatus: song.prevStatus ? this.mapBackendStatus(song.prevStatus) : undefined,
+      prevPublishDate: song.prevReleaseDate,
     };
   }
 
@@ -263,6 +269,8 @@ export class CatalogService extends BaseApiService {
       status: this.mapBackendStatus(collection.status),
       isBlocked: collection.isBlocked,
       releaseDate: collection.releaseDate,
+      prevStatus: collection.prevStatus ? this.mapBackendStatus(collection.prevStatus) : undefined,
+      prevReleaseDate: collection.prevReleaseDate,
     };
   }
 
