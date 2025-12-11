@@ -95,6 +95,9 @@ export function isTransitionAllowed(
   from: CatalogState,
   to: CatalogState
 ): boolean {
+  // Disallow no-op transitions (same state)
+  if (from === to) return false;
+
   return ALLOWED_TRANSITIONS.some(
     (t) => (t.from === null || t.from === from) && t.to === to
   );

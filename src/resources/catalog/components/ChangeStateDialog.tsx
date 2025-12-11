@@ -25,6 +25,7 @@ import {
   validateTransition,
 } from '../../../types/catalogStates';
 import { changeItemState } from '../../../services/catalogStateService';
+import { isoToLocalDatetimeInput, localDatetimeInputToIso, localNowDatetimeInput } from '../../../utils/date';
 
 interface ChangeStateDialogProps {
   open: boolean;
@@ -55,7 +56,7 @@ export function ChangeStateDialog({
   const [newState, setNewState] = useState<CatalogState>(currentState);
   const [reason, setReason] = useState('');
   const [scheduledDate, setScheduledDate] = useState<string>(
-    currentScheduledDate || prevScheduledDate || ''
+    isoToLocalDatetimeInput(currentScheduledDate || prevScheduledDate) || ''
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,6 +67,10 @@ export function ChangeStateDialog({
   // Business rule: If currently published, only allow blocking (can't schedule directly from published)
   if (currentState === 'published') {
     allowedStates = ['blocked'];
+  }
+  // Business rule: If currently scheduled, only allow publishing or blocking
+  if (currentState === 'scheduled') {
+    allowedStates = ['published', 'blocked'];
   }
   if (currentState === 'blocked') {
     if (prevState) {
@@ -99,9 +104,9 @@ export function ChangeStateDialog({
       return;
     }
 
-    // If unblocking to previous scheduled state and we have a prevScheduledDate, set it
+    // If unblocking to previous scheduled state and we have a prevScheduledDate, set it (converted to local input format)
     if (currentState === 'blocked' && newState === 'scheduled' && !scheduledDate && prevScheduledDate) {
-      setScheduledDate(prevScheduledDate);
+      setScheduledDate(isoToLocalDatetimeInput(prevScheduledDate));
     }
 
     // Validación: si el estado es 'scheduled', debe haber una fecha
@@ -127,7 +132,8 @@ export function ChangeStateDialog({
         newState,
         user: 'admin@melodia.com', // En producción, obtener del auth
         reason: reason || undefined,
-        scheduledDate: scheduledDate || undefined,
+        // Convert the datetime-local (local timezone) into an ISO UTC string when sending to backend
+        scheduledDate: scheduledDate ? localDatetimeInputToIso(scheduledDate) : undefined,
       });
 
       if (result.success) {
@@ -197,6 +203,12 @@ export function ChangeStateDialog({
           </Box>
         </Box>
 
+        {currentState === 'scheduled' && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Este ítem ya está programado y no puede reprogramarse desde aquí. Solo puede pasar a <strong>Publicado</strong> o <strong>Bloqueado</strong>.
+          </Alert>
+        )}
+
         <FormControl fullWidth sx={{ mb: 2 }}>
           <InputLabel sx={{ color: '#b3b3b3' }}>Nuevo estado</InputLabel>
           <Select
@@ -255,7 +267,7 @@ export function ChangeStateDialog({
               InputLabelProps={{ shrink: true }}
               helperText="Debe ser una fecha futura"
               inputProps={{
-                min: new Date().toISOString().slice(0, 16),
+                min: localNowDatetimeInput(),
               }}
               sx={{
                 '& .MuiInputLabel-root': { color: '#b3b3b3' },
@@ -268,6 +280,17 @@ export function ChangeStateDialog({
                 '& .MuiFormHelperText-root': { color: '#b3b3b3' },
               }}
             />
+            {/* Small helper and preview of the UTC value that will be sent to the backend */}
+            <Typography variant="caption" sx={{ color: '#b3b3b3', display: 'block', mt: 1 }}>
+              {currentState === 'blocked' && prevState === 'scheduled'
+                ? 'Restaurando desde estado anterior: puedes ajustar la fecha. Se enviará en UTC al servidor.'
+                : 'La fecha se enviará en UTC al servidor.'}
+            </Typography>
+            {scheduledDate && (
+              <Typography variant="caption" sx={{ color: '#b3b3b3', display: 'block' }}>
+                {'UTC: ' + localDatetimeInputToIso(scheduledDate)}
+              </Typography>
+            )}
           </Box>
         )}
 

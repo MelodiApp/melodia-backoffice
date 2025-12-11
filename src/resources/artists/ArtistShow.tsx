@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { Box, Card, CardContent, Typography, Avatar, Divider, Grid, TextField, MenuItem, Stack, Button, IconButton } from '@mui/material';
 import { Download } from '@mui/icons-material';
 import { artistsService } from '../../services/artistsService';
+import { validateDateRange } from '../../utils/date';
 import { useArtistMonthlyListeners, useArtistPlaysCount, useArtistSavedCollectionsCount, useArtistTopPlaylists, useArtistTopSongs } from '../../hooks/useMetrics';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import apiClient from '../../services/apiClient';
@@ -48,9 +49,9 @@ export default function ArtistShow() {
   }
 
   let playlistsRendered: React.ReactNode;
-  if (loadingPlaylists) playlistsRendered = <Typography>Loading...</Typography>;
-  else if (topPlaylistsError) playlistsRendered = <Typography color="error">Error cargando playlists: {String(topPlaylistsError)}</Typography>;
-  else if (!playlistsArray || playlistsArray.length === 0) playlistsRendered = <Typography>No data</Typography>;
+  if (loadingPlaylists) playlistsRendered = <Typography>Cargando...</Typography>;
+  else if (topPlaylistsError) playlistsRendered = <Typography color="error">Error al cargar listas destacadas: {String(topPlaylistsError)}</Typography>;
+  else if (!playlistsArray || playlistsArray.length === 0) playlistsRendered = <Typography>No hay datos</Typography>;
   else playlistsRendered = playlistsArray.map((pl: any) => (
     <Box key={pl.id} sx={{ display: 'flex', justifyContent: 'space-between', py: 1 }}>
       <Typography>{pl.title ?? pl.name}</Typography>
@@ -58,9 +59,9 @@ export default function ArtistShow() {
     </Box>
   ));
   let topSongsRendered: React.ReactNode;
-  if (loadingTopSongs) topSongsRendered = <Typography>Loading...</Typography>;
-  else if (topSongsError) topSongsRendered = <Typography color="error">Error cargando top songs: {String(topSongsError)}</Typography>;
-  else if (!topSongsArray || topSongsArray.length === 0) topSongsRendered = <Typography>No data</Typography>;
+  if (loadingTopSongs) topSongsRendered = <Typography>Cargando...</Typography>;
+  else if (topSongsError) topSongsRendered = <Typography color="error">Error al cargar canciones principales: {String(topSongsError)}</Typography>;
+  else if (!topSongsArray || topSongsArray.length === 0) topSongsRendered = <Typography>No hay datos</Typography>;
   else {
     const getPlays = (s: any) => Number(s.plays ?? s.playCount ?? s.count ?? s.plays_count ?? 0);
     const sorted = [...topSongsArray].sort((a: any, b: any) => getPlays(b) - getPlays(a));
@@ -120,7 +121,7 @@ export default function ArtistShow() {
   // CSV Download Functions
   const downloadCSV = (data: any[], filename: string, headers: string[]) => {
     if (!data || data.length === 0) {
-      alert('No data available to download');
+      alert('No hay datos disponibles para descargar');
       return;
     }
     
@@ -149,36 +150,36 @@ export default function ArtistShow() {
   const downloadTopSongsCSV = () => {
     const getPlays = (s: any) => Number(s.plays ?? s.playCount ?? s.count ?? s.plays_count ?? 0);
     const csvData = topSongsArray.map((song: any) => ({
-      Title: song.title ?? song.name ?? song.songId ?? song.id,
-      Artists: Array.isArray(song.artists) ? song.artists.join('; ') : song.artists,
-      Plays: getPlays(song) || 0,
-      Duration: typeof song.duration === 'number' 
+      Título: song.title ?? song.name ?? song.songId ?? song.id,
+      Artistas: Array.isArray(song.artists) ? song.artists.join('; ') : song.artists,
+      Reproducciones: getPlays(song) || 0,
+      Duración: typeof song.duration === 'number' 
         ? `${Math.floor(song.duration/60)}:${String(Math.floor(song.duration%60)).padStart(2,'0')}` 
         : song.duration ?? '',
     }));
-    downloadCSV(csvData, `artist-${id}-top-songs.csv`, ['Title', 'Artists', 'Plays', 'Duration']);
+    downloadCSV(csvData, `artist-${id}-top-songs.csv`, ['Título', 'Artistas', 'Reproducciones', 'Duración']);
   };
 
   const downloadTopPlaylistsCSV = () => {
     const csvData = playlistsArray.map((playlist: any) => ({
-      Name: playlist.title ?? playlist.name,
-      'Total Songs': playlist.total_songs ?? playlist.saves_count ?? playlist.saves ?? 0,
+      Nombre: playlist.title ?? playlist.name,
+      'Total canciones': playlist.total_songs ?? playlist.saves_count ?? playlist.saves ?? 0,
     }));
-    downloadCSV(csvData, `artist-${id}-top-playlists.csv`, ['Name', 'Total Songs']);
+    downloadCSV(csvData, `artist-${id}-top-playlists.csv`, ['Nombre', 'Total canciones']);
   };
 
   const downloadPlaysDataCSV = () => {
     const normalized = normalizeSeries(playsData);
     const csvData = normalized.map((item: any) => ({
-      Period: item.periodStart || `${item.year}-${String(item.month).padStart(2, '0')}` || item.date || item.label,
-      Count: item.count || item.unique_listeners || item.uniqueListeners || item.value || item.total || 0,
+      Periodo: item.periodStart || `${item.year}-${String(item.month).padStart(2, '0')}` || item.date || item.label,
+      Reproducciones: item.count || item.unique_listeners || item.uniqueListeners || item.value || item.total || 0,
     }));
-    downloadCSV(csvData, `artist-${id}-plays-data.csv`, ['Period', 'Count']);
+    downloadCSV(csvData, `artist-${id}-plays-data.csv`, ['Periodo', 'Reproducciones']);
   };
 
   const renderLineChart = (series: any) => {
     const normalized = normalizeSeries(series);
-    if (!normalized || normalized.length === 0) return <Typography>No data</Typography>;
+    if (!normalized || normalized.length === 0) return <Typography>No hay datos</Typography>;
     const dataForChart = normalized.map((s: any) => ({ x: s.periodStart || `${s.year}-${String(s.month).padStart(2, '0')}` || s.date || s.label, y: s.count || s.unique_listeners || s.uniqueListeners || s.value || s.total }));
     return (
       <ResponsiveContainer width="100%" height={200}>
@@ -195,7 +196,7 @@ export default function ArtistShow() {
 
   return (
     <Box sx={{ p: 3, backgroundColor: '#121212', minHeight: '100vh' }}>
-      <Title title={artist?.name || 'Artist'} />
+  <Title title={artist?.name || 'Artista'} />
       <Card sx={{ mb: 3, backgroundColor: '#181818' }}>
         <CardContent>
           <Grid container spacing={2} alignItems="center">
@@ -207,7 +208,7 @@ export default function ArtistShow() {
               <Typography sx={{ color: '#b3b3b3' }}>{artist?.bio}</Typography>
             </Grid>
             <Grid item sx={{ ml: 'auto' }}>
-              <Typography sx={{ color: '#b3b3b3' }}>Followers</Typography>
+              <Typography sx={{ color: '#b3b3b3' }}>Seguidores</Typography>
               <Typography variant="h6" sx={{ color: '#fff' }}>{followersCount ?? '-'}</Typography>
             </Grid>
           </Grid>
@@ -225,6 +226,8 @@ export default function ArtistShow() {
               value={fromDate ?? ''}
               onChange={(e) => setFromDate(e.target.value || undefined)}
               sx={{ maxWidth: 200 }}
+              error={!validateDateRange(fromDate, toDate).valid}
+              helperText={(!validateDateRange(fromDate, toDate).valid ? validateDateRange(fromDate, toDate).error : '')}
             />
             <TextField
               label="Hasta"
@@ -233,40 +236,46 @@ export default function ArtistShow() {
               value={toDate ?? ''}
               onChange={(e) => setToDate(e.target.value || undefined)}
               sx={{ maxWidth: 200 }}
+              error={!validateDateRange(fromDate, toDate).valid}
             />
             <TextField
-              label="Time Slice"
+              label="Intervalo"
               select
               value={timeSlice}
               onChange={(e) => setTimeSlice(e.target.value as any)}
               sx={{ maxWidth: 200 }}
             >
-              <MenuItem value="hour">Hour</MenuItem>
-              <MenuItem value="day">Day</MenuItem>
-              <MenuItem value="week">Week</MenuItem>
-              <MenuItem value="month">Month</MenuItem>
-              <MenuItem value="year">Year</MenuItem>
+              <MenuItem value="hour">Hora</MenuItem>
+              <MenuItem value="day">Día</MenuItem>
+              <MenuItem value="week">Semana</MenuItem>
+              <MenuItem value="month">Mes</MenuItem>
+              <MenuItem value="year">Año</MenuItem>
             </TextField>
             <TextField
-              label="Year"
+              label="Año"
               type="number"
               value={monthlyYear ?? ''}
               onChange={(e) => setMonthlyYear(e.target.value ? Number(e.target.value) : undefined)}
               sx={{ width: 120 }}
             />
             <TextField
-              label="Month"
+              label="Mes"
               select
               value={monthlyMonth ?? ''}
               onChange={(e) => setMonthlyMonth(e.target.value ? Number(e.target.value) : undefined)}
               sx={{ width: 140 }}
             >
-              <MenuItem value="">All</MenuItem>
+              <MenuItem value="">Todos</MenuItem>
               {[...Array(12)].map((_v, i) => (
                 <MenuItem key={i+1} value={i+1}>{i+1}</MenuItem>
               ))}
             </TextField>
-            <Button variant="contained" color="primary" onClick={() => { refetchPlays(); refetchSaved(); refetchMonthly(); refetchPlaylists(); refetchTopSongs(); }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => { refetchPlays(); refetchSaved(); refetchMonthly(); refetchPlaylists(); refetchTopSongs(); }}
+              disabled={!validateDateRange(fromDate, toDate).valid}
+            >
               Aplicar
             </Button>
             <Button variant="outlined" color="secondary" onClick={() => { setFromDate(undefined); setToDate(undefined); setTimeSlice('day'); setMonthlyYear(new Date().getFullYear()); setMonthlyMonth(new Date().getMonth() + 1); }}>
@@ -280,11 +289,11 @@ export default function ArtistShow() {
         <Grid item xs={12} md={6}>
           <Card sx={{ backgroundColor: '#181818', minHeight: 200 }}>
             <CardContent>
-              <Typography variant="h6" sx={{ color: '#1db954' }}>Monthly Listeners</Typography>
+              <Typography variant="h6" sx={{ color: '#1db954' }}>Oyentes mensuales</Typography>
               {loadingMonthly ? (
-                <Typography>Loading...</Typography>
+                <Typography>Cargando...</Typography>
               ) : monthlyError ? (
-                <Typography color="error">Error loading monthly listeners: {String(monthlyError)}</Typography>
+                <Typography color="error">Error al cargar oyentes mensuales: {String(monthlyError)}</Typography>
               ) : (
                 <Box>
                   <Typography variant="h4" sx={{ color: '#fff', mb: 1 }}>
@@ -311,19 +320,19 @@ export default function ArtistShow() {
           <Card sx={{ backgroundColor: '#181818' }}>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6" sx={{ color: '#1db954' }}>Plays (per period)</Typography>
+                <Typography variant="h6" sx={{ color: '#1db954' }}>Reproducciones (por período)</Typography>
                 {!loadingPlays && playsData && (
                   <IconButton 
                     onClick={downloadPlaysDataCSV}
                     size="small" 
                     sx={{ color: '#1db954' }}
-                    title="Download CSV"
+                    title="Descargar CSV"
                   >
                     <Download />
                   </IconButton>
                 )}
               </Box>
-              {loadingPlays ? <Typography>Loading...</Typography> : renderLineChart(playsData)}
+              {loadingPlays ? <Typography>Cargando...</Typography> : renderLineChart(playsData)}
             </CardContent>
           </Card>
         </Grid>
@@ -331,11 +340,11 @@ export default function ArtistShow() {
         <Grid item xs={12} md={6}>
           <Card sx={{ backgroundColor: '#181818', minHeight: 200 }}>
             <CardContent>
-              <Typography variant="h6" sx={{ color: '#1db954' }}>Saved Collections</Typography>
+              <Typography variant="h6" sx={{ color: '#1db954' }}>Colecciones guardadas</Typography>
               {loadingSaved ? (
-                <Typography>Loading...</Typography>
+                <Typography>Cargando...</Typography>
               ) : savedError ? (
-                <Typography color="error">Error cargando saved collections: {String(savedError)}</Typography>
+                <Typography color="error">Error al cargar colecciones guardadas: {String(savedError)}</Typography>
               ) : (
                 <Typography variant="h4">{
                   savedCounts?.total ??
@@ -352,13 +361,13 @@ export default function ArtistShow() {
           <Card sx={{ backgroundColor: '#181818' }}>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6" sx={{ color: '#1db954' }}>Top Playlists</Typography>
+                <Typography variant="h6" sx={{ color: '#1db954' }}>Listas destacadas</Typography>
                 {!loadingPlaylists && playlistsArray && playlistsArray.length > 0 && (
                   <IconButton 
                     onClick={downloadTopPlaylistsCSV}
                     size="small" 
                     sx={{ color: '#1db954' }}
-                    title="Download CSV"
+                    title="Descargar CSV"
                   >
                     <Download />
                   </IconButton>
@@ -372,13 +381,13 @@ export default function ArtistShow() {
           <Card sx={{ backgroundColor: '#181818' }}>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6" sx={{ color: '#1db954' }}>Top Songs</Typography>
+                <Typography variant="h6" sx={{ color: '#1db954' }}>Canciones principales</Typography>
                 {!loadingTopSongs && topSongsArray && topSongsArray.length > 0 && (
                   <IconButton 
                     onClick={downloadTopSongsCSV}
                     size="small" 
                     sx={{ color: '#1db954' }}
-                    title="Download CSV"
+                    title="Descargar CSV"
                   >
                     <Download />
                   </IconButton>

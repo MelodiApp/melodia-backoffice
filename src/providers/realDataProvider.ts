@@ -513,6 +513,25 @@ export const realDataProvider: DataProvider = {
           return { data: updatedItem as any };
         }
         
+        // Prevent changing the publish date of an already scheduled item via a generic update.
+        // Business rule: if the item is currently scheduled, it should only be transitioned
+        // using the ChangeStateDialog (to 'published' or 'blocked'). Directly updating
+        // the publishDate to re-schedule is not allowed from the backoffice.
+        if (
+          params.previousData &&
+          (params.previousData.status === 'scheduled' || params.previousData.status === 'programmed') &&
+          params.data.publishDate !== undefined
+        ) {
+          // If the date actually changed, reject. If it's the same date, allow passthrough.
+          const prevDate = params.previousData.publishDate;
+          const newDate = params.data.publishDate;
+          const prevTime = prevDate ? new Date(prevDate).getTime() : null;
+          const newTime = newDate ? new Date(newDate).getTime() : null;
+          if (prevTime !== newTime) {
+            throw new Error('No es posible reprogramar una publicación ya programada. Cambie el estado a Publicado o Bloqueado antes de modificar la fecha.');
+          }
+        }
+
         // Actualizar datos completos
         let updatedItem;
         if (itemType === 'song') {
