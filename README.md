@@ -89,3 +89,8 @@ npm prettier --write .
 # Lint
 npm run lint
 ```
+
+## Notas recientes
+
+- La UI ahora muestra las fechas de programación en la zona horaria local (campo "Fecha y hora de publicación") y las convierte a UTC al enviarlas al backend.
+- Un ítem que ya está en estado "Programado" sólo puede pasar a "Publicado" o "Bloqueado" desde la interfaz de cambio de estado.

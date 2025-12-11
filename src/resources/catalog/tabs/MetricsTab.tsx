@@ -3,6 +3,7 @@ import { Box, Button, TextField, Select, MenuItem, InputLabel, FormControl, Togg
 import { useSongPlaysCount, useCollectionPlaysCount, useSongLikesCount, useCollectionLikesCount } from '../../../hooks';
 import type { TimeSlice } from '../../../hooks';
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Legend } from 'recharts';
+import { validateDateRange } from '../../../utils/date';
 
 export function MetricsTab({ item }: { item?: any }) {
   const [mode, setMode] = useState<'song' | 'collection'>(item?.type === 'collection' ? 'collection' : 'song');
@@ -19,27 +20,40 @@ export function MetricsTab({ item }: { item?: any }) {
       {!item && (
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2, flexWrap: 'wrap' }}>
           <ToggleButtonGroup value={mode} exclusive onChange={(_, v) => v && setMode(v)}>
-            <ToggleButton value="song">Song</ToggleButton>
-            <ToggleButton value="collection">Collection</ToggleButton>
+            <ToggleButton value="song">Canción</ToggleButton>
+            <ToggleButton value="collection">Colección</ToggleButton>
           </ToggleButtonGroup>
 
-          <TextField placeholder={mode === 'song' ? 'Song ID' : 'Collection ID'} value={id} onChange={(e) => setId(e.target.value)} size="small" />
+          <TextField placeholder={mode === 'song' ? 'ID de canción' : 'ID de colección'} value={id} onChange={(e) => setId(e.target.value)} size="small" />
 
-          <TextField type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} size="small" />
-          <TextField type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} size="small" />
+          <TextField
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            size="small"
+            error={!validateDateRange(fromDate, toDate).valid}
+            helperText={!validateDateRange(fromDate, toDate).valid ? validateDateRange(fromDate, toDate).error : ''}
+          />
+          <TextField
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            size="small"
+            error={!validateDateRange(fromDate, toDate).valid}
+          />
 
           <FormControl size="small">
-            <InputLabel id="timeslice-label">Time Slice</InputLabel>
-            <Select labelId="timeslice-label" value={timeSlice} label="Time Slice" onChange={(e) => setTimeSlice(e.target.value as TimeSlice)}>
-              <MenuItem value="hour">Hour</MenuItem>
-              <MenuItem value="day">Day</MenuItem>
-              <MenuItem value="week">Week</MenuItem>
-              <MenuItem value="month">Month</MenuItem>
-              <MenuItem value="year">Year</MenuItem>
+            <InputLabel id="timeslice-label">Intervalo</InputLabel>
+            <Select labelId="timeslice-label" value={timeSlice} label="Intervalo" onChange={(e) => setTimeSlice(e.target.value as TimeSlice)}>
+              <MenuItem value="hour">Hora</MenuItem>
+              <MenuItem value="day">Día</MenuItem>
+              <MenuItem value="week">Semana</MenuItem>
+              <MenuItem value="month">Mes</MenuItem>
+              <MenuItem value="year">Año</MenuItem>
             </Select>
           </FormControl>
 
-          <Button variant="contained" onClick={() => setRefreshKey((k) => k + 1)}>Fetch</Button>
+          <Button variant="contained" onClick={() => setRefreshKey((k) => k + 1)} disabled={!validateDateRange(fromDate, toDate).valid}>Obtener</Button>
         </Box>
       )}
 
@@ -103,41 +117,43 @@ function SongMetrics({ itemId, defaultFrom, defaultTo, defaultTimeSlice, readOnl
   const loading = playsLoading || likesLoading;
   const error = (playsError || likesError) as string | null;
 
+  const dateRange = validateDateRange(fromDate, toDate);
+
   return (
     <Card sx={{ backgroundColor: '#181818' }}>
       <CardContent>
-        <Typography variant="h6" gutterBottom sx={{ color: '#ffffff' }}>Song Metrics</Typography>
-        <Typography variant="body2" sx={{ mb: 2, color: '#b3b3b3' }}>Plays for song ID {itemId || '—'}</Typography>
+  <Typography variant="h6" gutterBottom sx={{ color: '#ffffff' }}>Métricas de canción</Typography>
+  <Typography variant="body2" sx={{ mb: 2, color: '#b3b3b3' }}>Reproducciones para ID de canción {itemId || '—'}</Typography>
 
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2, flexWrap: 'wrap' }}>
-          <TextField placeholder="Song ID" value={localId} onChange={(e) => setLocalId(e.target.value)} disabled={!!readOnlyId} size="small" />
+          <TextField placeholder="ID de canción" value={localId} onChange={(e) => setLocalId(e.target.value)} disabled={!!readOnlyId} size="small" />
           <TextField type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} size="small" />
           <TextField type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} size="small" />
           <FormControl size="small">
-            <InputLabel id="song-timeslice-label">Time Slice</InputLabel>
-            <Select labelId="song-timeslice-label" value={timeSlice} label="Time Slice" onChange={(e) => setTimeSlice(e.target.value as TimeSlice)}>
-              <MenuItem value="hour">Hour</MenuItem>
-              <MenuItem value="day">Day</MenuItem>
-              <MenuItem value="week">Week</MenuItem>
-              <MenuItem value="month">Month</MenuItem>
-              <MenuItem value="year">Year</MenuItem>
+            <InputLabel id="song-timeslice-label">Intervalo</InputLabel>
+            <Select labelId="song-timeslice-label" value={timeSlice} label="Intervalo" onChange={(e) => setTimeSlice(e.target.value as TimeSlice)}>
+              <MenuItem value="hour">Hora</MenuItem>
+              <MenuItem value="day">Día</MenuItem>
+              <MenuItem value="week">Semana</MenuItem>
+              <MenuItem value="month">Mes</MenuItem>
+              <MenuItem value="year">Año</MenuItem>
             </Select>
           </FormControl>
-          <Button variant="contained" onClick={() => { refetchPlays(); refetchLikes(); }}>Fetch</Button>
+          <Button variant="contained" onClick={() => { refetchPlays(); refetchLikes(); }} disabled={!dateRange.valid}>Obtener</Button>
         </Box>
 
         {loading && <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}><CircularProgress sx={{ color: '#1db954' }} /></Box>}
-        {error && <Alert severity="error">Error loading metrics: {error}</Alert>}
+  {error && <Alert severity="error">Error al cargar métricas: {error}</Alert>}
 
         {typeof totalPlays === 'number' && (
           <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle2">Total plays</Typography>
+            <Typography variant="subtitle2">Reproducciones totales</Typography>
             <Typography variant="h6">{totalPlays}</Typography>
           </Box>
         )}
         {typeof totalLikes === 'number' && (
           <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle2">Total likes</Typography>
+            <Typography variant="subtitle2">Me gusta totales</Typography>
             <Typography variant="h6">{totalLikes}</Typography>
           </Box>
         )}
@@ -151,12 +167,12 @@ function SongMetrics({ itemId, defaultFrom, defaultTo, defaultTimeSlice, readOnl
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Line type="monotone" dataKey="plays" stroke="#8884d8" name="Plays" />
-                <Line type="monotone" dataKey="likes" stroke="#82ca9d" name="Likes" />
+                <Line type="monotone" dataKey="plays" stroke="#8884d8" name="Reproducciones" />
+                <Line type="monotone" dataKey="likes" stroke="#82ca9d" name="Me gusta" />
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            !loading && <Typography>No timeseries data available</Typography>
+            !loading && <Typography>No hay datos disponibles</Typography>
           )}
         </Box>
        
@@ -198,41 +214,43 @@ function CollectionMetrics({ itemId, defaultFrom, defaultTo, defaultTimeSlice, r
   const loading = playsLoading || likesLoading;
   const error = (playsError || likesError) as string | null;
 
+  const dateRange = validateDateRange(fromDate, toDate);
+
   return (
     <Card sx={{ backgroundColor: '#181818' }}>
       <CardContent>
-        <Typography variant="h6" gutterBottom sx={{ color: '#ffffff' }}>Collection Metrics</Typography>
-        <Typography variant="body2" sx={{ mb: 2, color: '#b3b3b3' }}>Plays for collection ID {itemId || '—'}</Typography>
+  <Typography variant="h6" gutterBottom sx={{ color: '#ffffff' }}>Métricas de colección</Typography>
+  <Typography variant="body2" sx={{ mb: 2, color: '#b3b3b3' }}>Reproducciones para ID de colección {itemId || '—'}</Typography>
 
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 2, flexWrap: 'wrap' }}>
-          <TextField placeholder="Collection ID" value={localId} onChange={(e) => setLocalId(e.target.value)} disabled={!!readOnlyId} size="small" />
+          <TextField placeholder="ID de colección" value={localId} onChange={(e) => setLocalId(e.target.value)} disabled={!!readOnlyId} size="small" />
           <TextField type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} size="small" />
           <TextField type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} size="small" />
           <FormControl size="small">
-            <InputLabel id="collection-timeslice-label">Time Slice</InputLabel>
-            <Select labelId="collection-timeslice-label" value={timeSlice} label="Time Slice" onChange={(e) => setTimeSlice(e.target.value as TimeSlice)}>
-              <MenuItem value="hour">Hour</MenuItem>
-              <MenuItem value="day">Day</MenuItem>
-              <MenuItem value="week">Week</MenuItem>
-              <MenuItem value="month">Month</MenuItem>
-              <MenuItem value="year">Year</MenuItem>
+            <InputLabel id="collection-timeslice-label">Intervalo</InputLabel>
+            <Select labelId="collection-timeslice-label" value={timeSlice} label="Intervalo" onChange={(e) => setTimeSlice(e.target.value as TimeSlice)}>
+              <MenuItem value="hour">Hora</MenuItem>
+              <MenuItem value="day">Día</MenuItem>
+              <MenuItem value="week">Semana</MenuItem>
+              <MenuItem value="month">Mes</MenuItem>
+              <MenuItem value="year">Año</MenuItem>
             </Select>
           </FormControl>
-          <Button variant="contained" onClick={() => { refetchPlays(); refetchLikes(); }}>Fetch</Button>
+          <Button variant="contained" onClick={() => { refetchPlays(); refetchLikes(); }} disabled={!dateRange.valid}>Obtener</Button>
         </Box>
 
         {loading && <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}><CircularProgress sx={{ color: '#1db954' }} /></Box>}
-        {error && <Alert severity="error">Error loading metrics: {error}</Alert>}
+  {error && <Alert severity="error">Error al cargar métricas: {error}</Alert>}
 
         {typeof totalPlays === 'number' && (
           <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle2">Total plays</Typography>
+            <Typography variant="subtitle2">Reproducciones totales</Typography>
             <Typography variant="h6">{totalPlays}</Typography>
           </Box>
         )}
         {typeof totalLikes === 'number' && (
           <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle2">Total likes</Typography>
+            <Typography variant="subtitle2">Me gusta totales</Typography>
             <Typography variant="h6">{totalLikes}</Typography>
           </Box>
         )}
@@ -246,12 +264,12 @@ function CollectionMetrics({ itemId, defaultFrom, defaultTo, defaultTimeSlice, r
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Line type="monotone" dataKey="plays" stroke="#8884d8" name="Plays" />
-                <Line type="monotone" dataKey="likes" stroke="#82ca9d" name="Likes" />
+                <Line type="monotone" dataKey="plays" stroke="#8884d8" name="Reproducciones" />
+                <Line type="monotone" dataKey="likes" stroke="#82ca9d" name="Me gusta" />
               </LineChart>
             </ResponsiveContainer>
           ) : (
-            !loading && <Typography>No timeseries data available</Typography>
+            !loading && <Typography>No hay datos disponibles</Typography>
           )}
         </Box>
       </CardContent>

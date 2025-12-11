@@ -78,7 +78,7 @@ export default function ArtistsList() {
                 <TableRow>
                   <TableCell>#</TableCell>
                   <TableCell>Artista</TableCell>
-                  <TableCell>Followers</TableCell>
+                  <TableCell>Seguidores</TableCell>
                   <TableCell>Acciones</TableCell>
                 </TableRow>
               </TableHead>
